@@ -1,0 +1,39 @@
+{
+  "name": "ecommerce",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace frontend",
+    "dev:api": "npm run start:dev --workspace backend",
+    "build": "npm run build --workspace @ecommerce/shared && npm run build --workspace backend && npm run build --workspace frontend",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "deps:check": "npx -y npm-check-updates@latest --deep",
+    "deps:upgrade": "npx -y npm-check-updates@latest --deep -u && npm install",
+    "prepare": "husky || true"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.7.0",
+    "globals": "^17.7.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15",
+    "prettier": "^3.9.5",
+    "typescript": "^6",
+    "typescript-eslint": "^8.64.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,cjs,mjs,json,md,css,yml,yaml}": "prettier --write"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

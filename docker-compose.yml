@@ -1,0 +1,46 @@
+# Local one-command orchestration: client + server + MongoDB.
+# In production these are deployed separately — see docs/14-docker-deployment.md §9.
+#
+#   docker compose up -d --build      # build + start everything
+#   docker compose logs -f server     # tail API logs
+#   docker compose down [-v]          # stop (‑v also wipes the DB volume)
+
+services:
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  server:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      # Reach Mongo by its compose service name (not localhost)
+      MONGODB_URI: mongodb://mongo:27017/ecommerce
+      CLIENT_ORIGIN: http://localhost:8080
+      PORT: "4000"
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongo
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # VITE_* are baked in at build time
+        VITE_API_URL: http://localhost:4000/api
+        VITE_WS_URL: http://localhost:4000/realtime
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:

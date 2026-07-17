@@ -1,0 +1,7 @@
+node_modules
+dist
+build
+coverage
+*.md
+docs/sprint-plan.csv
+package-lock.json

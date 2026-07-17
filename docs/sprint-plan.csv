@@ -1,0 +1,176 @@
+Sprint,Module,Feature,Feature Description,Status,Testing Status,Priority,Code Status,Remarks
+Sprint 1,Project Setup,Monorepo scaffold,"npm workspaces: frontend, backend, packages/shared",Done,Build OK,Critical,Done,npm install + full build pass
+Sprint 1,Project Setup,Tooling,"ESLint, Prettier, Husky, lint-staged",Done,Lint OK,High,Done,ESLint 10 flat config; lint-staged pinned ^15 (Node 20)
+Sprint 1,Project Setup,Docker Compose (dev),MongoDB service only,Done,Verified,High,Done,Redis deferred to Sprint 13; mongo:8 + backend connect verified
+Sprint 1,Project Setup,CI pipeline,"GitHub Actions: lint, typecheck, build, test",Done,Pending (no GitHub yet),High,Done,Workflow authored; runs on first push
+Sprint 1,Project Setup,Shared package,Types + Zod schemas shared FE/BE,Done,Build OK,High,Done,@ecommerce/shared consumed by FE+BE
+Sprint 1,Design System,Design tokens,"Tailwind v4 tokens, light + dark via .dark",Done,Verified (build+run),Critical,Done,"No shadows, rounded-md; @theme CSS vars"
+Sprint 1,Design System,UI primitives,"Button, Input, Select, Checkbox, Badge",Done,Verified (kitchen-sink),Critical,Done,
+Sprint 1,Design System,Table component,Custom headless bordered/dense table,Done,Verified (kitchen-sink),High,Done,No TanStack/React Table
+Sprint 1,Design System,Feedback components,"Modal, Toast, Tooltip, Dropdown",Done,Verified (kitchen-sink),High,Done,react-hot-toast; Modal/Tooltip/Dropdown custom (no Radix)
+Sprint 1,Design System,Layout shell,"Sidebar, Navbar, MainLayout, AuthLayout",Done,Verified (run),Critical,Done,"Graphite sidebar, white-pill active"
+Sprint 1,Design System,Loading/empty/error states,"Skeletons, empty states, ErrorBoundary",Done,Verified (kitchen-sink),Medium,Done,"Skeletons, never spinners"
+Sprint 2,Auth,Signup,Email/password registration + validation,Not Started,Not Started,Critical,Not Started,
+Sprint 2,Auth,Login,Credential login returning JWT,Not Started,Not Started,Critical,Not Started,
+Sprint 2,Auth,JWT access + refresh,Access (~15m) + refresh (httpOnly cookie) + rotation,Not Started,Not Started,Critical,Not Started,
+Sprint 2,Auth,Password hashing,bcrypt hashing,Not Started,Not Started,Critical,Not Started,
+Sprint 2,Auth,Guards & RBAC,"JwtAuthGuard global, RolesGuard, @Public/@Roles",Not Started,Not Started,Critical,Not Started,5 roles
+Sprint 2,Auth,Forgot password,Request password reset email,Not Started,Not Started,High,Not Started,Email sync (Nodemailer)
+Sprint 2,Auth,Reset password,Token-based password reset,Not Started,Not Started,High,Not Started,
+Sprint 2,Auth,Email verification,Verify email via token,Not Started,Not Started,High,Not Started,
+Sprint 2,Auth,Google login,OAuth via Passport,Not Started,Not Started,Medium,Not Started,
+Sprint 2,Auth,Profile,View/update current user,Not Started,Not Started,High,Not Started,
+Sprint 2,Auth,Change password,Authenticated password change,Not Started,Not Started,Medium,Not Started,
+Sprint 2,Auth,Sessions,List and revoke active sessions,Not Started,Not Started,Medium,Not Started,Revocable refresh sessions
+Sprint 2,Auth,Logout,Revoke refresh session,Not Started,Not Started,High,Not Started,
+Sprint 3,User Management,User CRUD,Admin create/read/update/delete users,Not Started,Not Started,High,Not Started,ADMIN only
+Sprint 3,User Management,Roles & permissions,Role assignment + permission checks,Not Started,Not Started,High,Not Started,
+Sprint 3,User Management,Ban / Restore,Suspend/ban and restore users,Not Started,Not Started,Medium,Not Started,
+Sprint 3,User Management,User activity,Activity log per user,Not Started,Not Started,Low,Not Started,
+Sprint 3,User Management,Addresses,Multiple addresses per user,Not Started,Not Started,Medium,Not Started,
+Sprint 3,User Management,Wishlist,User wishlist,Not Started,Not Started,Medium,Not Started,Linked to storefront
+Sprint 3,User Management,Recently viewed,Track recently viewed products,Not Started,Not Started,Low,Not Started,
+Sprint 3,Dashboard,KPI cards,"Revenue, Orders, Customers, Conversion + sparkline",Not Started,Not Started,High,Not Started,
+Sprint 3,Dashboard,Sales chart,Custom dual-line SVG chart,Not Started,Not Started,High,Not Started,"2px lines, no gradient"
+Sprint 3,Dashboard,Order status chart,Radial status breakdown,Not Started,Not Started,Medium,Not Started,
+Sprint 3,Dashboard,Category distribution,Donut chart,Not Started,Not Started,Medium,Not Started,
+Sprint 3,Dashboard,Recent orders,Recent orders table,Not Started,Not Started,High,Not Started,
+Sprint 3,Dashboard,Live orders,Realtime order feed,Not Started,Not Started,Medium,Not Started,socket.io
+Sprint 3,Dashboard,Top customers,Top customers list,Not Started,Not Started,Low,Not Started,
+Sprint 4,Products,Product CRUD,Create/read/update/delete products,Not Started,Not Started,Critical,Not Started,Largest module
+Sprint 4,Products,SKU / Slug / Barcode,Identifiers + unique slug,Not Started,Not Started,High,Not Started,
+Sprint 4,Products,SEO fields,Meta title/description,Not Started,Not Started,Medium,Not Started,
+Sprint 4,Products,Media,"Thumbnail, gallery, product video",Not Started,Not Started,High,Not Started,Depends on Uploads
+Sprint 4,Products,Pricing,"Price, tax class, discount",Not Started,Not Started,High,Not Started,
+Sprint 4,Products,Attributes,"Weight, dimensions, shipping, tags, collections",Not Started,Not Started,Medium,Not Started,
+Sprint 4,Products,Product type,Physical vs digital,Not Started,Not Started,Medium,Not Started,
+Sprint 4,Products,Relations,"Related, cross-sell, upsell",Not Started,Not Started,Low,Not Started,
+Sprint 4,Products,Flags,"Featured, popular, trending, new arrival",Not Started,Not Started,Low,Not Started,
+Sprint 4,Products,Product list UI,Rich table: image/stock/price/status/sales/actions,Not Started,Not Started,High,Not Started,
+Sprint 4,Products,Bulk actions,Bulk archive/delete/edit,Not Started,Not Started,Medium,Not Started,
+Sprint 4,Categories,Category CRUD,Create/read/update/delete categories,Not Started,Not Started,High,Not Started,
+Sprint 4,Categories,Nested tree,Unlimited nested categories,Not Started,Not Started,High,Not Started,
+Sprint 4,Categories,Tree view + reorder,Drag-drop ordering,Not Started,Not Started,Medium,Not Started,React DnD
+Sprint 4,Categories,Category SEO/media,"Banner, image, SEO",Not Started,Not Started,Low,Not Started,
+Sprint 4,Categories,Status,Active/inactive,Not Started,Not Started,Low,Not Started,
+Sprint 5,Brands,Brand CRUD,"Logo, banner, description, SEO",Not Started,Not Started,Medium,Not Started,
+Sprint 5,Variants,Variant options,Size/color/storage/material/flavor/pack,Not Started,Not Started,High,Not Started,
+Sprint 5,Variants,Variant matrix,Per-combination SKU/price/stock/barcode/weight,Not Started,Not Started,High,Not Started,
+Sprint 5,Variants,Variant images,Images per variant,Not Started,Not Started,Medium,Not Started,
+Sprint 5,Inventory,Stock tracking,Per-variant stock levels,Not Started,Not Started,High,Not Started,
+Sprint 5,Inventory,Warehouses,Multiple warehouses,Not Started,Not Started,Medium,Not Started,
+Sprint 5,Inventory,Stock adjustments,Purchase/transfer/damage/adjustment,Not Started,Not Started,Medium,Not Started,
+Sprint 5,Inventory,Low-stock alerts,Threshold-based alerts,Not Started,Not Started,Medium,Not Started,Notify (sync now)
+Sprint 5,Inventory,Stock history,Transaction ledger + audit,Not Started,Not Started,Medium,Not Started,
+Sprint 6,Coupons,Coupon types,Percentage / flat / free-shipping,Not Started,Not Started,High,Not Started,
+Sprint 6,Coupons,Rules,"Min purchase, max discount, expiry",Not Started,Not Started,High,Not Started,
+Sprint 6,Coupons,Usage limits,"Single-use, per-user, usage tracking",Not Started,Not Started,Medium,Not Started,
+Sprint 6,Coupons,Validate endpoint,Storefront coupon validation,Not Started,Not Started,High,Not Started,
+Sprint 6,Cart,Guest cart,Session-based cart,Not Started,Not Started,High,Not Started,
+Sprint 6,Cart,User cart,Persisted user cart + merge on login,Not Started,Not Started,High,Not Started,
+Sprint 6,Cart,Cart items,"Add/update/remove, quantity",Not Started,Not Started,Critical,Not Started,
+Sprint 6,Cart,Coupon apply,Apply coupon to cart,Not Started,Not Started,High,Not Started,
+Sprint 6,Cart,Save for later,Move items to saved list,Not Started,Not Started,Low,Not Started,
+Sprint 6,Cart,Gift wrap & notes,Cart-level options,Not Started,Not Started,Low,Not Started,
+Sprint 6,Cart,Totals,Subtotal/discount/shipping/tax/total (server-computed),Not Started,Not Started,High,Not Started,Never trust client totals
+Sprint 7,Checkout,Address step,Shipping/billing address selection,Not Started,Not Started,High,Not Started,
+Sprint 7,Checkout,Delivery method,Choose shipping method,Not Started,Not Started,High,Not Started,
+Sprint 7,Checkout,Checkout quote,Compute order totals pre-payment,Not Started,Not Started,High,Not Started,
+Sprint 7,Checkout,Review & place order,Review cart + create order,Not Started,Not Started,Critical,Not Started,
+Sprint 7,Orders,Order creation,Create order from checkout,Not Started,Not Started,Critical,Not Started,
+Sprint 7,Orders,Status state machine,Created to Delivered/Cancelled transitions,Not Started,Not Started,Critical,Not Started,Enforce valid transitions
+Sprint 7,Orders,Timeline,Order event timeline,Not Started,Not Started,High,Not Started,
+Sprint 7,Orders,Refund,Full/partial refund,Not Started,Not Started,Medium,Not Started,
+Sprint 7,Orders,Invoice,Generate invoice PDF,Not Started,Not Started,Medium,Not Started,
+Sprint 7,Orders,Tracking,Shipment tracking link,Not Started,Not Started,Medium,Not Started,
+Sprint 7,Orders,Order detail panel,Right context panel: customer/timeline/payment/shipment/notes,Not Started,Not Started,High,Not Started,
+Sprint 7,Orders,Customer order history,GET /me/orders,Not Started,Not Started,High,Not Started,
+Sprint 8,Payments,Stripe,Card payments via payment intent,Not Started,Not Started,High,Not Started,
+Sprint 8,Payments,Razorpay,Razorpay gateway integration,Not Started,Not Started,Medium,Not Started,
+Sprint 8,Payments,Cash on delivery,COD flow,Not Started,Not Started,Medium,Not Started,
+Sprint 8,Payments,Wallet / UPI,Wallet balance + UPI,Not Started,Not Started,Low,Not Started,
+Sprint 8,Payments,Webhooks,"Signature-verified, idempotent handlers",Not Started,Not Started,Critical,Not Started,Idempotency required
+Sprint 8,Payments,Refund processing,Refund via provider API,Not Started,Not Started,Medium,Not Started,
+Sprint 8,Shipping,Shipping methods,Carriers + base/per-kg rates,Not Started,Not Started,High,Not Started,
+Sprint 8,Shipping,Charge calculation,Weight-based charge calc,Not Started,Not Started,Medium,Not Started,
+Sprint 8,Shipping,Tracking,Track by tracking number,Not Started,Not Started,Medium,Not Started,
+Sprint 8,Shipping,Delivery estimate,ETA calculation,Not Started,Not Started,Low,Not Started,
+Sprint 9,Storefront,Home,"Hero, featured, deals",Not Started,Not Started,High,Not Started,Customer-facing
+Sprint 9,Storefront,Catalog,Category product listing,Not Started,Not Started,High,Not Started,
+Sprint 9,Storefront,Search + filters,"Search, filter, sort",Not Started,Not Started,High,Not Started,Depends on Search module
+Sprint 9,Storefront,Product detail page,"PDP: gallery, variants, reviews, add-to-cart",Not Started,Not Started,Critical,Not Started,
+Sprint 9,Storefront,Cart page,Storefront cart view,Not Started,Not Started,High,Not Started,
+Sprint 9,Storefront,Checkout flow,Storefront checkout UI,Not Started,Not Started,Critical,Not Started,
+Sprint 9,Storefront,Account,Profile + addresses,Not Started,Not Started,High,Not Started,
+Sprint 9,Storefront,Order history & invoices,Customer orders + invoices,Not Started,Not Started,High,Not Started,
+Sprint 9,Storefront,Wishlist page,Wishlist UI,Not Started,Not Started,Medium,Not Started,
+Sprint 9,Storefront,Notifications,In-app customer notifications,Not Started,Not Started,Low,Not Started,
+Sprint 9,Storefront,Responsive & SEO,"SSR-friendly, meta tags, performance",Not Started,Not Started,High,Not Started,
+Sprint 10,Reviews,Ratings & review,Rating + text + images,Not Started,Not Started,High,Not Started,
+Sprint 10,Reviews,Verified purchase,Verified-purchase badge,Not Started,Not Started,Medium,Not Started,
+Sprint 10,Reviews,Helpful & report,Helpful votes + report review,Not Started,Not Started,Low,Not Started,
+Sprint 10,Reviews,Moderation,Approve/hide reviews,Not Started,Not Started,Medium,Not Started,
+Sprint 10,Reviews,Reply,Admin/vendor reply to review,Not Started,Not Started,Low,Not Started,
+Sprint 10,CMS,Pages,CRUD content pages (TipTap),Not Started,Not Started,Medium,Not Started,
+Sprint 10,CMS,Banners,Hero/home/category banners,Not Started,Not Started,Medium,Not Started,
+Sprint 10,CMS,Blogs,Blog posts,Not Started,Not Started,Low,Not Started,
+Sprint 10,CMS,Static pages,"FAQ, terms, privacy, contact",Not Started,Not Started,Low,Not Started,
+Sprint 10,Marketing,Flash sale,Time-boxed sale campaign,Not Started,Not Started,Medium,Not Started,
+Sprint 10,Marketing,Deals,Deals of the day,Not Started,Not Started,Low,Not Started,
+Sprint 10,Marketing,Gift cards,Gift card issue/redeem,Not Started,Not Started,Medium,Not Started,
+Sprint 10,Marketing,Referral,Referral program,Not Started,Not Started,Low,Not Started,
+Sprint 10,Marketing,Newsletter,Subscribe + email campaign,Not Started,Not Started,Low,Not Started,Email sync now
+Sprint 10,Marketing,Push / popup,Push notifications + popups,Not Started,Not Started,Low,Not Started,
+Sprint 11,Reports,Sales & revenue reports,Time-series sales/revenue,Not Started,Not Started,Medium,Not Started,
+Sprint 11,Reports,Inventory & product reports,Stock + product performance,Not Started,Not Started,Medium,Not Started,
+Sprint 11,Reports,Customer/coupon/tax/profit,Additional report types,Not Started,Not Started,Low,Not Started,
+Sprint 11,Reports,Exports,CSV/Excel/PDF export,Not Started,Not Started,Medium,Not Started,
+Sprint 11,Settings,Store settings,Store profile,Not Started,Not Started,Medium,Not Started,
+Sprint 11,Settings,Currency/tax/shipping,Commerce config,Not Started,Not Started,Medium,Not Started,
+Sprint 11,Settings,Email/SMS,Provider configuration,Not Started,Not Started,Low,Not Started,
+Sprint 11,Settings,Theme,Light/dark + branding,Not Started,Not Started,Low,Not Started,
+Sprint 11,Settings,Payment config,Gateway keys,Not Started,Not Started,Medium,Not Started,
+Sprint 11,Notifications,In-app feed,Notification center,Not Started,Not Started,Medium,Not Started,
+Sprint 11,Notifications,Email,Transactional email,Not Started,Not Started,Medium,Not Started,Sync now; BullMQ later
+Sprint 11,Notifications,SMS,SMS provider,Not Started,Not Started,Low,Not Started,
+Sprint 11,Notifications,Push,Web push,Not Started,Not Started,Low,Not Started,
+Sprint 11,Search,Full-text search,MongoDB Atlas Search,Not Started,Not Started,High,Not Started,
+Sprint 11,Search,Autocomplete,Search suggestions,Not Started,Not Started,Medium,Not Started,
+Sprint 11,Search,Recent/popular,Recent + popular searches,Not Started,Not Started,Low,Not Started,
+Sprint 12,Security,Helmet,Secure HTTP headers,Not Started,Not Started,High,Not Started,
+Sprint 12,Security,Rate limiting,@nestjs/throttler (in-memory),Not Started,Not Started,High,Not Started,Redis-backed later
+Sprint 12,Security,Validation,DTO/Zod on all writes,Not Started,Not Started,Critical,Not Started,
+Sprint 12,Security,XSS/CSRF/CORS,Injection + cross-origin protection,Not Started,Not Started,High,Not Started,
+Sprint 12,Security,Audit logs,Sensitive mutation audit trail,Not Started,Not Started,Medium,Not Started,
+Sprint 12,Security,Activity logs,User activity logging,Not Started,Not Started,Low,Not Started,
+Sprint 12,File Management,Upload,Multer to Cloudinary/S3,Not Started,Not Started,High,Not Started,Local disk in dev
+Sprint 12,File Management,Image pipeline,"Compress, crop, resize",Not Started,Not Started,Medium,Not Started,
+Sprint 12,File Management,Folders/versions,Media library management,Not Started,Not Started,Low,Not Started,
+Sprint 12,Admin Bulk,Bulk edit/delete,Batch operations,Not Started,Not Started,Medium,Not Started,
+Sprint 12,Admin Bulk,CSV import,Import products/customers,Not Started,Not Started,Medium,Not Started,
+Sprint 12,Admin Bulk,Export,CSV/Excel/PDF export,Not Started,Not Started,Medium,Not Started,
+Sprint 12,Analytics,Revenue/orders analytics,Aggregation pipelines,Not Started,Not Started,Medium,Not Started,
+Sprint 12,Analytics,Visitors/conversion,Traffic + conversion,Not Started,Not Started,Low,Not Started,
+Sprint 12,Analytics,Retention/cohorts,Cohort + retention analysis,Not Started,Not Started,Low,Not Started,
+Sprint 12,Logging,API logs,Winston request logging,Not Started,Not Started,Medium,Not Started,
+Sprint 12,Logging,Login/audit/system logs,Structured logs,Not Started,Not Started,Medium,Not Started,
+Sprint 13,Performance,Pagination,Offset pagination on all lists,Not Started,Not Started,High,Not Started,
+Sprint 13,Performance,Lazy load / infinite scroll,Storefront list performance,Not Started,Not Started,Medium,Not Started,
+Sprint 13,Performance,Caching (Redis),Introduce Redis cache,Not Started,Not Started,Medium,Not Started,Redis enabled here
+Sprint 13,Performance,Queues (BullMQ),Move jobs to BullMQ,Not Started,Not Started,Medium,Not Started,BullMQ enabled here
+Sprint 13,Performance,Image optimization / CDN,CDN + optimized images,Not Started,Not Started,Medium,Not Started,
+Sprint 13,Production,Dockerize,Frontend + backend images,Not Started,Not Started,High,Not Started,
+Sprint 13,Production,Nginx,Reverse proxy + SSL,Not Started,Not Started,High,Not Started,
+Sprint 13,Production,PM2,Process manager on VPS,Not Started,Not Started,Medium,Not Started,
+Sprint 13,Production,CI/CD deploy,GitHub Actions build+push+deploy,Not Started,Not Started,High,Not Started,
+Sprint 13,Production,Monitoring,Uptime + error monitoring,Not Started,Not Started,Medium,Not Started,
+Sprint 13,Production,Cloudflare,"DNS, CDN, WAF, SSL",Not Started,Not Started,Medium,Not Started,
+Sprint 14,AI,Description generator,AI product description generation,Not Started,Not Started,Medium,Not Started,Optional; Claude
+Sprint 14,AI,SEO generator,AI meta title/description,Not Started,Not Started,Medium,Not Started,
+Sprint 14,AI,Alt-text generator,AI image alt text (batch),Not Started,Not Started,Low,Not Started,
+Sprint 14,AI,Review summarizer,Summarize product reviews,Not Started,Not Started,Low,Not Started,
+Sprint 14,AI,Shopping assistant (RAG),Chat over catalog with vector search,Not Started,Not Started,Medium,Not Started,Atlas Vector Search
+Sprint 14,AI,Recommendations,Embedding-based product recs,Not Started,Not Started,Medium,Not Started,
+Sprint 14,AI,Support chatbot,Order-aware support agent (tool-use),Not Started,Not Started,Low,Not Started,
+Sprint 14,AI,Sales insights,AI narration of dashboard metrics,Not Started,Not Started,Low,Not Started,
+Sprint 14,AI,Inventory forecasting,Demand prediction + restock suggestions,Not Started,Not Started,Low,Not Started,
