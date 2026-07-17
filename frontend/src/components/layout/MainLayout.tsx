@@ -11,7 +11,7 @@ export function MainLayout() {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Navbar />
-          <main className="flex-1 overflow-auto p-6">
+          <main className="flex-1 overflow-auto p-6 scrollbar-custom">
             <Outlet />
           </main>
         </div>

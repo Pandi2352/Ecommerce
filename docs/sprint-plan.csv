@@ -10,6 +10,8 @@ Sprint 1,Design System,Table component,Custom headless bordered/dense table,Done
 Sprint 1,Design System,Feedback components,"Modal, Toast, Tooltip, Dropdown",Done,Verified (kitchen-sink),High,Done,react-hot-toast; Modal/Tooltip/Dropdown custom (no Radix)
 Sprint 1,Design System,Layout shell,"Sidebar, Navbar, MainLayout, AuthLayout",Done,Verified (run),Critical,Done,"Graphite sidebar, white-pill active"
 Sprint 1,Design System,Loading/empty/error states,"Skeletons, empty states, ErrorBoundary",Done,Verified (kitchen-sink),Medium,Done,"Skeletons, never spinners"
+Sprint 1,Design System,Error pages,"404 / 400 / 403 / 500 + router error boundary",Done,Verified (build),Medium,Done,Reusable ErrorState; catch-all 404 + errorElement; preview at /errors/*
+Sprint 1,Design System,Design-system audit,No shadows + rounded-md across dashboard/sidebar/navbar,Done,Verified (build),High,Done,Swept shadows; radii -> rounded-md (full kept for avatars/pills)
 Sprint 2,Auth,Signup,Email/password registration + validation,Not Started,Not Started,Critical,Not Started,
 Sprint 2,Auth,Login,Credential login returning JWT,Not Started,Not Started,Critical,Not Started,
 Sprint 2,Auth,JWT access + refresh,Access (~15m) + refresh (httpOnly cookie) + rotation,Not Started,Not Started,Critical,Not Started,

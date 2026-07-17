@@ -1,37 +1,88 @@
-import { Bell, Menu, Moon, Search, Sun } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Bell, MessageSquare, Moon, Search, Sun, BarChart2, Plus, ChevronDown } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
-import { useSidebar } from '@/hooks/useSidebar';
 
-/** Top bar: 64px, bottom border only (no shadow). */
 export function Navbar() {
   const { theme, toggle } = useTheme();
-  const { toggle: toggleSidebar } = useSidebar();
 
   return (
-    <header className="flex h-16 items-center gap-3 border-b bg-surface px-4">
-      <Button variant="ghost" size="sm" onClick={toggleSidebar} aria-label="Toggle sidebar">
-        <Menu className="size-4" />
-      </Button>
-
-      <div className="relative max-w-md flex-1">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" />
-        <input
-          placeholder="Search anything…  ⌘K"
-          className="h-9 w-full rounded-md border bg-bg pl-9 pr-3 text-sm text-text placeholder:text-text-secondary focus:border-info focus:outline-none"
-        />
+    <header className="flex h-16 items-center justify-between border-b border-border bg-surface px-6 transition-all duration-200">
+      
+      {/* Welcome Greetings (Left) */}
+      <div className="flex flex-col">
+        <h1 className="text-base font-bold text-text flex items-center gap-1.5 leading-none">
+          Good morning, John! <span className="animate-wiggle text-base">👋</span>
+        </h1>
+        <p className="mt-1 text-[11px] font-medium text-text-secondary">
+          Here's what's happening with your store today.
+        </p>
       </div>
 
-      <div className="ml-auto flex items-center gap-1">
-        <Button variant="ghost" size="sm" onClick={toggle} aria-label="Toggle theme">
-          {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-        </Button>
-        <Button variant="ghost" size="sm" aria-label="Notifications">
-          <Bell className="size-4" />
-        </Button>
-        <div className="ml-1 grid size-8 place-items-center rounded-md border bg-bg text-xs font-semibold text-text">
-          AD
+      {/* Search Input (Center) */}
+      <div className="relative mx-4 hidden max-w-sm flex-1 md:block">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+        <input
+          type="text"
+          placeholder="Search anything..."
+          className="h-9 w-full rounded-md border border-border bg-bg pl-9 pr-14 text-xs text-text placeholder:text-text-secondary focus:border-indigo-500 focus:outline-none transition-all"
+        />
+        <kbd className="pointer-events-none absolute right-2.5 top-2.5 inline-flex h-4 select-none items-center gap-0.5 rounded-md border border-border bg-surface px-1.5 font-mono text-[9px] font-medium text-text-secondary">
+          <span className="text-[10px]">⌘</span>K
+        </kbd>
+      </div>
+
+      {/* Right Actions Panel */}
+      <div className="flex items-center gap-3">
+        {/* Statistics Icon */}
+        <button className="flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-bg hover:text-text transition-colors cursor-pointer" aria-label="Stats">
+          <BarChart2 className="h-4.5 w-4.5" />
+        </button>
+
+        {/* Messaging Icon with Badge */}
+        <button className="relative flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-bg hover:text-text transition-colors cursor-pointer" aria-label="Messages">
+          <MessageSquare className="h-4.5 w-4.5" />
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-violet-600 px-1 text-[9px] font-bold text-white ring-2 ring-surface">
+            5
+          </span>
+        </button>
+
+        {/* Notification Icon with Badge */}
+        <button className="relative flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-bg hover:text-text transition-colors cursor-pointer" aria-label="Notifications">
+          <Bell className="h-4.5 w-4.5" />
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white ring-2 ring-surface">
+            12
+          </span>
+        </button>
+
+        {/* Theme Toggle Button */}
+        <button 
+          onClick={toggle} 
+          className="flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-bg hover:text-text transition-colors cursor-pointer" 
+          aria-label="Theme toggle"
+        >
+          {theme === 'dark' ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
+        </button>
+
+        <div className="h-6 w-px bg-border" />
+
+        {/* User Profile Card */}
+        <div className="flex items-center gap-2.5">
+          <img
+            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=80&h=80&q=80"
+            alt="John Doe"
+            className="h-8 w-8 rounded-full border border-border object-cover"
+          />
+          <div className="hidden flex-col items-start leading-none sm:flex">
+            <span className="text-xs font-semibold text-text">John Doe</span>
+            <span className="mt-0.5 text-[9px] font-medium text-text-secondary">Super Admin</span>
+          </div>
         </div>
+
+        {/* Add New Dropdown Button */}
+        <button className="flex items-center gap-1.5 rounded-md bg-indigo-650 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-600 transition-colors cursor-pointer">
+          <Plus className="h-3.5 w-3.5" />
+          <span>Add New</span>
+          <ChevronDown className="h-3.5 w-3.5 opacity-80" />
+        </button>
       </div>
     </header>
   );
