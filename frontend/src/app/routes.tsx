@@ -5,6 +5,7 @@ import { Dashboard } from '@/pages/Dashboard';
 import { KitchenSink } from '@/pages/KitchenSink';
 import { Login } from '@/pages/Login';
 import { Placeholder } from '@/pages/Placeholder';
+import { CategoriesPage } from '@/features/categories/CategoriesPage';
 import {
   RouteErrorBoundary,
   NotFound,
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { path: 'analytics', element: <Placeholder title="Analytics" /> },
       { path: 'orders', element: <Placeholder title="Orders" /> },
       { path: 'products', element: <Placeholder title="Products" /> },
+      { path: 'categories', element: <CategoriesPage /> },
       { path: 'customers', element: <Placeholder title="Customers" /> },
       { path: 'marketing', element: <Placeholder title="Marketing" /> },
       { path: 'discounts', element: <Placeholder title="Discounts" /> },

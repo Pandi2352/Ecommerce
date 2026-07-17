@@ -23,9 +23,9 @@ interface Row {
 }
 
 const rows: Row[] = [
-  { id: '1', product: 'iPhone 15 Pro', status: 'ACTIVE', price: '₹1,29,900' },
-  { id: '2', product: 'MacBook Air M3', status: 'DRAFT', price: '₹1,14,900' },
-  { id: '3', product: 'AirPods Pro', status: 'ARCHIVED', price: '₹24,900' },
+  { id: '1', product: 'Floral Maxi Dress', status: 'ACTIVE', price: '₹2,499' },
+  { id: '2', product: 'Denim Jacket', status: 'DRAFT', price: '₹3,299' },
+  { id: '3', product: 'Silk Saree', status: 'ARCHIVED', price: '₹6,999' },
 ];
 
 const statusTone = { ACTIVE: 'success', DRAFT: 'neutral', ARCHIVED: 'danger' } as const;
@@ -70,8 +70,9 @@ export function KitchenSink() {
             <option value="" disabled>
               Choose a category…
             </option>
-            <option>Electronics</option>
-            <option>Apparel</option>
+            <option>Dresses</option>
+            <option>Footwear</option>
+            <option>Accessories</option>
           </Select>
           <label className="flex items-center gap-2 text-sm text-text">
             <Checkbox defaultChecked /> Subscribe to updates

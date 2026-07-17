@@ -43,9 +43,21 @@ one new concept — see [09-roadmap.md](./09-roadmap.md).
   ([15-ai-features.md](./15-ai-features.md)).
 - **DevOps** — Docker, Nginx, PM2, SSL, GitHub Actions, VPS/Cloudflare.
 
-**Out of scope (for now)** — native mobile apps (the web is responsive); the 50
-stretch items in [16-advanced-features.md](./16-advanced-features.md) are an
-optional backlog, not v1.
+**Shop niche: dress / fashion & apparel.** The store ("NovaShop") sells dresses,
+tops, bottoms, outerwear, footwear, ethnic wear, activewear, and accessories — chosen
+because apparel exercises the **size × color variant matrix** hardest (the richest
+part of Phases 7–8), plus brands, collections, and image-heavy catalogs. Categories,
+brands, and seed data follow this vertical.
+
+**Tenancy: single shop.** This is a **single-tenant** platform — one store, one
+admin team, one catalog (not a multi-tenant SaaS where many shops sign up). Core
+commerce is identical either way; multi-store / multi-vendor lives in the advanced
+backlog ([16-advanced-features.md](./16-advanced-features.md) #1 & #4). Store-wide
+config lives in Settings so it can be extended later without a rewrite.
+
+**Out of scope (for now)** — multi-tenant SaaS, native mobile apps (the web is
+responsive); the 50 stretch items in [16-advanced-features.md](./16-advanced-features.md)
+are an optional backlog, not v1.
 
 ## Primary personas
 

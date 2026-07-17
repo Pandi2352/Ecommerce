@@ -50,11 +50,11 @@ Sprint 4,Products,Relations,"Related, cross-sell, upsell",Not Started,Not Starte
 Sprint 4,Products,Flags,"Featured, popular, trending, new arrival",Not Started,Not Started,Low,Not Started,
 Sprint 4,Products,Product list UI,Rich table: image/stock/price/status/sales/actions,Not Started,Not Started,High,Not Started,
 Sprint 4,Products,Bulk actions,Bulk archive/delete/edit,Not Started,Not Started,Medium,Not Started,
-Sprint 4,Categories,Category CRUD,Create/read/update/delete categories,Not Started,Not Started,High,Not Started,
-Sprint 4,Categories,Nested tree,Unlimited nested categories,Not Started,Not Started,High,Not Started,
-Sprint 4,Categories,Tree view + reorder,Drag-drop ordering,Not Started,Not Started,Medium,Not Started,React DnD
-Sprint 4,Categories,Category SEO/media,"Banner, image, SEO",Not Started,Not Started,Low,Not Started,
-Sprint 4,Categories,Status,Active/inactive,Not Started,Not Started,Low,Not Started,
+Sprint 4,Categories,Category CRUD,Create/read/update/delete categories,Done,Verified (curl + build),High,Done,"Full-stack: NestJS module + Axios/React page; pulled forward. Mutations need @Roles(ADMIN) once auth lands (Sprint 2)"
+Sprint 4,Categories,Nested tree,Unlimited nested categories,Done,Verified (curl),High,Done,"parent ref + GET ?tree=true; delete reparents children. Fixed SchemaTypes.ObjectId cast bug"
+Sprint 4,Categories,Tree view + reorder,Drag-drop ordering,Not Started,Not Started,Medium,Not Started,React DnD; flat table + parent column for now
+Sprint 4,Categories,Category SEO/media,"Banner, image, SEO",In Progress,Not Started,Low,In Progress,Schema+DTO support metaTitle/metaDescription/image; not yet in the UI form
+Sprint 4,Categories,Status,Active/inactive,Done,Verified (build),Low,Done,isActive toggle + badge
 Sprint 5,Brands,Brand CRUD,"Logo, banner, description, SEO",Not Started,Not Started,Medium,Not Started,
 Sprint 5,Variants,Variant options,Size/color/storage/material/flavor/pack,Not Started,Not Started,High,Not Started,
 Sprint 5,Variants,Variant matrix,Per-combination SKU/price/stock/barcode/weight,Not Started,Not Started,High,Not Started,

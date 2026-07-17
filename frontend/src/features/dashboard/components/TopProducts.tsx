@@ -6,41 +6,42 @@ interface Product {
   revenue: string;
 }
 
+// Placeholder demo data — replaced by real product media in Sprint 4 (Products).
 const products: Product[] = [
   {
     rank: 1,
-    name: 'Wireless Headphones',
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=80&h=80&q=80',
+    name: 'Floral Maxi Dress',
+    image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=80&h=80&q=80',
     sold: '1,245 sold',
-    revenue: '₹12,999',
+    revenue: '₹2,499',
   },
   {
     rank: 2,
-    name: 'Smart Watch Series 8',
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=80&h=80&q=80',
+    name: 'Denim Jacket',
+    image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=80&h=80&q=80',
     sold: '982 sold',
-    revenue: '₹24,999',
+    revenue: '₹3,299',
   },
   {
     rank: 3,
-    name: 'Leather Backpack',
+    name: 'Leather Tote Bag',
     image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=80&h=80&q=80',
     sold: '653 sold',
-    revenue: '₹3,499',
+    revenue: '₹4,999',
   },
   {
     rank: 4,
-    name: 'Running Shoes',
+    name: 'Classic White Sneakers',
     image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=80&h=80&q=80',
     sold: '529 sold',
-    revenue: '₹2,799',
+    revenue: '₹3,999',
   },
   {
     rank: 5,
-    name: 'Cotton T-Shirt',
+    name: 'Oversized Cotton Tee',
     image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=80&h=80&q=80',
     sold: '425 sold',
-    revenue: '₹599',
+    revenue: '₹899',
   },
 ];
 
