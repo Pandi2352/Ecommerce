@@ -12,33 +12,33 @@ Sprint 1,Design System,Layout shell,"Sidebar, Navbar, MainLayout, AuthLayout",Do
 Sprint 1,Design System,Loading/empty/error states,"Skeletons, empty states, ErrorBoundary",Done,Verified (kitchen-sink),Medium,Done,"Skeletons, never spinners"
 Sprint 1,Design System,Error pages,"404 / 400 / 403 / 500 + router error boundary",Done,Verified (build),Medium,Done,Reusable ErrorState; catch-all 404 + errorElement; preview at /errors/*
 Sprint 1,Design System,Design-system audit,No shadows + rounded-md across dashboard/sidebar/navbar,Done,Verified (build),High,Done,Swept shadows; radii -> rounded-md (full kept for avatars/pills)
-Sprint 2,Auth,Signup,Email/password registration + validation,Not Started,Not Started,Critical,Not Started,
-Sprint 2,Auth,Login,Credential login returning JWT,Not Started,Not Started,Critical,Not Started,
-Sprint 2,Auth,JWT access + refresh,Access (~15m) + refresh (httpOnly cookie) + rotation,Not Started,Not Started,Critical,Not Started,
-Sprint 2,Auth,Password hashing,bcrypt hashing,Not Started,Not Started,Critical,Not Started,
-Sprint 2,Auth,Guards & RBAC,"JwtAuthGuard global, RolesGuard, @Public/@Roles",Not Started,Not Started,Critical,Not Started,5 roles
-Sprint 2,Auth,Forgot password,Request password reset email,Not Started,Not Started,High,Not Started,Email sync (Nodemailer)
-Sprint 2,Auth,Reset password,Token-based password reset,Not Started,Not Started,High,Not Started,
-Sprint 2,Auth,Email verification,Verify email via token,Not Started,Not Started,High,Not Started,
-Sprint 2,Auth,Google login,OAuth via Passport,Not Started,Not Started,Medium,Not Started,
-Sprint 2,Auth,Profile,View/update current user,Not Started,Not Started,High,Not Started,
-Sprint 2,Auth,Change password,Authenticated password change,Not Started,Not Started,Medium,Not Started,
-Sprint 2,Auth,Sessions,List and revoke active sessions,Not Started,Not Started,Medium,Not Started,Revocable refresh sessions
-Sprint 2,Auth,Logout,Revoke refresh session,Not Started,Not Started,High,Not Started,
-Sprint 3,User Management,User CRUD,Admin create/read/update/delete users,Not Started,Not Started,High,Not Started,ADMIN only
-Sprint 3,User Management,Roles & permissions,Role assignment + permission checks,Not Started,Not Started,High,Not Started,
-Sprint 3,User Management,Ban / Restore,Suspend/ban and restore users,Not Started,Not Started,Medium,Not Started,
-Sprint 3,User Management,User activity,Activity log per user,Not Started,Not Started,Low,Not Started,
-Sprint 3,User Management,Addresses,Multiple addresses per user,Not Started,Not Started,Medium,Not Started,
-Sprint 3,User Management,Wishlist,User wishlist,Not Started,Not Started,Medium,Not Started,Linked to storefront
-Sprint 3,User Management,Recently viewed,Track recently viewed products,Not Started,Not Started,Low,Not Started,
-Sprint 3,Dashboard,KPI cards,"Revenue, Orders, Customers, Conversion + sparkline",Not Started,Not Started,High,Not Started,
-Sprint 3,Dashboard,Sales chart,Custom dual-line SVG chart,Not Started,Not Started,High,Not Started,"2px lines, no gradient"
-Sprint 3,Dashboard,Order status chart,Radial status breakdown,Not Started,Not Started,Medium,Not Started,
-Sprint 3,Dashboard,Category distribution,Donut chart,Not Started,Not Started,Medium,Not Started,
-Sprint 3,Dashboard,Recent orders,Recent orders table,Not Started,Not Started,High,Not Started,
-Sprint 3,Dashboard,Live orders,Realtime order feed,Not Started,Not Started,Medium,Not Started,socket.io
-Sprint 3,Dashboard,Top customers,Top customers list,Not Started,Not Started,Low,Not Started,
+Sprint 2,Auth,Signup,Email/password registration + validation,Done,Verified (curl + build),Critical,Done,Backend + signup page; AuthProvider + protected routes
+Sprint 2,Auth,Login,Credential login returning JWT,Done,Verified (curl + build),Critical,Done,Backend + login page; Axios refresh-on-401 interceptor. Wrong pw -> 401
+Sprint 2,Auth,JWT access + refresh,Access (~15m) + refresh (httpOnly cookie) + rotation,Done,Verified (curl),Critical,Done,Refresh rotates + revokes old session
+Sprint 2,Auth,Password hashing,bcrypt hashing,Done,Verified (curl),Critical,Done,bcrypt 10 rounds; password select:false + stripped from JSON
+Sprint 2,Auth,Guards & RBAC,"JwtAuthGuard global, RolesGuard, @Public/@Roles",Done,Verified (401/403),Critical,Done,Global guards; category writes now ADMIN-only
+Sprint 2,Auth,Forgot password,Request password reset email,Done,Verified (curl),High,Done,Nodemailer (dev logs link); JWT_MAIL_SECRET token; forgot page
+Sprint 2,Auth,Reset password,Token-based password reset,Done,Verified (curl),High,Done,30m token; revokes all sessions on reset; reset page
+Sprint 2,Auth,Email verification,Verify email via token,Done,Verified (curl),High,Done,Sent on signup; verify page; bad token -> 400
+Sprint 2,Auth,Google login,OAuth via Passport,In Progress,Not run (needs creds),Medium,In Progress,Scaffolded + gated (GOOGLE_CLIENT_ID/SECRET); strategy+routes; UI link pending
+Sprint 2,Auth,Profile,View/update current user,Done,Verified (curl + build),High,Done,GET /auth/me + PATCH /auth/profile; Settings page
+Sprint 2,Auth,Change password,Authenticated password change,Done,Verified (curl),Medium,Done,bcrypt verify current; Settings page
+Sprint 2,Auth,Sessions,List and revoke active sessions,Done,Verified (curl),Medium,Done,list + revoke one/all; userAgent captured; Settings page
+Sprint 2,Auth,Logout,Revoke refresh session,Done,Verified (curl),High,Done,Clears cookie + deletes session
+Sprint 3,User Management,User CRUD,Admin create/read/update/delete users,Done,Verified (curl + build),High,Done,"ADMIN only; paginated list + search/role/status filters; soft-delete (status DELETED)"
+Sprint 3,User Management,Roles & permissions,Role assignment + permission checks,Done,Verified (curl),High,Done,"5 roles via PATCH /users/:id/role; fine-grained permissions deferred (advanced)"
+Sprint 3,User Management,Ban / Restore,Suspend/ban and restore users,Done,Verified (curl),Medium,Done,"ban/restore endpoints + UI; admin can't ban/delete self (400)"
+Sprint 3,User Management,User activity,Activity log per user,Not Started,Not Started,Low,Not Started,Deferred (ActivityLog schema — Phase 27)
+Sprint 3,User Management,Addresses,Multiple addresses per user,Not Started,Not Started,Medium,Not Started,Storefront/customers feature — later sprint
+Sprint 3,User Management,Wishlist,User wishlist,Not Started,Not Started,Medium,Not Started,Storefront feature — later sprint
+Sprint 3,User Management,Recently viewed,Track recently viewed products,Not Started,Not Started,Low,Not Started,Storefront feature — later sprint
+Sprint 3,Dashboard,KPI cards,"Revenue, Orders, Customers, Conversion + sparkline",In Progress,Not Started,High,In Progress,UI built (mock); real analytics wiring needs orders/products (Sprint 4-6)
+Sprint 3,Dashboard,Sales chart,Custom dual-line SVG chart,In Progress,Not Started,High,In Progress,"UI built (mock, animated, 2px no-gradient); data pending"
+Sprint 3,Dashboard,Order status chart,Radial status breakdown,In Progress,Not Started,Medium,In Progress,UI built (mock); data pending orders
+Sprint 3,Dashboard,Category distribution,Donut chart,In Progress,Not Started,Medium,In Progress,UI built (mock, animated); data pending
+Sprint 3,Dashboard,Recent orders,Recent orders table,In Progress,Not Started,High,In Progress,UI built (mock); data pending orders
+Sprint 3,Dashboard,Live orders,Realtime order feed,Not Started,Not Started,Medium,Not Started,socket.io; needs realtime gateway + orders
+Sprint 3,Dashboard,Top customers,Top customers list,In Progress,Not Started,Low,In Progress,UI built (Top Products mock); data pending
 Sprint 4,Products,Product CRUD,Create/read/update/delete products,Not Started,Not Started,Critical,Not Started,Largest module
 Sprint 4,Products,SKU / Slug / Barcode,Identifiers + unique slug,Not Started,Not Started,High,Not Started,
 Sprint 4,Products,SEO fields,Meta title/description,Not Started,Not Started,Medium,Not Started,
@@ -50,7 +50,7 @@ Sprint 4,Products,Relations,"Related, cross-sell, upsell",Not Started,Not Starte
 Sprint 4,Products,Flags,"Featured, popular, trending, new arrival",Not Started,Not Started,Low,Not Started,
 Sprint 4,Products,Product list UI,Rich table: image/stock/price/status/sales/actions,Not Started,Not Started,High,Not Started,
 Sprint 4,Products,Bulk actions,Bulk archive/delete/edit,Not Started,Not Started,Medium,Not Started,
-Sprint 4,Categories,Category CRUD,Create/read/update/delete categories,Done,Verified (curl + build),High,Done,"Full-stack: NestJS module + Axios/React page; pulled forward. Mutations need @Roles(ADMIN) once auth lands (Sprint 2)"
+Sprint 4,Categories,Category CRUD,Create/read/update/delete categories,Done,Verified (curl + build),High,Done,"Full-stack: NestJS module + Axios/React page. Reads public; writes now @Roles(ADMIN)"
 Sprint 4,Categories,Nested tree,Unlimited nested categories,Done,Verified (curl),High,Done,"parent ref + GET ?tree=true; delete reparents children. Fixed SchemaTypes.ObjectId cast bug"
 Sprint 4,Categories,Tree view + reorder,Drag-drop ordering,Not Started,Not Started,Medium,Not Started,React DnD; flat table + parent column for now
 Sprint 4,Categories,Category SEO/media,"Banner, image, SEO",In Progress,Not Started,Low,In Progress,Schema+DTO support metaTitle/metaDescription/image; not yet in the UI form

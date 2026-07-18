@@ -10,6 +10,13 @@ Legend: 🖥️ frontend · 🔌 backend · ⚡ realtime/jobs · 🧠 concept le
 > Suggested pace and grouping are in [Milestones](#milestones). Phases are ordered so
 > each builds on the last; you can reorder within a milestone.
 
+> **Current status** (live tracker: [`sprint-plan.csv`](./sprint-plan.csv)):
+> ✅ **Phase 0–1 done** (monorepo, tooling, CI, design system, shell — theme-aware
+> sidebar with submenu flyouts, error pages, dashboard). 🟢 **Category CRUD (Phase 5)
+> pulled forward** — backend module + admin page done (nested tree, delete-reparent);
+> SEO/media form fields + drag-reorder pending. ▶️ **Next: Phase 1 Authentication**
+> (then guard category mutations with `@Roles('ADMIN')`).
+
 ---
 
 ## Foundation

@@ -73,11 +73,14 @@ Layout order: KPI row → Sales chart → Orders table → Recent activity → A
 - **Endpoints** `GET/POST /products` · `GET/PATCH/DELETE /products/:id` · `POST /products/bulk`.
 - **Access** create/update/delete → ADMIN, OPERATOR; read → all roles.
 
-#### 2a. Categories (sub-domain of `products`)
+#### 2a. Categories (sub-domain of `products`) — ✅ built (ahead of schedule)
 
-- Product taxonomy (optionally nested via `parent`). Powers the category filter and
-  the dashboard distribution widget.
-- **Entities** `Category`. **Endpoints** `GET/POST /categories`.
+- Product taxonomy, **unlimited nesting** via `parent`; delete reparents children.
+  Powers the category filter and the dashboard distribution widget.
+- **Entities** `Category`. **Endpoints** `GET /categories` (+ `?tree=true`) ·
+  `GET/:id` · `POST` · `PATCH/:id` · `DELETE/:id`.
+- **Status:** backend `categories` module + admin CRUD page done. Pending: SEO/media
+  fields in the form, drag-reorder UI, and `@Roles('ADMIN')` guard (needs Sprint 2 auth).
 
 #### 2b. Inventory & Warehouses ➕ (sub-domain of `products`)
 

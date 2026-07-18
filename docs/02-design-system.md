@@ -18,13 +18,19 @@ This is the source of truth for the visual language. Every component in
 > The single most important rule: **if you're about to add a shadow, add a border
 > instead.** If you're about to add color, ask whether it carries meaning.
 
+> **Brand-mark exceptions.** The no-shadow / no-gradient rules apply to **UI surfaces**
+> (cards, tables, panels, buttons). The **brand logo** and **favicon** may use a
+> gradient + subtle glow, and the **sidebar menu icons** are intentionally duotone and
+> colorful — these are identity/decoration, deliberately exempt. Everything else stays
+> flat and border-based.
+
 ## Color tokens
 
 ### Light mode
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `--bg` | `#F7F8FA` | App background (the canvas) |
+| `--bg` | `lab(98.26% 0 0)` | App background / outlet canvas (clean neutral near-white) |
 | `--surface` | `#FFFFFF` | Cards, panels, tables, inputs |
 | `--border` | `#E5E7EB` | All 1px separators |
 | `--text` | `#111827` | Primary text |
@@ -47,19 +53,24 @@ This is the source of truth for the visual language. Every component in
 > Status colors (success/warning/danger/info) stay the same hue in dark mode; they
 > already read well on the dark surface. Adjust only if contrast testing fails.
 
-### Sidebar (both modes — the sidebar is always graphite)
+### Sidebar (theme-aware — light in light mode, graphite in dark)
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--sidebar-bg` | `#1A1D24` | Medium-dark graphite (not solid black) |
-| `--sidebar-border` | `#2B2F38` | Sidebar separators |
-| `--sidebar-hover` | `#252932` | Row hover |
-| `--sidebar-active-bg` | `#FFFFFF` | Active item = white pill |
-| `--sidebar-active-text` | `#000000` | Active item icon + text = black |
-| `--sidebar-text` | `#9CA3AF` | Inactive item text |
+The sidebar follows the theme (it is **not** always dark). Tokens flip via `.dark`.
 
-**Rule:** only the **active** menu item gets the white pill. Everything else stays
-dark. No gradients, no glow.
+| Token | Light | Dark | Usage |
+|-------|-------|------|-------|
+| `--sidebar-bg` | `#FFFFFF` | `#111217` | Sidebar surface |
+| `--sidebar-border` | `#EBEDF0` | `#23252D` | Separators / right border |
+| `--sidebar-hover` | `#F3F4F6` | `#1B1D24` | Row hover **and** active-row background |
+| `--sidebar-text` | `#566072` | `#97A1B2` | Inactive item text |
+| `--sidebar-heading` | `#9AA2B1` | `#5B6472` | Section labels |
+| `--sidebar-accent` | `#6366F1` | `#818CF8` | Submenu dots / pills |
+
+**Active state:** subtle `--sidebar-hover` background + stronger text (no white pill,
+no vertical accent line). **Menu icons are duotone**: a colored outline + faint fill
+of the same per-item hue (each item has its own color) — the one place color is used
+decoratively, by design. Collapsed sidebar shows hover **flyouts** (label tooltip for
+leaves, submenu popover for parents).
 
 ### Table-specific
 

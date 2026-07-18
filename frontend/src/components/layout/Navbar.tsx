@@ -1,8 +1,19 @@
 import { Bell, MessageSquare, Moon, Search, Sun, BarChart2, Plus, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/useTheme';
+import { useAuth } from '@/features/auth/AuthContext';
+import { Dropdown } from '@/components/ui';
 
 export function Navbar() {
   const { theme, toggle } = useTheme();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const initials = (user?.name ?? '?')
+    .split(' ')
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-surface px-6 transition-all duration-200">
@@ -64,18 +75,27 @@ export function Navbar() {
 
         <div className="h-6 w-px bg-border" />
 
-        {/* User Profile Card */}
-        <div className="flex items-center gap-2.5">
-          <img
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=80&h=80&q=80"
-            alt="John Doe"
-            className="h-8 w-8 rounded-full border border-border object-cover"
-          />
-          <div className="hidden flex-col items-start leading-none sm:flex">
-            <span className="text-xs font-semibold text-text">John Doe</span>
-            <span className="mt-0.5 text-[9px] font-medium text-text-secondary">Super Admin</span>
-          </div>
-        </div>
+        {/* User Profile + menu */}
+        <Dropdown
+          align="right"
+          trigger={
+            <div className="flex items-center gap-2.5">
+              <span className="grid h-8 w-8 place-items-center rounded-full border border-border bg-indigo-500/10 text-xs font-bold text-indigo-500">
+                {initials}
+              </span>
+              <div className="hidden flex-col items-start leading-none sm:flex">
+                <span className="text-xs font-semibold text-text">{user?.name ?? 'Account'}</span>
+                <span className="mt-0.5 text-[9px] font-medium capitalize text-text-secondary">
+                  {user?.role?.toLowerCase() ?? ''}
+                </span>
+              </div>
+            </div>
+          }
+          items={[
+            { label: 'Profile', onSelect: () => navigate('/settings') },
+            { label: 'Sign out', onSelect: () => void logout(), danger: true },
+          ]}
+        />
 
         {/* Add New Dropdown Button */}
         <button className="flex items-center gap-1.5 rounded-md bg-indigo-650 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-600 transition-colors cursor-pointer">

@@ -3,9 +3,16 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Dashboard } from '@/pages/Dashboard';
 import { KitchenSink } from '@/pages/KitchenSink';
-import { Login } from '@/pages/Login';
 import { Placeholder } from '@/pages/Placeholder';
 import { CategoriesPage } from '@/features/categories/CategoriesPage';
+import { RequireAuth } from '@/features/auth/RequireAuth';
+import { LoginPage } from '@/features/auth/LoginPage';
+import { SignupPage } from '@/features/auth/SignupPage';
+import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
+import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage';
+import { SettingsPage } from '@/features/settings/SettingsPage';
+import { UsersPage } from '@/features/users/UsersPage';
 import {
   RouteErrorBoundary,
   NotFound,
@@ -16,10 +23,14 @@ import {
 
 export const router = createBrowserRouter([
   {
-    path: '/',
-    element: <MainLayout />,
-    errorElement: <RouteErrorBoundary />,
+    // Everything under the admin shell requires authentication.
+    element: <RequireAuth />,
     children: [
+      {
+        path: '/',
+        element: <MainLayout />,
+        errorElement: <RouteErrorBoundary />,
+        children: [
       { index: true, element: <Dashboard /> },
       { path: 'kitchen-sink', element: <KitchenSink /> },
       
@@ -52,8 +63,8 @@ export const router = createBrowserRouter([
       { path: 'automation', element: <Placeholder title="Automation" /> },
       
       // Settings
-      { path: 'settings', element: <Placeholder title="Settings" /> },
-      { path: 'users-roles', element: <Placeholder title="Users & Roles" /> },
+      { path: 'settings', element: <SettingsPage /> },
+      { path: 'users-roles', element: <UsersPage /> },
       { path: 'integrations', element: <Placeholder title="Integrations" /> },
       { path: 'billing', element: <Placeholder title="Billing" /> },
 
@@ -64,11 +75,19 @@ export const router = createBrowserRouter([
 
       // Catch-all 404 (rendered inside the admin shell)
       { path: '*', element: <NotFound /> },
+        ],
+      },
     ],
   },
   {
     path: '/auth',
     element: <AuthLayout />,
-    children: [{ path: 'login', element: <Login /> }],
+    children: [
+      { path: 'login', element: <LoginPage /> },
+      { path: 'signup', element: <SignupPage /> },
+      { path: 'forgot', element: <ForgotPasswordPage /> },
+      { path: 'reset', element: <ResetPasswordPage /> },
+      { path: 'verify', element: <VerifyEmailPage /> },
+    ],
   },
 ]);
