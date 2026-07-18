@@ -8,7 +8,7 @@
  * Light values live on :root; dark overrides under .dark. Tailwind reads them via @theme.
  */
 :root {
-  --bg: #f7f8fa;
+  --bg: lab(98.26% 0 0);
   --surface: #ffffff;
   --border: #e5e7eb;
   --text: #111827;
@@ -22,11 +22,15 @@
   --table-header: #fafafa;
   --row-hover: #f9fafb;
 
-  /* Sidebar is graphite in both themes */
-  --sidebar-bg: #1a1d24;
-  --sidebar-border: #2b2f38;
-  --sidebar-hover: #252932;
-  --sidebar-text: #9ca3af;
+  /* Sidebar — LIGHT in light mode (theme-aware). */
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #ebedf0;
+  --sidebar-hover: #f3f4f6;
+  --sidebar-text: #566072;
+  --sidebar-heading: #9aa2b1;
+  --sidebar-active-fg: #4f46e5;
+  --sidebar-active-bg: rgba(99, 102, 241, 0.1);
+  --sidebar-accent: #6366f1;
 }
 
 .dark {
@@ -38,6 +42,16 @@
 
   --table-header: #1f232b;
   --row-hover: #1f232b;
+
+  /* Sidebar — graphite in dark mode. */
+  --sidebar-bg: #111217;
+  --sidebar-border: #23252d;
+  --sidebar-hover: #1b1d24;
+  --sidebar-text: #97a1b2;
+  --sidebar-heading: #5b6472;
+  --sidebar-active-fg: #c7d2fe;
+  --sidebar-active-bg: rgba(99, 102, 241, 0.16);
+  --sidebar-accent: #818cf8;
 }
 
 @theme inline {
@@ -56,6 +70,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-hover: var(--sidebar-hover);
   --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-heading: var(--sidebar-heading);
+  --color-sidebar-active-fg: var(--sidebar-active-fg);
+  --color-sidebar-active-bg: var(--sidebar-active-bg);
+  --color-sidebar-accent: var(--sidebar-accent);
 
   --radius-md: 6px;
 
@@ -102,36 +120,66 @@ body {
   transform-origin: bottom right;
 }
 
-/* Custom compact scrollbar style */
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+/* ── Custom scrollbars — theme-aware, subtle, rounded, inset (works on both modes) ── */
+:root {
+  --scrollbar-thumb: rgba(120, 130, 150, 0.4);
+  --scrollbar-thumb-hover: rgba(120, 130, 150, 0.65);
 }
 
-/* Custom scrollbar style for larger scrolling panels like main content */
-.scrollbar-custom::-webkit-scrollbar {
+/* Global default (Firefox + WebKit). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+  border: 3px solid transparent; /* creates padding → floating pill look */
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Thinner variant for compact panels (sidebar, dropdowns). */
+.scrollbar-thin::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-.scrollbar-custom::-webkit-scrollbar-track {
-  background: transparent;
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  border-width: 2px;
 }
-.scrollbar-custom::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 6px;
+
+/* Main content panels — same as default but named for intent. */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
-.scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+
+/* ── Pointer cursor on interactive elements (Chrome defaults <button> to arrow) ── */
+button:not(:disabled),
+[role='button'],
+select,
+summary,
+a[href],
+input[type='checkbox'],
+input[type='radio'] {
+  cursor: pointer;
+}
+button:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
 /* ── Chart entrance animations (play once on mount → i.e. on route enter/refresh) ── */

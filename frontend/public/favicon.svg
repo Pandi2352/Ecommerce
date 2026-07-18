@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+  </defs>
+  <style>
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.93); opacity: 0.88; }
+    }
+    @keyframes rotateRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .pulsing-bg {
+      animation: pulse 3s ease-in-out infinite;
+      transform-origin: center;
+      fill: url(#grad);
+    }
+    .rotating-ring {
+      animation: rotateRing 12s linear infinite;
+      transform-origin: center;
+      stroke: #7c3aed;
+      stroke-dasharray: 4 3;
+      opacity: 0.6;
+    }
+    .letter-n {
+      fill: #ffffff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+  </style>
+  <!-- Rotating Outer Ring -->
+  <circle cx="16" cy="16" r="14.5" fill="none" stroke-width="1.2" class="rotating-ring" />
+  
+  <!-- Pulsing Rounded Hexagon/Square Base -->
+  <rect x="5.5" y="5.5" width="21" height="21" rx="6" class="pulsing-bg" />
+  
+  <!-- Center letter 'N' -->
+  <text x="16" y="16" class="letter-n">N</text>
+</svg>
