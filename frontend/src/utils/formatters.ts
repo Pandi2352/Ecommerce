@@ -36,6 +36,27 @@ export function formatDateTime(value?: string | number | Date | null): string {
     : '—';
 }
 
+/**
+ * Relative time, e.g. `3 min ago`, `in 12 min`, `2 days ago`. Handles both past
+ * and future. Useful for "invited 5 min ago" / "expires in 10 min".
+ */
+export function formatRelative(value?: string | number | Date | null): string {
+  const d = toDate(value);
+  if (!d) return '—';
+  const diffMs = d.getTime() - Date.now();
+  const past = diffMs < 0;
+  const suffix = (n: number, unit: string) => {
+    const label = `${n} ${unit}${n === 1 ? '' : 's'}`;
+    return past ? `${label} ago` : `in ${label}`;
+  };
+  const mins = Math.round(Math.abs(diffMs) / 60_000);
+  if (mins < 1) return past ? 'just now' : 'in <1 min';
+  if (mins < 60) return past ? `${mins} min ago` : `in ${mins} min`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return suffix(hrs, 'hr');
+  return suffix(Math.round(hrs / 24), 'day');
+}
+
 /** Up to two uppercase initials from a name, e.g. `John Doe` → `JD`. */
 export function getInitials(name?: string | null): string {
   if (!name?.trim()) return '?';

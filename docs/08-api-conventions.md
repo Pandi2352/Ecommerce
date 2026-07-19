@@ -161,6 +161,26 @@ duplicate key (E11000) → 409, `ValidationError` → 422, `CastError` → 400.
 - **Access token** sent as `Authorization: Bearer <token>`.
 - Short-lived access (~15m), longer refresh (~7d).
 
+**Invitations (admin-only, `users.write`):**
+
+- `POST /auth/invite` `{ name, email, role }` → creates an `INVITED` account and
+  emails a set-password link. **The link/token expires in 15 minutes.** Tracks
+  `invitedAt` / `inviteExpiresAt` / `invitedBy` on the user; returns `{ link }`.
+- `POST /auth/reinvite/:id` → refreshes the 15-minute window + token and re-emails
+  (only while `status = INVITED`, else `400`).
+- `DELETE /auth/invite/:id` → revokes a pending invite (hard-deletes the
+  not-yet-activated account; only while `INVITED`).
+- `POST /auth/accept-invite` `{ token, password }` → sets password, `INVITED → ACTIVE`, logs in.
+- The **Invited tab** on the Users page lists `GET /users?status=INVITED` and drives reinvite/revoke.
+- `POST /auth/resend-verification/:id` (`users.write`) — admin re-sends a user's verification email.
+
+**User management (`users.*`):**
+
+- `GET /users` — paginated list. Query: `page`, `pageSize`, `sort` (`-createdAt`, `name`…), `search`, `role`, `status`, `verified` (`true`/`false`).
+- `GET /users/stats` (`users.read`) — count cards: `{ total, active, invited, banned, suspended, deleted, verified, unverified, byRole[] }`.
+- `POST /users/bulk` (`users.write`) — `{ ids[], action: 'ban'|'restore'|'delete'|'setRole', role? }` → `{ affected }`. The acting admin **and any Super Admin** are always excluded from the target set.
+- **Super Admin protection:** ban / delete / role-change on a Super Admin (single or bulk) is refused — single actions `403`, bulk silently skips them — so the seeded account can never be locked out. You also can't act on yourself (`400`).
+
 ## Authorization (RBAC)
 
 - Routes guarded by `@Roles('ADMIN' | 'MODERATOR' | 'OPERATOR' | 'ANALYST' |

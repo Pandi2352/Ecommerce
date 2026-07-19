@@ -33,6 +33,18 @@ export class User {
 
   @Prop()
   lastLogin?: Date;
+
+  // ── Invitation tracking (set while status = INVITED) ──
+  @Prop()
+  invitedAt?: Date;
+
+  /** When the current invite token stops working (invitedAt + 15 min). */
+  @Prop()
+  inviteExpiresAt?: Date;
+
+  /** Id of the admin who sent the (latest) invite. */
+  @Prop({ type: String })
+  invitedBy?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

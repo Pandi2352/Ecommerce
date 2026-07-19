@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ChevronDown, ChevronsUpDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Skeleton } from './Skeleton';
 
@@ -8,6 +9,15 @@ export interface Column<T> {
   /** Cell renderer. */
   cell: (row: T) => ReactNode;
   className?: string;
+  /** Enable click-to-sort on this column's header. */
+  sortable?: boolean;
+  /** Field name sent to the API when sorting (defaults to `key`). */
+  sortKey?: string;
+}
+
+export interface SortState {
+  key: string;
+  dir: 'asc' | 'desc';
 }
 
 export interface TableProps<T> {
@@ -18,6 +28,10 @@ export interface TableProps<T> {
   loading?: boolean;
   emptyState?: ReactNode;
   className?: string;
+  /** Current sort (field + direction). */
+  sort?: SortState;
+  /** Called with the column's sortKey when a sortable header is clicked. */
+  onSort?: (key: string) => void;
 }
 
 /** Custom headless table styled to the design tokens (bordered, dense, no shadow). */
@@ -29,23 +43,52 @@ export function Table<T>({
   loading,
   emptyState,
   className,
+  sort,
+  onSort,
 }: TableProps<T>) {
   return (
-    <div className={cn('overflow-hidden rounded-md border', className)}>
+    <div className={cn('overflow-hidden rounded-md border border-border bg-surface', className)}>
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="bg-table-header">
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={cn(
-                  'border-b px-4 py-2.5 text-left text-xs font-medium text-text-secondary',
-                  col.className,
-                )}
-              >
-                {col.header}
-              </th>
-            ))}
+            {columns.map((col) => {
+              const canSort = col.sortable && onSort;
+              const field = col.sortKey ?? col.key;
+              const activeSort = sort?.key === field;
+              return (
+                <th
+                  key={col.key}
+                  className={cn(
+                    'border-b border-border px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wide text-text-secondary',
+                    col.className,
+                  )}
+                >
+                  {canSort ? (
+                    <button
+                      type="button"
+                      onClick={() => onSort(field)}
+                      className={cn(
+                        'inline-flex cursor-pointer items-center gap-1 hover:text-text',
+                        activeSort && 'text-text',
+                      )}
+                    >
+                      {col.header}
+                      {activeSort ? (
+                        sort?.dir === 'asc' ? (
+                          <ChevronUp className="size-3.5" />
+                        ) : (
+                          <ChevronDown className="size-3.5" />
+                        )
+                      ) : (
+                        <ChevronsUpDown className="size-3.5 opacity-50" />
+                      )}
+                    </button>
+                  ) : (
+                    col.header
+                  )}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
@@ -74,8 +117,9 @@ export function Table<T>({
                 key={rowKey(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={cn(
-                  'border-b last:border-0',
-                  onRowClick && 'cursor-pointer hover:bg-row-hover',
+                  'border-b border-border last:border-0 transition-colors',
+                  'even:bg-row-stripe hover:bg-row-hover',
+                  onRowClick && 'cursor-pointer',
                 )}
               >
                 {columns.map((col) => (

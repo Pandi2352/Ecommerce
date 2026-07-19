@@ -82,7 +82,7 @@ The reusable layer already implemented:
 | `utils/validators` | `isEmail / minLength / isValidPassword / isRequired` | inline form checks that match the backend DTO rules |
 | `utils/constants` | `USER_STATUS_TONE / ORDER_STATUS_TONE / toneFor` | status → Badge tone maps |
 | `lib/types` + `lib/api` | `Paginated<T>`, `Meta`, `getList<T>(url, cfg)` | typed list endpoints (reads the interceptor's `meta`) |
-| `components/ui` | `FormField, Alert, Card, ConfirmDialog` (+ primitives) | labelled fields, inline banners, bordered panels, delete confirms |
+| `components/ui` | `FormField, Alert, Card, ConfirmDialog, SearchInput, Pagination, Tabs, Drawer` (+ primitives; `Dropdown` is portaled, `Table` supports sort) | labelled fields, banners, panels, confirms, clearable search, server pagination, tabs, slide-overs |
 | `components/common` | `PageHeader, Avatar` (+ `BrandLoader, ErrorBoundary`) | page title+actions row, initials avatar |
 
 Every feature exposes a public **barrel** (`features/<name>/index.ts`); import

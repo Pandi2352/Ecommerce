@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { SUPER_ADMIN_ROLE, UserStatus } from '@ecommerce/shared';
@@ -14,7 +20,10 @@ export interface UserListQuery {
   sort?: string;
   role?: string;
   status?: UserStatus;
+  verified?: string;
 }
+
+export type BulkAction = 'ban' | 'restore' | 'delete' | 'setRole';
 
 @Injectable()
 export class UsersService extends BaseService<UserDocument> {
@@ -28,10 +37,26 @@ export class UsersService extends BaseService<UserDocument> {
     password: string;
     role?: string;
     status?: UserStatus;
+    invitedAt?: Date;
+    inviteExpiresAt?: Date;
+    invitedBy?: string;
   }): Promise<UserDocument> {
     const exists = await this.model.exists({ email: data.email.toLowerCase() });
     if (exists) throw new ConflictException('Email already registered');
     return this.model.create(data);
+  }
+
+  /** Refresh the invite window (used on re-invite). */
+  async setInvite(
+    id: string,
+    fields: { invitedAt: Date; inviteExpiresAt: Date; invitedBy?: string },
+  ): Promise<void> {
+    await this.model.findByIdAndUpdate(id, fields).exec();
+  }
+
+  /** Hard-delete a record (used to revoke a pending invite that never activated). */
+  async hardDelete(id: string): Promise<void> {
+    await this.model.findByIdAndDelete(id).exec();
   }
 
   /** Includes the password hash (for credential checks) — use only in auth. */
@@ -85,12 +110,93 @@ export class UsersService extends BaseService<UserDocument> {
     };
     if (q.role) filter.role = q.role;
     if (q.status) filter.status = q.status;
+    if (q.verified === 'true' || q.verified === 'false') filter.emailVerified = q.verified === 'true';
     return this.paginate({
       filter,
       sort: parseSort(q.sort),
       page: q.page,
       pageSize: q.pageSize,
     });
+  }
+
+  /** Aggregate counts for the dashboard cards on the Users page. */
+  async stats(): Promise<{
+    total: number;
+    active: number;
+    invited: number;
+    banned: number;
+    suspended: number;
+    deleted: number;
+    verified: number;
+    unverified: number;
+    byRole: Array<{ role: string; count: number }>;
+  }> {
+    const [byStatus, byRole, verified, total] = await Promise.all([
+      this.model.aggregate<{ _id: string; count: number }>([
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      this.model.aggregate<{ _id: string; count: number }>([
+        { $group: { _id: '$role', count: { $sum: 1 } } },
+      ]),
+      this.model.countDocuments({ emailVerified: true }).exec(),
+      this.model.countDocuments().exec(),
+    ]);
+    const s = Object.fromEntries(byStatus.map((r) => [r._id, r.count])) as Record<string, number>;
+    return {
+      total,
+      active: s[UserStatus.ACTIVE] ?? 0,
+      invited: s[UserStatus.INVITED] ?? 0,
+      banned: s[UserStatus.BANNED] ?? 0,
+      suspended: s[UserStatus.SUSPENDED] ?? 0,
+      deleted: s[UserStatus.DELETED] ?? 0,
+      verified,
+      unverified: total - verified,
+      byRole: byRole
+        .map((r) => ({ role: r._id, count: r.count }))
+        .sort((a, b) => b.count - a.count),
+    };
+  }
+
+  /** Throw if the target is a Super Admin — those accounts can't be banned/deleted/re-roled. */
+  async assertMutable(id: string): Promise<void> {
+    const user = await this.model.findById(id).select('role').exec();
+    if (user?.role === SUPER_ADMIN_ROLE) {
+      throw new ForbiddenException('Super Admin accounts are protected');
+    }
+  }
+
+  /** Apply an action to many users at once (excludes `excludeId` and any Super Admin). */
+  async bulk(
+    ids: string[],
+    action: BulkAction,
+    role: string | undefined,
+    excludeId?: string,
+  ): Promise<{ affected: number }> {
+    let targets = excludeId ? ids.filter((id) => id !== excludeId) : ids;
+    // Never let a bulk action touch a Super Admin.
+    const supers = await this.model
+      .find({ _id: { $in: targets }, role: SUPER_ADMIN_ROLE })
+      .select('_id')
+      .exec();
+    if (supers.length) {
+      const superIds = new Set(supers.map((s) => String(s._id)));
+      targets = targets.filter((id) => !superIds.has(id));
+    }
+    if (targets.length === 0) return { affected: 0 };
+    const filter = { _id: { $in: targets } };
+    if (action === 'setRole') {
+      if (!role) throw new BadRequestException('role is required for setRole');
+      const res = await this.model.updateMany(filter, { role }).exec();
+      return { affected: res.modifiedCount };
+    }
+    const status =
+      action === 'ban'
+        ? UserStatus.BANNED
+        : action === 'restore'
+          ? UserStatus.ACTIVE
+          : UserStatus.DELETED;
+    const res = await this.model.updateMany(filter, { status }).exec();
+    return { affected: res.modifiedCount };
   }
 
   async adminUpdate(

@@ -36,11 +36,25 @@ export class AuthController {
     private readonly roles: RolesService,
   ) {}
 
-  /** Admin invites a new user (no public signup). */
+  /** Admin invites a new user (no public signup). Returns the set-password link (15-min TTL). */
   @RequirePermission('users.write')
   @Post('invite')
-  async invite(@Body() dto: InviteUserDto) {
-    await this.auth.inviteUser(dto);
+  invite(@CurrentUser() me: AuthUser, @Body() dto: InviteUserDto) {
+    return this.auth.inviteUser(dto, me.id);
+  }
+
+  /** Re-send a pending invite (refreshes the 15-min window). */
+  @RequirePermission('users.write')
+  @Post('reinvite/:id')
+  reinvite(@CurrentUser() me: AuthUser, @Param('id') id: string) {
+    return this.auth.reinviteUser(id, me.id);
+  }
+
+  /** Revoke a pending invite (deletes the not-yet-activated account). */
+  @RequirePermission('users.write')
+  @Delete('invite/:id')
+  async revokeInvite(@Param('id') id: string) {
+    await this.auth.revokeInvite(id);
     return { success: true };
   }
 
@@ -109,6 +123,15 @@ export class AuthController {
   async resend(@CurrentUser() current: AuthUser) {
     const user = await this.users.findById(current.id);
     if (user) await this.auth.sendVerification(current.id, user.email);
+    return { success: true };
+  }
+
+  /** Admin: (re)send the verification email for another user. */
+  @RequirePermission('users.write')
+  @Post('resend-verification/:id')
+  async resendFor(@Param('id') id: string) {
+    const user = await this.users.findById(id);
+    if (user) await this.auth.sendVerification(id, user.email);
     return { success: true };
   }
 

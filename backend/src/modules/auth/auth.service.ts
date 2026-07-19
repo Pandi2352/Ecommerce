@@ -6,7 +6,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'node:crypto';
 import { UserStatus } from '@ecommerce/shared';
-import { addDays, now } from '../../common/utils';
+import { addDays, addMinutes, now } from '../../common/utils';
 import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/schemas/user.schema';
 import { MailService } from '../mail/mail.service';
@@ -25,6 +25,9 @@ interface MailToken {
   sub: string;
   purpose: 'reset' | 'verify' | 'invite';
 }
+
+/** Invites expire quickly — the link and the tracked window both use this. */
+export const INVITE_TTL_MINUTES = 15;
 
 @Injectable()
 export class AuthService {
@@ -51,11 +54,16 @@ export class AuthService {
 
   // ── Invitations (admin-created accounts; no public signup) ─────────────────
 
-  /** Admin invites a user: creates an INVITED account and emails a set-password link. */
-  async inviteUser(input: { email: string; name: string; role: string }): Promise<{ link: string }> {
+  /** Admin invites a user: creates an INVITED account and emails a set-password link (15-min TTL). */
+  async inviteUser(
+    input: { email: string; name: string; role: string },
+    invitedBy?: string,
+  ): Promise<{ link: string }> {
     if (!(await this.roles.findByName(input.role))) {
       throw new BadRequestException(`Unknown role: ${input.role}`);
     }
+    const invitedAt = now();
+    const inviteExpiresAt = addMinutes(invitedAt, INVITE_TTL_MINUTES);
     const placeholder = await bcrypt.hash(randomBytes(24).toString('hex'), 10);
     const user = await this.users.create({
       email: input.email,
@@ -63,11 +71,44 @@ export class AuthService {
       password: placeholder,
       role: input.role,
       status: UserStatus.INVITED,
+      invitedAt,
+      inviteExpiresAt,
+      invitedBy,
     });
-    const token = await this.mailToken(String(user._id), 'invite', '3d');
+    return { link: await this.sendInviteLink(String(user._id), user.email) };
+  }
+
+  /** Re-send an invite: refreshes the 15-min window + token and re-emails the link. */
+  async reinviteUser(userId: string, invitedBy?: string): Promise<{ link: string }> {
+    const user = await this.users.findById(userId);
+    if (!user) throw new BadRequestException('User not found');
+    if (user.status !== UserStatus.INVITED) {
+      throw new BadRequestException('Only pending invites can be re-sent');
+    }
+    const invitedAt = now();
+    await this.users.setInvite(userId, {
+      invitedAt,
+      inviteExpiresAt: addMinutes(invitedAt, INVITE_TTL_MINUTES),
+      invitedBy,
+    });
+    return { link: await this.sendInviteLink(userId, user.email) };
+  }
+
+  /** Revoke a pending invite — removes the not-yet-activated account entirely. */
+  async revokeInvite(userId: string): Promise<void> {
+    const user = await this.users.findById(userId);
+    if (!user) throw new BadRequestException('User not found');
+    if (user.status !== UserStatus.INVITED) {
+      throw new BadRequestException('Only pending invites can be revoked');
+    }
+    await this.users.hardDelete(userId);
+  }
+
+  private async sendInviteLink(userId: string, email: string): Promise<string> {
+    const token = await this.mailToken(userId, 'invite', `${INVITE_TTL_MINUTES}m`);
     const link = `${this.config.get('CLIENT_ORIGIN')}/auth/accept?token=${token}`;
-    await this.mail.sendInvite(user.email, link);
-    return { link };
+    await this.mail.sendInvite(email, link);
+    return link;
   }
 
   /** Invited user sets their password → account becomes ACTIVE and they're logged in. */
