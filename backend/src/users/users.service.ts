@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UserRole, UserStatus } from '@ecommerce/shared';
+import { SUPER_ADMIN_ROLE, UserStatus } from '@ecommerce/shared';
 import { buildMeta, type PaginatedMeta } from '../common/dto/pagination.dto';
 import { User, UserDocument } from './schemas/user.schema';
 
@@ -9,7 +9,7 @@ export interface UserListQuery {
   page: number;
   pageSize: number;
   search?: string;
-  role?: UserRole;
+  role?: string;
   status?: UserStatus;
 }
 
@@ -21,7 +21,8 @@ export class UsersService {
     email: string;
     name: string;
     password: string;
-    role?: UserRole;
+    role?: string;
+    status?: UserStatus;
   }): Promise<UserDocument> {
     const exists = await this.model.exists({ email: data.email.toLowerCase() });
     if (exists) throw new ConflictException('Email already registered');
@@ -97,7 +98,7 @@ export class UsersService {
 
   async adminUpdate(
     id: string,
-    patch: { name?: string; role?: UserRole; status?: UserStatus },
+    patch: { name?: string; role?: string; status?: UserStatus },
   ): Promise<UserDocument> {
     const doc = await this.model.findByIdAndUpdate(id, patch, { new: true }).exec();
     if (!doc) throw new NotFoundException('User not found');
@@ -118,7 +119,7 @@ export class UsersService {
       name: data.name,
       password: '',
       emailVerified: true,
-      role: first ? UserRole.ADMIN : UserRole.CUSTOMER,
+      role: first ? SUPER_ADMIN_ROLE : 'Customer',
     });
   }
 }

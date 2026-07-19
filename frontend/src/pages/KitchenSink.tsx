@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ArrowRight, Download, Plus, Trash2 } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -7,6 +8,7 @@ import {
   EmptyState,
   Input,
   Modal,
+  PasswordInput,
   Select,
   Skeleton,
   Table,
@@ -53,12 +55,30 @@ export function KitchenSink() {
       <h1 className="text-xl font-semibold text-text">Component Gallery</h1>
 
       <Section title="Buttons">
-        <div className="flex flex-wrap gap-3">
-          <Button>Primary</Button>
-          <Button variant="secondary">Secondary</Button>
-          <Button variant="danger">Danger</Button>
-          <Button variant="ghost">Ghost</Button>
-          <Button disabled>Disabled</Button>
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button>Primary</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="danger">Danger</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="outline">Outline</Button>
+            <Button disabled>Disabled</Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button leftIcon={<Plus className="size-4" />}>Prefix icon</Button>
+            <Button variant="secondary" rightIcon={<ArrowRight className="size-4" />}>
+              Suffix icon
+            </Button>
+            <Button variant="secondary" leftIcon={<Download className="size-4" />}>
+              Export
+            </Button>
+            <Button loading>Loading</Button>
+            <Button iconOnly variant="ghost" aria-label="Delete">
+              <Trash2 className="size-4 text-danger" />
+            </Button>
+            <Button size="sm">Small</Button>
+            <Button size="lg">Large</Button>
+          </div>
         </div>
       </Section>
 
@@ -66,6 +86,7 @@ export function KitchenSink() {
         <div className="grid max-w-md gap-3">
           <Input placeholder="Text input" />
           <Input placeholder="Error input" error />
+          <PasswordInput placeholder="Password (with eye toggle)" />
           <Select defaultValue="">
             <option value="" disabled>
               Choose a category…

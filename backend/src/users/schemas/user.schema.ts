@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { UserRole, UserStatus } from '@ecommerce/shared';
+import { UserStatus } from '@ecommerce/shared';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -27,8 +27,9 @@ export class User {
   @Prop({ required: true, select: false })
   password!: string;
 
-  @Prop({ type: String, enum: Object.values(UserRole), default: UserRole.CUSTOMER })
-  role!: UserRole;
+  /** Role name — references a Role document (dynamic roles + permissions). */
+  @Prop({ type: String, default: 'Customer', index: true })
+  role!: string;
 
   @Prop({ type: String, enum: Object.values(UserStatus), default: UserStatus.ACTIVE })
   status!: UserStatus;

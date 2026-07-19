@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Input, toast } from '@/components/ui';
+import { Button, PasswordInput, toast } from '@/components/ui';
 import { authApi } from './api';
 
 export function ResetPasswordPage() {
@@ -53,8 +53,7 @@ export function ResetPasswordPage() {
       )}
       <label className="block space-y-1">
         <span className="text-xs font-medium text-text-secondary">New password</span>
-        <Input
-          type="password"
+        <PasswordInput
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="At least 8 characters"

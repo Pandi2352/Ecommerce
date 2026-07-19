@@ -7,12 +7,13 @@ import { Placeholder } from '@/pages/Placeholder';
 import { CategoriesPage } from '@/features/categories/CategoriesPage';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { LoginPage } from '@/features/auth/LoginPage';
-import { SignupPage } from '@/features/auth/SignupPage';
+import { AcceptInvitePage } from '@/features/auth/AcceptInvitePage';
 import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { UsersPage } from '@/features/users/UsersPage';
+import { RolesPage } from '@/features/roles/RolesPage';
 import {
   RouteErrorBoundary,
   NotFound,
@@ -65,6 +66,7 @@ export const router = createBrowserRouter([
       // Settings
       { path: 'settings', element: <SettingsPage /> },
       { path: 'users-roles', element: <UsersPage /> },
+      { path: 'roles', element: <RolesPage /> },
       { path: 'integrations', element: <Placeholder title="Integrations" /> },
       { path: 'billing', element: <Placeholder title="Billing" /> },
 
@@ -84,7 +86,7 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { path: 'login', element: <LoginPage /> },
-      { path: 'signup', element: <SignupPage /> },
+      { path: 'accept', element: <AcceptInvitePage /> },
       { path: 'forgot', element: <ForgotPasswordPage /> },
       { path: 'reset', element: <ResetPasswordPage /> },
       { path: 'verify', element: <VerifyEmailPage /> },

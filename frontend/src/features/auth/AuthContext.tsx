@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { hasPermission } from '@ecommerce/shared';
 import { setAccessToken, onSessionExpired } from '@/lib/api';
 import { authApi, type AuthUser } from './api';
 
@@ -8,8 +9,10 @@ interface AuthContextValue {
   user: AuthUser | null;
   status: Status;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  acceptInvite: (token: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  /** Does the current user have a permission (write implies read)? */
+  can: (permission: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -47,8 +50,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     apply(await authApi.login({ email, password }));
   };
 
-  const signup = async (name: string, email: string, password: string) => {
-    apply(await authApi.signup({ name, email, password }));
+  const acceptInvite = async (token: string, password: string) => {
+    apply(await authApi.acceptInvite(token, password));
   };
 
   const logout = async () => {
@@ -59,8 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const can = (permission: string) => hasPermission(user?.permissions ?? [], permission);
+
   return (
-    <AuthContext.Provider value={{ user, status, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, status, login, acceptInvite, logout, can }}>
       {children}
     </AuthContext.Provider>
   );

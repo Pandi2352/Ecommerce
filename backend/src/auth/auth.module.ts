@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
+import { RolesModule } from '../roles/roles.module';
 import { Session, SessionSchema } from './schemas/session.schema';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
@@ -15,6 +16,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 @Module({
   imports: [
     UsersModule,
+    RolesModule,
     PassportModule,
     JwtModule.register({}),
     MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),

@@ -56,4 +56,13 @@ export class MailService implements OnModuleInit {
       link,
     );
   }
+
+  sendInvite(to: string, link: string) {
+    return this.send(
+      to,
+      "You've been invited to NovaShop admin",
+      `<p>You've been invited. Set your password to activate your account:</p><p><a href="${link}">${link}</a></p><p>This link expires in 3 days.</p>`,
+      link,
+    );
+  }
 }

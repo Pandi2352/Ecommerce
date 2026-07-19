@@ -58,22 +58,47 @@ ecommerce/
 # 1. install all workspaces
 npm install
 
-# 2. configure env (values are sensible defaults for local dev)
+# 2. configure env (defaults work for local dev)
 cp frontend/.env.example frontend/.env
 cp backend/.env.example backend/.env
-#    edit backend/.env → set JWT secrets (MONGODB_URI defaults to localhost)
+#    optional: edit backend/.env → JWT secrets, SMTP (for real invite emails),
+#    and ADMIN_EMAIL / ADMIN_PASSWORD (the seeded super admin)
 
-# 3. start MongoDB (skip if you already run mongod locally)
+# 3. start MongoDB (skip if mongod already runs locally)
 docker compose up -d mongo
 
-# 4. run the apps (two terminals)
+# 4. seed the super admin + default roles
+npm run seed --workspace backend
+
+# 5. run the apps (two terminals)
 npm run dev:api     # NestJS API → http://localhost:4000/api
 npm run dev         # Vite app   → http://localhost:5173
 ```
 
-- API health check: `GET http://localhost:4000/api/health`
+Then open **http://localhost:5173** and sign in.
+
+### 🔑 Default login (from the seed)
+
+| Email | Password |
+|-------|----------|
+| `admin@nova.shop` | `Admin@12345` |
+
+This is the **Super Admin** (full permissions). Change the credentials via
+`ADMIN_EMAIL` / `ADMIN_PASSWORD` in `backend/.env` before seeding.
+
+- Health check: `GET http://localhost:4000/api/health`
 - Component gallery (design system): `http://localhost:5173/kitchen-sink`
-- Swagger API docs (added with the auth module): `http://localhost:4000/api/docs`
+
+## Authentication & access control
+
+- **No public signup.** The admin panel is **invite-only** — one super admin is seeded,
+  and admins invite others by email (SMTP; in dev the invite link is printed to the API
+  console if SMTP is unset).
+- **Dynamic RBAC.** Roles are data, not a fixed enum. **Super Admin** creates roles and
+  ticks a **read/write permission matrix** per resource (products, orders, users, …).
+  Invites pick a role; the UI hides what you can't access; the API enforces it.
+- **JWT** access token (in-memory) + **refresh** token (httpOnly cookie, rotated), bcrypt
+  passwords, password reset + email verification.
 
 ## Scripts (run from the repo root)
 
@@ -81,6 +106,7 @@ npm run dev         # Vite app   → http://localhost:5173
 |---------|--------------|
 | `npm run dev` | Start the frontend (Vite) |
 | `npm run dev:api` | Start the backend (NestJS, watch mode) |
+| `npm run seed --workspace backend` | Seed the super admin + default roles (idempotent) |
 | `npm run build` | Build shared → backend → frontend |
 | `npm run lint` | ESLint across the monorepo |
 | `npm run format` | Prettier write |
@@ -94,14 +120,22 @@ npm run dev         # Vite app   → http://localhost:5173
 
 ## Project status
 
-Built with a phased roadmap; progress is tracked feature-by-feature in
-[`docs/sprint-plan.csv`](./docs/sprint-plan.csv).
+Progress is tracked feature-by-feature in [`docs/sprint-plan.csv`](./docs/sprint-plan.csv).
 
-- ✅ **Sprint 1 — Foundation & Design System** (monorepo, tooling, CI, shared
-  package, design tokens, UI primitives, custom table, layout shell, feedback
-  components) — **done & verified** (build + lint green, API health OK).
-- ⏳ **Sprint 2 — Authentication** (JWT + refresh, RBAC, signup/login/…) — next.
-- 📋 Sprints 3–14 — see the [roadmap](./docs/09-roadmap.md).
+- ✅ **Sprint 1 — Foundation & Design System** — monorepo, tooling, CI, shared package,
+  design tokens, UI primitives (Button with icons/loading, custom Table, PasswordInput,
+  Modal…), theme-aware sidebar with submenu flyouts, error pages.
+- ✅ **Sprint 2 — Authentication** — **invite-only** admin (seed + email invites), JWT
+  access + refresh (rotating, httpOnly cookie), bcrypt, password reset, email
+  verification, change password, sessions; split login screen with a branded loader.
+- ✅ **Sprint 3 — User Management + RBAC** — dynamic **Roles** with a read/write
+  **permission matrix**, user CRUD (paginate/filter/ban/restore), permission-gated nav.
+  **Category CRUD** (nested tree) also landed early.
+- 🟢 Dashboard UI is built (animated custom SVG charts) — wired to live data as
+  orders/products land in Sprints 4–6.
+- 📋 **Next: Sprint 4 — Products** · full roadmap in [docs/09-roadmap.md](./docs/09-roadmap.md).
+
+**Everything above is build + lint clean and verified against a running API + MongoDB.**
 
 ## Documentation
 

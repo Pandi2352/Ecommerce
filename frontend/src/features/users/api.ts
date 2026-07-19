@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 
-export type Role = 'ADMIN' | 'MODERATOR' | 'OPERATOR' | 'ANALYST' | 'CUSTOMER';
+export type Role = string;
 export type Status = 'ACTIVE' | 'INVITED' | 'SUSPENDED' | 'BANNED' | 'DELETED';
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: Role;
+  role: string;
   status: Status;
   emailVerified: boolean;
   lastLogin?: string;
@@ -22,20 +22,21 @@ export interface Meta {
   totalPages: number;
 }
 
-export const ROLES: Role[] = ['ADMIN', 'MODERATOR', 'OPERATOR', 'ANALYST', 'CUSTOMER'];
-
 export interface UsersFilters {
   page: number;
   search: string;
-  role: Role | '';
+  role: string;
   status: Status | '';
 }
 
-export const setUserRole = (id: string, role: Role) =>
+export const setUserRole = (id: string, role: string) =>
   api.patch(`/users/${id}/role`, { role }).then(() => undefined);
 export const banUser = (id: string) => api.post(`/users/${id}/ban`).then(() => undefined);
 export const restoreUser = (id: string) => api.post(`/users/${id}/restore`).then(() => undefined);
 export const deleteUser = (id: string) => api.delete(`/users/${id}`).then(() => undefined);
+
+export const inviteUser = (input: { name: string; email: string; role: string }) =>
+  api.post('/auth/invite', input).then(() => undefined);
 
 /** Paginated user list with filters (no TanStack). */
 export function useUsers() {

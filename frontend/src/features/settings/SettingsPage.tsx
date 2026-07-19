@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Monitor, Trash2 } from 'lucide-react';
-import { Button, Input, toast } from '@/components/ui';
+import { Button, Input, PasswordInput, toast } from '@/components/ui';
 import { useAuth } from '@/features/auth/AuthContext';
 import { authApi } from '@/features/auth/api';
 
@@ -95,11 +95,11 @@ export function SettingsPage() {
         <form className="space-y-3" onSubmit={changePassword}>
           <label className="block space-y-1">
             <span className="text-xs font-medium text-text-secondary">Current password</span>
-            <Input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" required />
+            <PasswordInput value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="off" required />
           </label>
           <label className="block space-y-1">
             <span className="text-xs font-medium text-text-secondary">New password</span>
-            <Input type="password" value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" required />
+            <PasswordInput value={next} onChange={(e) => setNext(e.target.value)} autoComplete="off" required />
           </label>
           <Button type="submit" size="sm" disabled={savingPw}>
             {savingPw ? 'Updating…' : 'Update password'}

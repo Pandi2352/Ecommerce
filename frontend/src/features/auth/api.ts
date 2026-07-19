@@ -1,12 +1,13 @@
 import { api } from '@/lib/api';
 
-export type Role = 'ADMIN' | 'MODERATOR' | 'OPERATOR' | 'ANALYST' | 'CUSTOMER';
-
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: Role;
+  /** Role name (dynamic — see the roles feature). */
+  role: string;
+  /** Flattened permission keys granted by the role. */
+  permissions: string[];
 }
 
 interface AuthPayload {
@@ -15,11 +16,12 @@ interface AuthPayload {
 }
 
 export const authApi = {
-  signup: (input: { name: string; email: string; password: string }) =>
-    api.post<AuthPayload>('/auth/signup', input).then((r) => r.data),
-
   login: (input: { email: string; password: string }) =>
     api.post<AuthPayload>('/auth/login', input).then((r) => r.data),
+
+  /** Invited user sets their password → logged in. */
+  acceptInvite: (token: string, password: string) =>
+    api.post<AuthPayload>('/auth/accept-invite', { token, password }).then((r) => r.data),
 
   /** Uses the httpOnly refresh cookie to mint a new access token. */
   refresh: () => api.post<AuthPayload>('/auth/refresh').then((r) => r.data),

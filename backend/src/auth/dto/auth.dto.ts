@@ -1,12 +1,20 @@
 import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
-export class SignupDto {
+export class InviteUserDto {
   @IsString()
   @MinLength(2)
   name!: string;
 
   @IsEmail()
   email!: string;
+
+  @IsString()
+  role!: string;
+}
+
+export class AcceptInviteDto {
+  @IsString()
+  token!: string;
 
   @IsString()
   @MinLength(8)

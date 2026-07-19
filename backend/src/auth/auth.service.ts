@@ -4,23 +4,25 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { UserRole } from '@ecommerce/shared';
+import { randomBytes } from 'node:crypto';
+import { UserStatus } from '@ecommerce/shared';
 import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/schemas/user.schema';
 import { MailService } from '../mail/mail.service';
+import { RolesService } from '../roles/roles.service';
 import { Session, SessionDocument } from './schemas/session.schema';
-import { SignupDto, LoginDto } from './dto/auth.dto';
+import { LoginDto } from './dto/auth.dto';
 import type { JwtPayload } from './strategies/jwt.strategy';
 
 export interface AuthResult {
   accessToken: string;
   refreshToken: string;
-  user: { id: string; name: string; email: string; role: string };
+  user: { id: string; name: string; email: string; role: string; permissions: string[] };
 }
 
 interface MailToken {
   sub: string;
-  purpose: 'reset' | 'verify';
+  purpose: 'reset' | 'verify' | 'invite';
 }
 
 @Injectable()
@@ -30,29 +32,54 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly mail: MailService,
+    private readonly roles: RolesService,
     @InjectModel(Session.name) private readonly sessions: Model<SessionDocument>,
   ) {}
-
-  async signup(dto: SignupDto, userAgent?: string): Promise<AuthResult> {
-    const password = await bcrypt.hash(dto.password, 10);
-    const isFirstUser = (await this.users.count()) === 0;
-    const user = await this.users.create({
-      name: dto.name,
-      email: dto.email,
-      password,
-      role: isFirstUser ? UserRole.ADMIN : undefined,
-    });
-    void this.sendVerification(String(user._id), user.email).catch(() => undefined);
-    return this.issue(user, userAgent);
-  }
 
   async login(dto: LoginDto, userAgent?: string): Promise<AuthResult> {
     const user = await this.users.findByEmailWithPassword(dto.email);
     if (!user || !user.password || !(await bcrypt.compare(dto.password, user.password))) {
       throw new UnauthorizedException('Invalid email or password');
     }
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedException(`Account is ${user.status.toLowerCase()}`);
+    }
     await this.users.touchLastLogin(String(user._id));
     return this.issue(user, userAgent);
+  }
+
+  // ── Invitations (admin-created accounts; no public signup) ─────────────────
+
+  /** Admin invites a user: creates an INVITED account and emails a set-password link. */
+  async inviteUser(input: { email: string; name: string; role: string }): Promise<{ link: string }> {
+    if (!(await this.roles.findByName(input.role))) {
+      throw new BadRequestException(`Unknown role: ${input.role}`);
+    }
+    const placeholder = await bcrypt.hash(randomBytes(24).toString('hex'), 10);
+    const user = await this.users.create({
+      email: input.email,
+      name: input.name,
+      password: placeholder,
+      role: input.role,
+      status: UserStatus.INVITED,
+    });
+    const token = await this.mailToken(String(user._id), 'invite', '3d');
+    const link = `${this.config.get('CLIENT_ORIGIN')}/auth/accept?token=${token}`;
+    await this.mail.sendInvite(user.email, link);
+    return { link };
+  }
+
+  /** Invited user sets their password → account becomes ACTIVE and they're logged in. */
+  async acceptInvite(token: string, password: string, userAgent?: string): Promise<AuthResult> {
+    const payload = await this.verifyMailToken(token, 'invite');
+    const user = await this.users.findById(payload.sub);
+    if (!user) throw new BadRequestException('Invitation is no longer valid');
+    if (user.status !== UserStatus.INVITED) throw new BadRequestException('Invitation already used');
+    await this.users.setPassword(payload.sub, await bcrypt.hash(password, 10));
+    await this.users.adminUpdate(payload.sub, { status: UserStatus.ACTIVE });
+    await this.users.setEmailVerified(payload.sub);
+    const fresh = (await this.users.findById(payload.sub))!;
+    return this.issue(fresh, userAgent);
   }
 
   async refresh(refreshToken: string, userAgent?: string): Promise<AuthResult> {
@@ -172,10 +199,17 @@ export class AuthService {
       userAgent,
     });
 
+    const permissions = await this.roles.permissionsFor(user.role);
     return {
       accessToken,
       refreshToken,
-      user: { id: String(user._id), name: user.name, email: user.email, role: user.role },
+      user: {
+        id: String(user._id),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        permissions,
+      },
     };
   }
 

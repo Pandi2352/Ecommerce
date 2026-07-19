@@ -1,33 +1,30 @@
-import { Ban, RotateCcw, Search, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Ban, RotateCcw, Search, Trash2, UserPlus } from 'lucide-react';
 import {
   Badge,
   Button,
   Input,
+  Modal,
   Select,
   Table,
   toast,
   type Column,
 } from '@/components/ui';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useRoles } from '@/features/roles/api';
 import {
   banUser,
   deleteUser,
+  inviteUser,
   restoreUser,
-  ROLES,
   setUserRole,
   useUsers,
-  type Role,
   type Status,
   type User,
 } from './api';
 
-const roleTone: Record<Role, 'info' | 'success' | 'warning' | 'neutral'> = {
-  ADMIN: 'info',
-  MODERATOR: 'warning',
-  OPERATOR: 'success',
-  ANALYST: 'neutral',
-  CUSTOMER: 'neutral',
-};
+const roleTone = (name: string): 'info' | 'success' | 'neutral' =>
+  name === 'Super Admin' ? 'info' : name === 'Customer' ? 'neutral' : 'success';
 
 const statusTone: Record<Status, 'success' | 'warning' | 'danger' | 'neutral'> = {
   ACTIVE: 'success',
@@ -37,9 +34,34 @@ const statusTone: Record<Status, 'success' | 'warning' | 'danger' | 'neutral'> =
   DELETED: 'neutral',
 };
 
+const emptyInvite = { name: '', email: '', role: 'Admin' };
+
 export function UsersPage() {
   const { user: me } = useAuth();
   const { data, meta, loading, error, filters, setFilters, reload } = useUsers();
+  const { data: roles } = useRoles();
+  const roleNames = roles.map((r) => r.name);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [invite, setInvite] = useState(emptyInvite);
+  const [inviting, setInviting] = useState(false);
+
+  const sendInvite = async () => {
+    if (invite.name.trim().length < 2 || !invite.email.includes('@')) {
+      return toast.error('Enter a name and a valid email');
+    }
+    setInviting(true);
+    try {
+      await inviteUser(invite);
+      toast.success(`Invitation sent to ${invite.email}`);
+      setInviteOpen(false);
+      setInvite(emptyInvite);
+      await reload();
+    } catch (e) {
+      toast.error((e as { message?: string })?.message ?? 'Invite failed');
+    } finally {
+      setInviting(false);
+    }
+  };
 
   const act = async (fn: () => Promise<void>, ok: string) => {
     try {
@@ -80,14 +102,14 @@ export function UsersPage() {
       header: 'Role',
       cell: (u) =>
         me?.id === u.id ? (
-          <Badge tone={roleTone[u.role]}>{u.role}</Badge>
+          <Badge tone={roleTone(u.role)}>{u.role}</Badge>
         ) : (
           <Select
             className="h-8 w-32"
             value={u.role}
-            onChange={(e) => act(() => setUserRole(u.id, e.target.value as Role), 'Role updated')}
+            onChange={(e) => act(() => setUserRole(u.id, e.target.value), 'Role updated')}
           >
-            {ROLES.map((r) => (
+            {roleNames.map((r) => (
               <option key={r} value={r}>
                 {r}
               </option>
@@ -135,9 +157,14 @@ export function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text">Users &amp; Roles</h1>
-        <p className="text-sm text-text-secondary">Manage team members and customer accounts.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-text">Users &amp; Roles</h1>
+          <p className="text-sm text-text-secondary">Manage team members and customer accounts.</p>
+        </div>
+        <Button onClick={() => setInviteOpen(true)}>
+          <UserPlus className="size-4" /> Invite user
+        </Button>
       </div>
 
       {/* Toolbar */}
@@ -154,10 +181,10 @@ export function UsersPage() {
         <Select
           className="w-40"
           value={filters.role}
-          onChange={(e) => setFilters((f) => ({ ...f, role: e.target.value as Role | '', page: 1 }))}
+          onChange={(e) => setFilters((f) => ({ ...f, role: e.target.value, page: 1 }))}
         >
           <option value="">All roles</option>
-          {ROLES.map((r) => (
+          {roleNames.map((r) => (
             <option key={r} value={r}>
               {r}
             </option>
@@ -216,6 +243,61 @@ export function UsersPage() {
           </div>
         </div>
       )}
+
+      {/* Invite user */}
+      <Modal
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        title="Invite user"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setInviteOpen(false)} disabled={inviting}>
+              Cancel
+            </Button>
+            <Button onClick={sendInvite} disabled={inviting}>
+              {inviting ? 'Sending…' : 'Send invitation'}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-text-secondary">
+            They'll get an email with a link to set their password and activate the account.
+          </p>
+          <label className="block space-y-1">
+            <span className="text-xs font-medium text-text-secondary">Name</span>
+            <Input
+              value={invite.name}
+              onChange={(e) => setInvite((v) => ({ ...v, name: e.target.value }))}
+              placeholder="Jane Doe"
+              autoComplete="off"
+            />
+          </label>
+          <label className="block space-y-1">
+            <span className="text-xs font-medium text-text-secondary">Email</span>
+            <Input
+              type="email"
+              value={invite.email}
+              onChange={(e) => setInvite((v) => ({ ...v, email: e.target.value }))}
+              placeholder="jane@nova.shop"
+              autoComplete="off"
+            />
+          </label>
+          <label className="block space-y-1">
+            <span className="text-xs font-medium text-text-secondary">Role</span>
+            <Select
+              value={invite.role}
+              onChange={(e) => setInvite((v) => ({ ...v, role: e.target.value }))}
+            >
+              {roleNames.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </Select>
+          </label>
+        </div>
+      </Modal>
     </div>
   );
 }

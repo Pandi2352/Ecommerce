@@ -12,8 +12,9 @@ import {
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import {
-  SignupDto,
   LoginDto,
+  InviteUserDto,
+  AcceptInviteDto,
   ForgotPasswordDto,
   ResetPasswordDto,
   VerifyEmailDto,
@@ -21,8 +22,10 @@ import {
   UpdateProfileDto,
 } from './dto/auth.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { RequirePermission } from '../common/decorators/require-permission.decorator';
 import { CurrentUser, type AuthUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from '../users/users.service';
+import { RolesService } from '../roles/roles.service';
 
 const REFRESH_COOKIE = 'refresh_token';
 const REFRESH_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
@@ -32,12 +35,26 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly users: UsersService,
+    private readonly roles: RolesService,
   ) {}
 
+  /** Admin invites a new user (no public signup). */
+  @RequirePermission('users.write')
+  @Post('invite')
+  async invite(@Body() dto: InviteUserDto) {
+    await this.auth.inviteUser(dto);
+    return { success: true };
+  }
+
+  /** Invited user sets their password → logged in. */
   @Public()
-  @Post('signup')
-  async signup(@Body() dto: SignupDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    return this.respond(res, await this.auth.signup(dto, req.headers['user-agent']));
+  @Post('accept-invite')
+  async acceptInvite(
+    @Body() dto: AcceptInviteDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.respond(res, await this.auth.acceptInvite(dto.token, dto.password, req.headers['user-agent']));
   }
 
   @Public()
@@ -60,8 +77,11 @@ export class AuthController {
   }
 
   @Get('me')
-  me(@CurrentUser() current: AuthUser) {
-    return this.users.findById(current.id);
+  async me(@CurrentUser() current: AuthUser) {
+    const user = await this.users.findById(current.id);
+    if (!user) return null;
+    const permissions = await this.roles.permissionsFor(user.role);
+    return { ...(user.toJSON() as unknown as Record<string, unknown>), permissions };
   }
 
   // ── Password reset ──

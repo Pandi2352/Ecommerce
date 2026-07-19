@@ -1,11 +1,11 @@
 import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
-import { UserRole, UserStatus } from '@ecommerce/shared';
+import { UserStatus } from '@ecommerce/shared';
 import { PaginationQueryDto } from '../../common/dto/pagination.dto';
 
 export class ListUsersQueryDto extends PaginationQueryDto {
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsString()
+  role?: string;
 
   @IsOptional()
   @IsEnum(UserStatus)
@@ -19,8 +19,8 @@ export class UpdateUserDto {
   name?: string;
 
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsString()
+  role?: string;
 
   @IsOptional()
   @IsEnum(UserStatus)
@@ -28,6 +28,6 @@ export class UpdateUserDto {
 }
 
 export class SetRoleDto {
-  @IsEnum(UserRole)
-  role!: UserRole;
+  @IsString()
+  role!: string;
 }

@@ -37,6 +37,8 @@ export interface SidebarItem {
   isNew?: boolean;
   isExternal?: boolean;
   children?: SidebarLeaf[];
+  /** If set, the item is hidden unless the user has this permission. */
+  permission?: string;
 }
 
 export interface SidebarGroup {

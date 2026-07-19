@@ -11,8 +11,13 @@ export const envSchema = z.object({
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_SECRET: z.string().default('dev-refresh-secret-change-me'),
   JWT_REFRESH_TTL: z.string().default('7d'),
-  // Signs password-reset + email-verification tokens (must differ from the access secret).
+  // Signs password-reset + email-verification + invite tokens (must differ from access secret).
   JWT_MAIL_SECRET: z.string().default('dev-mail-secret-change-me'),
+
+  // Seed admin (created by `npm run seed --workspace backend` when no admin exists).
+  ADMIN_EMAIL: z.string().default('admin@nova.shop'),
+  ADMIN_PASSWORD: z.string().default('Admin@12345'),
+  ADMIN_NAME: z.string().default('Store Admin'),
 
   // Mail (optional — if SMTP_HOST is unset, links are logged to the console in dev).
   SMTP_HOST: z.string().optional(),

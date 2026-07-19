@@ -2,12 +2,22 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { storeConfig } from '@/config/store.config';
 import { useSidebar } from '@/hooks/useSidebar';
+import { useAuth } from '@/features/auth/AuthContext';
 import { sidebarConfig } from './sidebar.config';
 import { SidebarItemRow } from './SidebarItem';
 
 /** Theme-aware sidebar: light in light mode, graphite in dark; collapsible with flyout submenus. */
 export function Sidebar() {
   const { collapsed, toggle } = useSidebar();
+  const { can } = useAuth();
+
+  // Hide items the user lacks permission for, then drop any now-empty groups.
+  const groups = sidebarConfig
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !item.permission || can(item.permission)),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <aside
@@ -78,7 +88,7 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4 scrollbar-thin">
-        {sidebarConfig.map((group) => (
+        {groups.map((group) => (
           <div key={group.title} className="space-y-1">
             {!collapsed && (
               <h3 className="px-2 text-[10px] font-bold tracking-wider text-sidebar-heading">

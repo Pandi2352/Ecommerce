@@ -15,6 +15,7 @@ import {
   Sparkles,
   Settings2,
   ShieldCheck,
+  UserCog,
   Wallet,
 } from 'lucide-react';
 import type { SidebarGroup } from './types';
@@ -91,7 +92,8 @@ export const sidebarConfig: SidebarGroup[] = [
     title: 'SYSTEM',
     items: [
       { label: 'Settings', icon: Settings2, color: 'slate', to: '/settings' },
-      { label: 'Users & Roles', icon: ShieldCheck, color: 'red', to: '/users-roles' },
+      { label: 'Users', icon: UserCog, color: 'red', to: '/users-roles', permission: 'users.read' },
+      { label: 'Roles', icon: ShieldCheck, color: 'violet', to: '/roles', permission: 'roles.read' },
       { label: 'Billing', icon: Wallet, color: 'lime', to: '/billing' },
     ],
   },

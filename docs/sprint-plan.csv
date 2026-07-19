@@ -12,8 +12,8 @@ Sprint 1,Design System,Layout shell,"Sidebar, Navbar, MainLayout, AuthLayout",Do
 Sprint 1,Design System,Loading/empty/error states,"Skeletons, empty states, ErrorBoundary",Done,Verified (kitchen-sink),Medium,Done,"Skeletons, never spinners"
 Sprint 1,Design System,Error pages,"404 / 400 / 403 / 500 + router error boundary",Done,Verified (build),Medium,Done,Reusable ErrorState; catch-all 404 + errorElement; preview at /errors/*
 Sprint 1,Design System,Design-system audit,No shadows + rounded-md across dashboard/sidebar/navbar,Done,Verified (build),High,Done,Swept shadows; radii -> rounded-md (full kept for avatars/pills)
-Sprint 2,Auth,Signup,Email/password registration + validation,Done,Verified (curl + build),Critical,Done,Backend + signup page; AuthProvider + protected routes
-Sprint 2,Auth,Login,Credential login returning JWT,Done,Verified (curl + build),Critical,Done,Backend + login page; Axios refresh-on-401 interceptor. Wrong pw -> 401
+Sprint 2,Auth,Admin seed + invite,No public signup; seed one admin then admin invites users by email,Done,Verified (curl + build),Critical,Done,"npm run seed creates ADMIN; POST /auth/invite + /auth/accept-invite; signup removed (404); INVITED->ACTIVE"
+Sprint 2,Auth,Login,Credential login returning JWT,Done,Verified (curl + build),Critical,Done,"Redesigned split AuthLayout (SVG) + branded loader; login enforces ACTIVE status; refresh-on-401. Wrong pw -> 401"
 Sprint 2,Auth,JWT access + refresh,Access (~15m) + refresh (httpOnly cookie) + rotation,Done,Verified (curl),Critical,Done,Refresh rotates + revokes old session
 Sprint 2,Auth,Password hashing,bcrypt hashing,Done,Verified (curl),Critical,Done,bcrypt 10 rounds; password select:false + stripped from JSON
 Sprint 2,Auth,Guards & RBAC,"JwtAuthGuard global, RolesGuard, @Public/@Roles",Done,Verified (401/403),Critical,Done,Global guards; category writes now ADMIN-only
@@ -26,7 +26,7 @@ Sprint 2,Auth,Change password,Authenticated password change,Done,Verified (curl)
 Sprint 2,Auth,Sessions,List and revoke active sessions,Done,Verified (curl),Medium,Done,list + revoke one/all; userAgent captured; Settings page
 Sprint 2,Auth,Logout,Revoke refresh session,Done,Verified (curl),High,Done,Clears cookie + deletes session
 Sprint 3,User Management,User CRUD,Admin create/read/update/delete users,Done,Verified (curl + build),High,Done,"ADMIN only; paginated list + search/role/status filters; soft-delete (status DELETED)"
-Sprint 3,User Management,Roles & permissions,Role assignment + permission checks,Done,Verified (curl),High,Done,"5 roles via PATCH /users/:id/role; fine-grained permissions deferred (advanced)"
+Sprint 3,User Management,Roles & permissions,Role assignment + permission checks,Done,Verified (curl + build),High,Done,"Dynamic roles collection + CRUD UI; read/write permission matrix per resource; Super Admin seed; @RequirePermission guard; invite/user-role selects use dynamic roles; sidebar gated by can()"
 Sprint 3,User Management,Ban / Restore,Suspend/ban and restore users,Done,Verified (curl),Medium,Done,"ban/restore endpoints + UI; admin can't ban/delete self (400)"
 Sprint 3,User Management,User activity,Activity log per user,Not Started,Not Started,Low,Not Started,Deferred (ActivityLog schema — Phase 27)
 Sprint 3,User Management,Addresses,Multiple addresses per user,Not Started,Not Started,Medium,Not Started,Storefront/customers feature — later sprint

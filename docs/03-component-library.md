@@ -11,13 +11,16 @@ Components live in `frontend/src/components/ui/`.
 
 | Variant | Style |
 |---------|-------|
-| **Primary** | `bg-black text-white rounded-md`, no shadow. Hover: slightly lighter black (`#1f1f1f`). |
-| **Secondary** | `bg-surface border rounded-md text-text`. Hover: `--table-row-hover`. |
+| **Primary** | `bg-indigo-600 text-white rounded-md` (project theme, not black), no shadow. Hover: `indigo-700`. |
+| **Secondary** | `bg-surface border rounded-md text-text`. Hover: `--row-hover`. |
 | **Danger** | `bg-surface border border-danger text-danger rounded-md`. Hover: faint red tint. |
 | **Ghost** | Transparent, text only, hover background. For toolbar/icon actions. |
+| **Outline** | Transparent + border, like secondary without the surface fill. |
 
 - Heights: `sm` 32px · `md` 36px · `lg` 40px. Default 36px.
-- Icon buttons: square, same heights, centered Lucide icon (1.5px stroke).
+- **Props (all features):** `variant`, `size`, `leftIcon` (prefix), `rightIcon`
+  (suffix), `loading` (spinner + auto-disabled), `iconOnly` (square icon button),
+  `fullWidth`, plus every native `<button>` attribute. `cursor-pointer` built in.
 - Disabled: 50% opacity, no pointer.
 
 ## Inputs
