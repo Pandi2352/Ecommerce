@@ -30,8 +30,18 @@ export interface PaginatedMeta {
   pageSize: number;
   total: number;
   totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 export function buildMeta(total: number, page: number, pageSize: number): PaginatedMeta {
-  return { page, pageSize, total, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  return {
+    page,
+    pageSize,
+    total,
+    totalPages,
+    hasNext: page < totalPages,
+    hasPrev: page > 1,
+  };
 }

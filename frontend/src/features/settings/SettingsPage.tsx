@@ -1,16 +1,21 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { Monitor, Trash2 } from 'lucide-react';
-import { Button, Input, PasswordInput, toast } from '@/components/ui';
+import { Button, Card, FormField, Input, PasswordInput, toast } from '@/components/ui';
+import { PageHeader } from '@/components/common';
+import { useApi } from '@/hooks/useApi';
+import { useMutation } from '@/hooks/useMutation';
+import { formatDateTime } from '@/utils/formatters';
+import { isValidPassword } from '@/utils/validators';
 import { useAuth } from '@/features/auth/AuthContext';
 import { authApi } from '@/features/auth/api';
 
-function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+function Section({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
-    <section className="rounded-md border border-border bg-surface p-5">
+    <Card className="p-5">
       <h2 className="text-sm font-semibold text-text">{title}</h2>
       {description && <p className="mt-0.5 text-xs text-text-secondary">{description}</p>}
       <div className="mt-4">{children}</div>
-    </section>
+    </Card>
   );
 }
 
@@ -20,107 +25,90 @@ export function SettingsPage() {
   const { user } = useAuth();
 
   const [name, setName] = useState(user?.name ?? '');
-  const [savingProfile, setSavingProfile] = useState(false);
-
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
-  const [savingPw, setSavingPw] = useState(false);
 
-  const [sessions, setSessions] = useState<Session[]>([]);
+  const profileMutation = useMutation();
+  const passwordMutation = useMutation();
+  const revokeMutation = useMutation();
 
-  const loadSessions = () => authApi.listSessions().then(setSessions).catch(() => undefined);
-  useEffect(() => {
-    void loadSessions();
-  }, []);
+  const { data: sessions, reload: reloadSessions } = useApi(() => authApi.listSessions() as Promise<Session[]>, {
+    errorMessage: 'Failed to load sessions',
+  });
+  const sessionList = sessions ?? [];
 
-  const saveProfile = async (e: FormEvent) => {
+  const saveProfile = (e: FormEvent) => {
     e.preventDefault();
-    setSavingProfile(true);
-    try {
-      await authApi.updateProfile({ name });
-      toast.success('Profile updated');
-    } catch (err) {
-      toast.error((err as { message?: string })?.message ?? 'Update failed');
-    } finally {
-      setSavingProfile(false);
-    }
+    void profileMutation.run(() => authApi.updateProfile({ name }), {
+      success: 'Profile updated',
+      error: 'Update failed',
+    });
   };
 
-  const changePassword = async (e: FormEvent) => {
+  const changePassword = (e: FormEvent) => {
     e.preventDefault();
-    if (next.length < 8) return toast.error('New password must be at least 8 characters');
-    setSavingPw(true);
-    try {
-      await authApi.changePassword(current, next);
-      toast.success('Password changed');
-      setCurrent('');
-      setNext('');
-    } catch (err) {
-      toast.error((err as { message?: string })?.message ?? 'Change failed');
-    } finally {
-      setSavingPw(false);
-    }
+    if (!isValidPassword(next)) return toast.error('New password must be at least 8 characters');
+    void passwordMutation.run(() => authApi.changePassword(current, next), {
+      success: 'Password changed',
+      error: 'Change failed',
+      onSuccess: () => {
+        setCurrent('');
+        setNext('');
+      },
+    });
   };
 
-  const revoke = async (id: string) => {
-    await authApi.revokeSession(id);
-    toast.success('Session revoked');
-    void loadSessions();
-  };
+  const revoke = (id: string) =>
+    void revokeMutation.run(() => authApi.revokeSession(id), {
+      success: 'Session revoked',
+      error: 'Failed to revoke',
+      onSuccess: () => reloadSessions(),
+    });
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-text">Settings</h1>
-        <p className="text-sm text-text-secondary">Manage your account and security.</p>
-      </div>
+      <PageHeader title="Settings" subtitle="Manage your account and security." />
 
       <Section title="Profile">
         <form className="space-y-3" onSubmit={saveProfile}>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-text-secondary">Name</span>
+          <FormField label="Name">
             <Input value={name} onChange={(e) => setName(e.target.value)} />
-          </label>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-text-secondary">Email</span>
+          </FormField>
+          <FormField label="Email">
             <Input value={user?.email ?? ''} disabled />
-          </label>
-          <Button type="submit" size="sm" disabled={savingProfile}>
-            {savingProfile ? 'Saving…' : 'Save profile'}
+          </FormField>
+          <Button type="submit" size="sm" loading={profileMutation.saving}>
+            Save profile
           </Button>
         </form>
       </Section>
 
       <Section title="Change password">
         <form className="space-y-3" onSubmit={changePassword}>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-text-secondary">Current password</span>
+          <FormField label="Current password">
             <PasswordInput value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="off" required />
-          </label>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-text-secondary">New password</span>
+          </FormField>
+          <FormField label="New password" hint="At least 8 characters.">
             <PasswordInput value={next} onChange={(e) => setNext(e.target.value)} autoComplete="off" required />
-          </label>
-          <Button type="submit" size="sm" disabled={savingPw}>
-            {savingPw ? 'Updating…' : 'Update password'}
+          </FormField>
+          <Button type="submit" size="sm" loading={passwordMutation.saving}>
+            Update password
           </Button>
         </form>
       </Section>
 
       <Section title="Active sessions" description="Devices where you're currently signed in.">
         <div className="divide-y divide-border rounded-md border border-border">
-          {sessions.length === 0 && (
+          {sessionList.length === 0 && (
             <p className="px-3 py-4 text-sm text-text-secondary">No active sessions.</p>
           )}
-          {sessions.map((s) => (
+          {sessionList.map((s) => (
             <div key={s.id} className="flex items-center justify-between px-3 py-2.5">
               <div className="flex items-center gap-2.5">
                 <Monitor className="size-4 text-text-secondary" />
                 <div className="leading-tight">
                   <p className="max-w-xs truncate text-xs font-medium text-text">{s.userAgent}</p>
-                  <p className="text-[11px] text-text-secondary">
-                    {new Date(s.createdAt).toLocaleString()}
-                  </p>
+                  <p className="text-[11px] text-text-secondary">{formatDateTime(s.createdAt)}</p>
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={() => revoke(s.id)} aria-label="Revoke">

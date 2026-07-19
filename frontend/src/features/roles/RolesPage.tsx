@@ -1,20 +1,39 @@
 import { useMemo, useState } from 'react';
 import { Pencil, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 import { PERMISSION_RESOURCES, permission } from '@ecommerce/shared';
-import { Badge, Button, Checkbox, Input, Modal, Skeleton, toast } from '@/components/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  ConfirmDialog,
+  FormField,
+  Input,
+  Modal,
+  Skeleton,
+  toast,
+} from '@/components/ui';
+import { PageHeader } from '@/components/common';
+import { useMutation } from '@/hooks/useMutation';
+import { minLength } from '@/utils/validators';
+import { useAuth } from '@/features/auth/AuthContext';
 import { createRole, deleteRole, updateRole, useRoles, type Role } from './api';
 
 const emptyForm = { name: '', description: '', permissions: new Set<string>() };
 
 export function RolesPage() {
+  const { can } = useAuth();
+  const canWrite = can('roles.write');
   const { data, loading, error, reload } = useRoles();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Role | null>(null);
   const [form, setForm] = useState<{ name: string; description: string; permissions: Set<string> }>(
     emptyForm,
   );
-  const [saving, setSaving] = useState(false);
   const [toDelete, setToDelete] = useState<Role | null>(null);
+  const saveMutation = useMutation();
+  const deleteMutation = useMutation();
 
   const allKeys = useMemo(
     () => PERMISSION_RESOURCES.flatMap((r) => [permission(r.key, 'read'), permission(r.key, 'write')]),
@@ -50,56 +69,53 @@ export function RolesPage() {
       permissions: f.permissions.size === allKeys.length ? new Set() : new Set(allKeys),
     }));
 
-  const save = async () => {
-    if (form.name.trim().length < 2) return toast.error('Role name is required');
-    setSaving(true);
-    try {
-      const payload = {
-        name: form.name,
-        description: form.description,
-        permissions: [...form.permissions],
-      };
-      if (editing) await updateRole(editing.id, payload);
-      else await createRole(payload);
-      toast.success(editing ? 'Role updated' : 'Role created');
-      setOpen(false);
-      await reload();
-    } catch (e) {
-      toast.error((e as { message?: string })?.message ?? 'Save failed');
-    } finally {
-      setSaving(false);
-    }
+  const save = () => {
+    if (!minLength(form.name, 2)) return toast.error('Role name is required');
+    const payload = {
+      name: form.name,
+      description: form.description,
+      permissions: [...form.permissions],
+    };
+    void saveMutation.run(
+      () => (editing ? updateRole(editing.id, payload) : createRole(payload)),
+      {
+        success: editing ? 'Role updated' : 'Role created',
+        error: 'Save failed',
+        onSuccess: () => {
+          setOpen(false);
+          void reload();
+        },
+      },
+    );
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     if (!toDelete) return;
-    try {
-      await deleteRole(toDelete.id);
-      toast.success('Role deleted');
-      setToDelete(null);
-      await reload();
-    } catch (e) {
-      toast.error((e as { message?: string })?.message ?? 'Delete failed');
-    }
+    void deleteMutation.run(() => deleteRole(toDelete.id), {
+      success: 'Role deleted',
+      error: 'Delete failed',
+      onSuccess: () => {
+        setToDelete(null);
+        void reload();
+      },
+    });
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-text">Roles &amp; permissions</h1>
-          <p className="text-sm text-text-secondary">Define roles and what each one can access.</p>
-        </div>
-        <Button leftIcon={<Plus className="size-4" />} onClick={openCreate}>
-          New role
-        </Button>
-      </div>
+      <PageHeader
+        title="Roles & permissions"
+        subtitle="Define roles and what each one can access."
+        action={
+          canWrite && (
+            <Button leftIcon={<Plus className="size-4" />} onClick={openCreate}>
+              New role
+            </Button>
+          )
+        }
+      />
 
-      {error && (
-        <div className="rounded-md border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {error && <Alert>{error}</Alert>}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {loading &&
@@ -108,7 +124,7 @@ export function RolesPage() {
           ))}
         {!loading &&
           data.map((role) => (
-            <div key={role.id} className="flex flex-col rounded-md border border-border bg-surface p-4">
+            <Card key={role.id} className="flex flex-col">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-text">{role.name}</span>
@@ -118,7 +134,7 @@ export function RolesPage() {
                     </Badge>
                   )}
                 </div>
-                {!role.isSystem && (
+                {canWrite && !role.isSystem && (
                   <div className="flex gap-1">
                     <Button variant="ghost" size="sm" iconOnly aria-label="Edit" onClick={() => openEdit(role)}>
                       <Pencil className="size-4" />
@@ -133,7 +149,7 @@ export function RolesPage() {
               <p className="mt-auto pt-2 text-xs font-medium text-text-secondary">
                 {role.permissions.length} permission{role.permissions.length === 1 ? '' : 's'}
               </p>
-            </div>
+            </Card>
           ))}
       </div>
 
@@ -145,34 +161,32 @@ export function RolesPage() {
         title={editing ? `Edit role — ${editing.name}` : 'New role'}
         footer={
           <>
-            <Button variant="secondary" onClick={() => setOpen(false)} disabled={saving}>
+            <Button variant="secondary" onClick={() => setOpen(false)} disabled={saveMutation.saving}>
               Cancel
             </Button>
-            <Button onClick={save} loading={saving}>
+            <Button onClick={save} loading={saveMutation.saving}>
               {editing ? 'Save changes' : 'Create role'}
             </Button>
           </>
         }
       >
         <div className="space-y-4">
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-text-secondary">Role name</span>
+          <FormField label="Role name" required>
             <Input
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="e.g. Store Manager"
               autoComplete="off"
             />
-          </label>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-text-secondary">Description</span>
+          </FormField>
+          <FormField label="Description">
             <Input
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               placeholder="Optional"
               autoComplete="off"
             />
-          </label>
+          </FormField>
 
           <div>
             <div className="mb-1.5 flex items-center justify-between">
@@ -219,24 +233,21 @@ export function RolesPage() {
         </div>
       </Modal>
 
-      <Modal
+      <ConfirmDialog
         open={!!toDelete}
-        onClose={() => setToDelete(null)}
         title="Delete role"
-        footer={
+        danger
+        confirmLabel="Delete"
+        loading={deleteMutation.saving}
+        onConfirm={confirmDelete}
+        onClose={() => setToDelete(null)}
+        message={
           <>
-            <Button variant="secondary" onClick={() => setToDelete(null)}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={confirmDelete}>
-              Delete
-            </Button>
+            Delete the <span className="font-medium text-text">{toDelete?.name}</span> role? Users
+            with this role will lose its permissions.
           </>
         }
-      >
-        Delete the <span className="font-medium text-text">{toDelete?.name}</span> role? Users with
-        this role will lose its permissions.
-      </Modal>
+      />
     </div>
   );
 }

@@ -100,6 +100,41 @@ This is the **Super Admin** (full permissions). Change the credentials via
 - **JWT** access token (in-memory) + **refresh** token (httpOnly cookie, rotated), bcrypt
   passwords, password reset + email verification.
 
+## Reusable building blocks (for new contributors)
+
+The codebase is built **common-first** — a new feature should almost never
+hand-roll fetching, forms, CRUD chrome, pagination, or error handling. Reach for
+these; full reference tables are in [docs/04-architecture.md](./docs/04-architecture.md).
+
+**Frontend** (`frontend/src`)
+
+| Kind | What | For |
+|------|------|-----|
+| Hooks | `useApi`, `useMutation`, `useDebounce` | fetch state, save→toast→reload flow, debounced search |
+| Utils | `getErrorMessage`, `formatters` (currency/date/number/initials), `validators`, `constants` (status→tone) | kill copy-paste; currency/locale come from `config/store.config` (white-label) |
+| API | `lib/api` `getList<T>()`, `lib/types` `Paginated<T>` / `Meta` | typed **server-side** list calls (reads the envelope's `meta`) |
+| UI | `FormField`, `Alert`, `Card`, `ConfirmDialog`, `Pagination`, `toast` (success/error/**warning**/info/loading) | labelled fields, banners, panels, delete confirms, advanced pager |
+| Common | `PageHeader`, `Avatar` | page title+actions, initials chip |
+
+Every feature exposes a public **barrel** (`features/<name>/index.ts`); import
+another feature only through its barrel, never its internals.
+
+**Backend** (`backend/src/common`)
+
+| Kind | What | For |
+|------|------|-----|
+| Services | `BaseService<TDoc>` → `super(model, 'Entity')` | free `findByIdOrThrow` (consistent 404) + `paginate` (`{ data, meta }`) |
+| Query | `query.util` — `paginate` / `parseSort` / `buildSearchFilter` | server-side list endpoints (`?page=&pageSize=&search=&sort=-field`) |
+| Utils | `generateId`/`isUuid`, date helpers, `slugify` | UUID ids (no ObjectId), date math, slugs |
+| Schema | `baseSchemaOptions()` + UUID `_id` | timestamps, `toJSON` id-mapping, secret stripping |
+| Decorators | `@Public/@Roles/@RequirePermission/@ResponseMessage/@IsUuidId` | route metadata + UUID validation (**not** `@IsMongoId`) |
+| Cross-cutting | `ResponseInterceptor`, `AllExceptionsFilter` | global success/error envelopes — never hand-roll |
+
+**Pagination is always server-side.** Lists send `page`/`pageSize`/`sort`/`search`
+to the API; the backend returns `{ data, meta:{ page, pageSize, total, totalPages,
+hasNext, hasPrev } }`; the `<Pagination>` component drives page/size changes back
+to the server (it never slices data on the client).
+
 ## Scripts (run from the repo root)
 
 | Command | What it does |
@@ -133,6 +168,9 @@ Progress is tracked feature-by-feature in [`docs/sprint-plan.csv`](./docs/sprint
   **Category CRUD** (nested tree) also landed early.
 - 🟢 Dashboard UI is built (animated custom SVG charts) — wired to live data as
   orders/products land in Sprints 4–6.
+- 🧱 **Reusable common layer** — shared FE hooks/utils/components + BE
+  `BaseService`/query utils, server-side `<Pagination>`, and a consistent
+  toast + confirm-dialog story (see *Reusable building blocks* above).
 - 📋 **Next: Sprint 4 — Products** · full roadmap in [docs/09-roadmap.md](./docs/09-roadmap.md).
 
 **Everything above is build + lint clean and verified against a running API + MongoDB.**

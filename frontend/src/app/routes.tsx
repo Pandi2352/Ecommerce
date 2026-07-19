@@ -4,7 +4,7 @@ import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Dashboard } from '@/pages/Dashboard';
 import { KitchenSink } from '@/pages/KitchenSink';
 import { Placeholder } from '@/pages/Placeholder';
-import { CategoriesPage } from '@/features/categories/CategoriesPage';
+import { CategoriesPage } from '@/features/categories';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { AcceptInvitePage } from '@/features/auth/AcceptInvitePage';
@@ -12,8 +12,8 @@ import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
-import { UsersPage } from '@/features/users/UsersPage';
-import { RolesPage } from '@/features/roles/RolesPage';
+import { UsersPage } from '@/features/users';
+import { RolesPage } from '@/features/roles';
 import {
   RouteErrorBoundary,
   NotFound,

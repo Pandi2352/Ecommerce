@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { useApi } from '@/hooks/useApi';
 
 export interface Category {
   id: string;
@@ -37,25 +37,6 @@ export const deleteCategory = async (id: string): Promise<void> => {
 
 /** Minimal data hook (no TanStack): fetch on mount + manual reload. */
 export function useCategories() {
-  const [data, setData] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const reload = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      setData(await fetchCategories());
-    } catch (e) {
-      setError((e as { message?: string })?.message ?? 'Failed to load categories');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void reload();
-  }, [reload]);
-
-  return { data, loading, error, reload };
+  const { data, ...rest } = useApi(fetchCategories, { errorMessage: 'Failed to load categories' });
+  return { data: data ?? [], ...rest };
 }

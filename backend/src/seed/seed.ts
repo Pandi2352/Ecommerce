@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { SUPER_ADMIN_ROLE, UserStatus } from '@ecommerce/shared';
 import { AppModule } from '../app.module';
-import { UsersService } from '../users/users.service';
-import { RolesService } from '../roles/roles.service';
+import { UsersService } from '../modules/users/users.service';
+import { RolesService } from '../modules/roles/roles.service';
 
 /**
  * Seeds the single store ADMIN from env (ADMIN_EMAIL / ADMIN_PASSWORD / ADMIN_NAME).

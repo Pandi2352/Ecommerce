@@ -81,20 +81,36 @@ Grouped by domain (see [05-modules.md](./05-modules.md)). `🌐` = public/storef
 
 ## Response envelope
 
+Every success response is wrapped by the global `ResponseInterceptor` into a
+consistent shape — handlers just return the data, never the envelope.
+
 **Single resource**
 
 ```json
-{ "data": { "id": "…", "name": "…" } }
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Success",
+  "data": { "id": "…", "name": "…" }
+}
 ```
 
 **Collection (paginated)**
 
 ```json
 {
+  "statusCode": 200,
+  "success": true,
+  "message": "Success",
   "data": [ /* items */ ],
   "meta": { "page": 1, "pageSize": 25, "total": 342, "totalPages": 14 }
 }
 ```
+
+`message` defaults to `"Success"`; override it per-handler with the
+`@ResponseMessage('…')` decorator. `statusCode` mirrors the HTTP status.
+Resource `id`s are **UUID v4 strings** (see [07](./07-data-model.md)), not
+Mongo ObjectIds.
 
 ## Query params (lists)
 
@@ -111,16 +127,23 @@ list UI is shareable and reloadable.
 
 ## Errors
 
-Consistent shape from the global exception filter:
+Consistent shape from the global `AllExceptionsFilter` — mirrors the success
+envelope with `success: false`:
 
 ```json
 {
   "statusCode": 422,
-  "code": "VALIDATION_ERROR",
+  "success": false,
   "message": "price must be a positive number",
-  "details": [ { "field": "price", "message": "…" } ]
+  "error": "UNPROCESSABLE_ENTITY",
+  "details": [ "price must be a positive number", "name should not be empty" ]
 }
 ```
+
+`error` is the `HttpStatus` name for the code. `details` is present only when
+there's more than one field error (the full `class-validator` message list);
+`message` is the first of them. The filter also normalizes Mongoose errors:
+duplicate key (E11000) → 409, `ValidationError` → 422, `CastError` → 400.
 
 | Status | When |
 |--------|------|

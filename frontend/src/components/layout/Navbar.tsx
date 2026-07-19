@@ -3,17 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/features/auth/AuthContext';
 import { Dropdown } from '@/components/ui';
+import { Avatar } from '@/components/common';
 
 export function Navbar() {
   const { theme, toggle } = useTheme();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const initials = (user?.name ?? '?')
-    .split(' ')
-    .map((s) => s[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-surface px-6 transition-all duration-200">
@@ -80,9 +75,7 @@ export function Navbar() {
           align="right"
           trigger={
             <div className="flex items-center gap-2.5">
-              <span className="grid h-8 w-8 place-items-center rounded-full border border-border bg-indigo-500/10 text-xs font-bold text-indigo-500">
-                {initials}
-              </span>
+              <Avatar name={user?.name ?? '?'} />
               <div className="hidden flex-col items-start leading-none sm:flex">
                 <span className="text-xs font-semibold text-text">{user?.name ?? 'Account'}</span>
                 <span className="mt-0.5 text-[9px] font-medium capitalize text-text-secondary">

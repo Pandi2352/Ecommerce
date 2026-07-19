@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, PasswordInput } from '@/components/ui';
+import { Alert, Button, PasswordInput } from '@/components/ui';
 import { BrandLoader } from '@/components/common/BrandLoader';
+import { getErrorMessage } from '@/utils/getErrorMessage';
+import { isValidPassword } from '@/utils/validators';
 import { useAuth } from './AuthContext';
 
 export function AcceptInvitePage() {
@@ -17,13 +19,13 @@ export function AcceptInvitePage() {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password.length < 8) return setError('Password must be at least 8 characters');
+    if (!isValidPassword(password)) return setError('Password must be at least 8 characters');
     setBusy(true);
     try {
       await acceptInvite(token, password);
       navigate('/', { replace: true });
     } catch (err) {
-      setError((err as { message?: string })?.message ?? 'Could not accept invitation');
+      setError(getErrorMessage(err, 'Could not accept invitation'));
       setBusy(false);
     }
   };
@@ -51,11 +53,7 @@ export function AcceptInvitePage() {
         <h1 className="text-xl font-bold tracking-tight text-text">Accept your invitation</h1>
         <p className="mt-1 text-sm text-text-secondary">Set a password to activate your account.</p>
       </div>
-      {error && (
-        <div className="mb-4 rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {error && <Alert className="mb-4">{error}</Alert>}
       <form className="space-y-4" onSubmit={submit} autoComplete="off">
         <label className="block space-y-1.5">
           <span className="text-xs font-medium text-text-secondary">Create password</span>

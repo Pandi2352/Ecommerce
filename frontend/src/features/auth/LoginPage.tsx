@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
-import { Button, Input, PasswordInput } from '@/components/ui';
+import { Alert, Button, Input, PasswordInput } from '@/components/ui';
 import { BrandLoader } from '@/components/common/BrandLoader';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 import { useAuth } from './AuthContext';
 
 export function LoginPage() {
@@ -24,7 +25,7 @@ export function LoginPage() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError((err as { message?: string })?.message ?? 'Sign in failed');
+      setError(getErrorMessage(err, 'Sign in failed'));
       setBusy(false);
     }
   };
@@ -43,11 +44,7 @@ export function LoginPage() {
         <p className="mt-1 text-sm text-text-secondary">Sign in to your NovaShop admin.</p>
       </div>
 
-      {error && (
-        <div className="mb-4 rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {error && <Alert className="mb-4">{error}</Alert>}
 
       {/* autoComplete off → don't bind cached/autofilled values */}
       <form className="space-y-4" onSubmit={submit} autoComplete="off">

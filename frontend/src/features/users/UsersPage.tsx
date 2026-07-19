@@ -1,17 +1,26 @@
 import { useState } from 'react';
 import { Ban, RotateCcw, Search, Trash2, UserPlus } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
+  ConfirmDialog,
+  FormField,
   Input,
   Modal,
+  Pagination,
   Select,
   Table,
   toast,
   type Column,
 } from '@/components/ui';
+import { Avatar, PageHeader } from '@/components/common';
+import { useMutation } from '@/hooks/useMutation';
+import { formatDate } from '@/utils/formatters';
+import { isEmail, minLength } from '@/utils/validators';
+import { USER_STATUS_TONE, toneFor } from '@/utils/constants';
 import { useAuth } from '@/features/auth/AuthContext';
-import { useRoles } from '@/features/roles/api';
+import { useRoles } from '@/features/roles';
 import {
   banUser,
   deleteUser,
@@ -26,14 +35,6 @@ import {
 const roleTone = (name: string): 'info' | 'success' | 'neutral' =>
   name === 'Super Admin' ? 'info' : name === 'Customer' ? 'neutral' : 'success';
 
-const statusTone: Record<Status, 'success' | 'warning' | 'danger' | 'neutral'> = {
-  ACTIVE: 'success',
-  INVITED: 'warning',
-  SUSPENDED: 'warning',
-  BANNED: 'danger',
-  DELETED: 'neutral',
-};
-
 const emptyInvite = { name: '', email: '', role: 'Admin' };
 
 export function UsersPage() {
@@ -43,35 +44,40 @@ export function UsersPage() {
   const roleNames = roles.map((r) => r.name);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [invite, setInvite] = useState(emptyInvite);
-  const [inviting, setInviting] = useState(false);
+  const [confirm, setConfirm] = useState<{ user: User; kind: 'ban' | 'delete' } | null>(null);
+  const inviteMutation = useMutation();
+  const rowAction = useMutation();
 
-  const sendInvite = async () => {
-    if (invite.name.trim().length < 2 || !invite.email.includes('@')) {
+  const runConfirm = () => {
+    if (!confirm) return;
+    const { user, kind } = confirm;
+    void rowAction.run(() => (kind === 'delete' ? deleteUser(user.id) : banUser(user.id)), {
+      success: kind === 'delete' ? 'User deleted' : 'User banned',
+      error: 'Action failed',
+      onSuccess: () => {
+        setConfirm(null);
+        void reload();
+      },
+    });
+  };
+
+  const sendInvite = () => {
+    if (!minLength(invite.name, 2) || !isEmail(invite.email)) {
       return toast.error('Enter a name and a valid email');
     }
-    setInviting(true);
-    try {
-      await inviteUser(invite);
-      toast.success(`Invitation sent to ${invite.email}`);
-      setInviteOpen(false);
-      setInvite(emptyInvite);
-      await reload();
-    } catch (e) {
-      toast.error((e as { message?: string })?.message ?? 'Invite failed');
-    } finally {
-      setInviting(false);
-    }
+    void inviteMutation.run(() => inviteUser(invite), {
+      success: `Invitation sent to ${invite.email}`,
+      error: 'Invite failed',
+      onSuccess: () => {
+        setInviteOpen(false);
+        setInvite(emptyInvite);
+        void reload();
+      },
+    });
   };
 
-  const act = async (fn: () => Promise<void>, ok: string) => {
-    try {
-      await fn();
-      toast.success(ok);
-      await reload();
-    } catch (e) {
-      toast.error((e as { message?: string })?.message ?? 'Action failed');
-    }
-  };
+  const act = (fn: () => Promise<void>, ok: string) =>
+    void rowAction.run(fn, { success: ok, error: 'Action failed', onSuccess: () => reload() });
 
   const columns: Column<User>[] = [
     {
@@ -79,14 +85,7 @@ export function UsersPage() {
       header: 'User',
       cell: (u) => (
         <div className="flex items-center gap-2.5">
-          <span className="grid size-8 shrink-0 place-items-center rounded-full border border-border bg-indigo-500/10 text-xs font-bold text-indigo-500">
-            {u.name
-              .split(' ')
-              .map((s) => s[0])
-              .slice(0, 2)
-              .join('')
-              .toUpperCase()}
-          </span>
+          <Avatar name={u.name} />
           <div className="leading-tight">
             <p className="text-sm font-medium text-text">
               {u.name}
@@ -120,16 +119,12 @@ export function UsersPage() {
     {
       key: 'status',
       header: 'Status',
-      cell: (u) => <Badge tone={statusTone[u.status]}>{u.status}</Badge>,
+      cell: (u) => <Badge tone={toneFor(USER_STATUS_TONE, u.status)}>{u.status}</Badge>,
     },
     {
       key: 'lastLogin',
       header: 'Last login',
-      cell: (u) => (
-        <span className="text-xs text-text-secondary">
-          {u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : '—'}
-        </span>
-      ),
+      cell: (u) => <span className="text-xs text-text-secondary">{formatDate(u.lastLogin)}</span>,
     },
     {
       key: 'actions',
@@ -143,11 +138,11 @@ export function UsersPage() {
                 <RotateCcw className="size-4 text-success" />
               </Button>
             ) : (
-              <Button variant="ghost" size="sm" onClick={() => act(() => banUser(u.id), 'Banned')} aria-label="Ban">
+              <Button variant="ghost" size="sm" onClick={() => setConfirm({ user: u, kind: 'ban' })} aria-label="Ban">
                 <Ban className="size-4 text-warning" />
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={() => act(() => deleteUser(u.id), 'Deleted')} aria-label="Delete">
+            <Button variant="ghost" size="sm" onClick={() => setConfirm({ user: u, kind: 'delete' })} aria-label="Delete">
               <Trash2 className="size-4 text-danger" />
             </Button>
           </div>
@@ -157,15 +152,15 @@ export function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-text">Users &amp; Roles</h1>
-          <p className="text-sm text-text-secondary">Manage team members and customer accounts.</p>
-        </div>
-        <Button onClick={() => setInviteOpen(true)}>
-          <UserPlus className="size-4" /> Invite user
-        </Button>
-      </div>
+      <PageHeader
+        title="Users & Roles"
+        subtitle="Manage team members and customer accounts."
+        action={
+          <Button leftIcon={<UserPlus className="size-4" />} onClick={() => setInviteOpen(true)}>
+            Invite user
+          </Button>
+        }
+      />
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
@@ -204,11 +199,7 @@ export function UsersPage() {
         </Select>
       </div>
 
-      {error && (
-        <div className="rounded-md border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {error && <Alert>{error}</Alert>}
 
       <Table
         columns={columns}
@@ -218,30 +209,12 @@ export function UsersPage() {
         emptyState="No users match these filters."
       />
 
-      {meta && meta.total > 0 && (
-        <div className="flex items-center justify-between text-xs text-text-secondary">
-          <span>
-            Page {meta.page} of {meta.totalPages} · {meta.total} users
-          </span>
-          <div className="flex gap-1">
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={meta.page <= 1}
-              onClick={() => setFilters((f) => ({ ...f, page: f.page - 1 }))}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={meta.page >= meta.totalPages}
-              onClick={() => setFilters((f) => ({ ...f, page: f.page + 1 }))}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+      {meta && (
+        <Pagination
+          meta={meta}
+          onPageChange={(page) => setFilters((f) => ({ ...f, page }))}
+          onPageSizeChange={(pageSize) => setFilters((f) => ({ ...f, pageSize, page: 1 }))}
+        />
       )}
 
       {/* Invite user */}
@@ -251,11 +224,11 @@ export function UsersPage() {
         title="Invite user"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setInviteOpen(false)} disabled={inviting}>
+            <Button variant="secondary" onClick={() => setInviteOpen(false)} disabled={inviteMutation.saving}>
               Cancel
             </Button>
-            <Button onClick={sendInvite} disabled={inviting}>
-              {inviting ? 'Sending…' : 'Send invitation'}
+            <Button onClick={sendInvite} loading={inviteMutation.saving}>
+              Send invitation
             </Button>
           </>
         }
@@ -264,17 +237,15 @@ export function UsersPage() {
           <p className="text-sm text-text-secondary">
             They'll get an email with a link to set their password and activate the account.
           </p>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-text-secondary">Name</span>
+          <FormField label="Name" required>
             <Input
               value={invite.name}
               onChange={(e) => setInvite((v) => ({ ...v, name: e.target.value }))}
               placeholder="Jane Doe"
               autoComplete="off"
             />
-          </label>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-text-secondary">Email</span>
+          </FormField>
+          <FormField label="Email" required>
             <Input
               type="email"
               value={invite.email}
@@ -282,22 +253,41 @@ export function UsersPage() {
               placeholder="jane@nova.shop"
               autoComplete="off"
             />
-          </label>
-          <label className="block space-y-1">
-            <span className="text-xs font-medium text-text-secondary">Role</span>
-            <Select
-              value={invite.role}
-              onChange={(e) => setInvite((v) => ({ ...v, role: e.target.value }))}
-            >
+          </FormField>
+          <FormField label="Role">
+            <Select value={invite.role} onChange={(e) => setInvite((v) => ({ ...v, role: e.target.value }))}>
               {roleNames.map((r) => (
                 <option key={r} value={r}>
                   {r}
                 </option>
               ))}
             </Select>
-          </label>
+          </FormField>
         </div>
       </Modal>
+
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.kind === 'delete' ? 'Delete user' : 'Ban user'}
+        danger
+        confirmLabel={confirm?.kind === 'delete' ? 'Delete' : 'Ban'}
+        loading={rowAction.saving}
+        onConfirm={runConfirm}
+        onClose={() => setConfirm(null)}
+        message={
+          confirm?.kind === 'delete' ? (
+            <>
+              Delete <span className="font-medium text-text">{confirm?.user.name}</span>? This marks
+              the account as deleted and revokes access.
+            </>
+          ) : (
+            <>
+              Ban <span className="font-medium text-text">{confirm?.user.name}</span>? They'll be
+              signed out and blocked from signing in until restored.
+            </>
+          )
+        }
+      />
     </div>
   );
 }

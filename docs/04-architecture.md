@@ -67,6 +67,27 @@ src/
 > types/ assets/`). The earlier doc-10 tree (`components/ui`, `hooks`, `utils`) is a
 > subset — the reusable UI framework still lives under `components/` + `ui/`.
 
+#### Shared building blocks (frontend — reach for these before writing your own)
+
+A new feature should almost never hand-roll fetching, forms, or CRUD chrome.
+The reusable layer already implemented:
+
+| Where | Piece | Use it for |
+|-------|-------|-----------|
+| `hooks/useApi` | `useApi(fetcher, { errorMessage })` | data fetching — replaces the `useState(data/loading/error)+reload+useEffect` boilerplate |
+| `hooks/useMutation` | `useMutation()` → `{ saving, run }` | the write flow: set saving → run → toast success → onSuccess (close/reload) → toast error |
+| `hooks/useDebounce` | `useDebounce(value, ms)` | search inputs (avoid a request per keystroke) |
+| `utils/getErrorMessage` | `getErrorMessage(e, fallback)` | pull a message out of any thrown value / error envelope |
+| `utils/formatters` | `formatCurrency / formatDate / formatDateTime / formatNumber / getInitials` | all presentation formatting (currency/locale come from `config/store.config`) |
+| `utils/validators` | `isEmail / minLength / isValidPassword / isRequired` | inline form checks that match the backend DTO rules |
+| `utils/constants` | `USER_STATUS_TONE / ORDER_STATUS_TONE / toneFor` | status → Badge tone maps |
+| `lib/types` + `lib/api` | `Paginated<T>`, `Meta`, `getList<T>(url, cfg)` | typed list endpoints (reads the interceptor's `meta`) |
+| `components/ui` | `FormField, Alert, Card, ConfirmDialog` (+ primitives) | labelled fields, inline banners, bordered panels, delete confirms |
+| `components/common` | `PageHeader, Avatar` (+ `BrandLoader, ErrorBoundary`) | page title+actions row, initials avatar |
+
+Every feature exposes a public **barrel** (`features/<name>/index.ts`); import
+another feature only through its barrel, never its internal files.
+
 ### Technical design details
 
 #### 1. State strategy
@@ -108,44 +129,56 @@ Realtime: socket.io (VITE_WS_URL) → invalidate relevant query keys → UI upda
 
 ## Backend architecture (`backend/`)
 
-Feature-based NestJS modules (flat under `src/`), matching your enterprise structure.
-Each module owns its `schemas/`, `dto/`, controller, and service.
+Feature-based NestJS modules, all under `src/modules/`, matching your enterprise
+structure. Each module owns its `schemas/`, `dto/`, controller, and service.
 
 ```
 src/
 ├─ main.ts                      # Bootstrap: prefix, versioning, pipes, filters, CORS, Swagger, Helmet
-├─ app.module.ts                # Wires all modules; registers global guards + throttler
+├─ app.module.ts                # Wires all modules; registers global guards + response interceptor
 ├─ config/                      # env validation + typed config service
-├─ common/                      # guards, decorators, interceptors, filters, pipes, dto, utils
-│                               #   (JwtAuthGuard, RolesGuard, ResponseInterceptor, ExceptionFilter…)
-├─ auth/                        # JWT, refresh, sessions, Google OAuth, guards, RBAC
-├─ users/                       # users, roles, permissions, addresses, activity
-├─ products/                    # products, SKU, SEO, media links, related/upsell
-├─ categories/                  # nested tree, drag-drop order
-├─ brands/                      # brand CRUD + media
-├─ variants/                    # option combinations, per-variant SKU/price/stock
-├─ inventory/                   # stock, warehouses, adjustments, low-stock alerts ⚡
-├─ coupons/                     # rule engine, usage tracking
-├─ cart/                        # guest + user carts, save-for-later
-├─ checkout/                    # multi-step, address, delivery, review
-├─ orders/                      # lifecycle state machine, timeline, refunds, tracking
-├─ payments/                    # Stripe/Razorpay/COD/wallet/UPI, webhooks
-├─ shipping/                    # carriers, charges, tracking, estimates
-├─ reviews/                     # ratings, moderation, verified purchase
-├─ wishlist/                    # wishlist, recently viewed
-├─ cms/                         # pages, banners, blogs (TipTap content)
-├─ marketing/                   # flash sales, deals, referrals, gift cards, campaigns
-├─ notifications/               # email/SMS/push/in-app (sync now; BullMQ later ⏳) ⚡
-├─ reports/                     # sales/revenue/inventory/tax/profit + exports
-├─ analytics/                   # aggregation pipelines, dashboard metrics
-├─ settings/                    # store, currency, tax, shipping, email, theme
-├─ uploads/                     # Multer → Cloudinary/S3, image pipeline
-├─ search/                      # autocomplete, Atlas Search, vector search
-├─ ai/                          # generators, RAG assistant, recommendations (doc 15)
-├─ realtime/                    # WebSocket gateway (live orders, notifications)
-├─ health/                      # GET /health (Mongo ping)
-└─ database/                    # Mongoose connection  (redis/ + queues/ added later ⏳)
+├─ database/                    # Mongoose connection  (redis/ + queues/ added later ⏳)
+├─ seed/                        # seed.ts — default roles + super admin (idempotent)
+├─ common/                      # cross-cutting, framework-agnostic
+│  ├─ guards/                   #   JwtAuthGuard, RolesGuard, PermissionsGuard
+│  ├─ decorators/               #   @Public, @Roles, @RequirePermission, @ResponseMessage
+│  ├─ interceptors/             #   ResponseInterceptor (success envelope)
+│  ├─ filters/                  #   AllExceptionsFilter (error envelope)
+│  ├─ schemas/                  #   baseSchemaOptions() — UUID _id, timestamps, toJSON
+│  └─ utils/                    #   id (UUID), date, slug helpers
+└─ modules/                     # one folder per feature domain
+   ├─ auth/                     # JWT, refresh, sessions, Google OAuth, RBAC
+   ├─ users/                    # users, addresses, activity, invites
+   ├─ roles/                    # dynamic roles + permission catalog
+   ├─ categories/               # nested tree, drag-drop order
+   ├─ mail/                     # Nodemailer (dev logs link; SMTP when configured)
+   ├─ health/                   # GET /health (Mongo ping)
+   ├─ products/                 # products, SKU, SEO, media links, related/upsell   ⏳
+   ├─ brands/ · variants/ · inventory/ ⚡ · coupons/ · cart/ · checkout/            ⏳
+   ├─ orders/ · payments/ · shipping/ · reviews/ · wishlist/ · cms/                 ⏳
+   ├─ marketing/ · notifications/ ⚡ · reports/ · analytics/ · settings/            ⏳
+   └─ uploads/ · search/ · ai/ (doc 15) · realtime/                                 ⏳
 ```
+
+> ⏳ modules are planned — build them in [roadmap](./09-roadmap.md) phase order.
+> Currently shipped: `auth`, `users`, `roles`, `categories`, `mail`, `health`.
+> Small related concerns (e.g. brands, variants) may start folded into `products`
+> and split out as they grow.
+
+#### Shared building blocks (backend — reach for these before writing your own)
+
+| Where | Piece | Use it for |
+|-------|-------|-----------|
+| `common/services/base.service` | `extends BaseService<TDoc>` → `super(model, 'Entity')` | gives `findByIdOrThrow(id)` (consistent 404) + `paginate(opts)` (`{ data, meta }`) for free |
+| `common/utils/query.util` | `paginate / parseSort / buildSearchFilter / findByIdOrThrow` | list endpoints — filter + `?sort=-field` + skip/limit/count without hand-rolling |
+| `common/utils` | `generateId / isUuid`, `now / addMinutes / addDays / isExpired`, `slugify` | UUID ids (no ObjectId), date math, slugs |
+| `common/schemas/base-schema` | `baseSchemaOptions(strip)` + `@Prop({ type: String, default: generateId }) _id` | every root schema: UUID `_id`, timestamps, `toJSON` id-mapping + secret stripping |
+| `common/decorators` | `@Public, @Roles, @RequirePermission, @ResponseMessage, @IsUuidId` | route auth/metadata + UUID field validation (use `@IsUuidId()`, **not** `@IsMongoId()`) |
+| `common/dto/pagination.dto` | `PaginationQueryDto`, `buildMeta`, `PaginatedMeta` | extend for list query params |
+| `common/interceptors` + `common/filters` | `ResponseInterceptor`, `AllExceptionsFilter` | the global success/error envelopes (doc 08) — never hand-roll |
+
+A service **extends `BaseService`, injects its model, and calls the helpers** —
+see `users`/`roles`/`categories` services as the reference pattern.
 
 > Not every module ships at once — build them in [roadmap](./09-roadmap.md) phase
 > order. Small related concerns (e.g. brands, variants) may start folded into

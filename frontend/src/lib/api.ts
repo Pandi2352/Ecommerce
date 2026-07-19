@@ -1,4 +1,9 @@
-import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosError,
+  type AxiosRequestConfig,
+  type InternalAxiosRequestConfig,
+} from 'axios';
+import type { Meta, Paginated } from './types';
 
 /**
  * Shared Axios instance.
@@ -71,3 +76,12 @@ api.interceptors.response.use(
     return Promise.reject(error.response?.data ?? { message: error.message, code: 'NETWORK_ERROR' });
   },
 );
+
+/**
+ * Typed GET for paginated list endpoints. Centralizes reading the `meta` that
+ * the response interceptor attaches, so features don't cast it by hand.
+ */
+export async function getList<T>(url: string, config?: AxiosRequestConfig): Promise<Paginated<T>> {
+  const res = await api.get<T[]>(url, config);
+  return { data: res.data, meta: (res as unknown as { meta: Meta }).meta };
+}

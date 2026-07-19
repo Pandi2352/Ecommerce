@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, PasswordInput, toast } from '@/components/ui';
+import { Alert, Button, PasswordInput, toast } from '@/components/ui';
+import { getErrorMessage } from '@/utils/getErrorMessage';
+import { isValidPassword } from '@/utils/validators';
 import { authApi } from './api';
 
 export function ResetPasswordPage() {
@@ -15,14 +17,14 @@ export function ResetPasswordPage() {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password.length < 8) return setError('Password must be at least 8 characters');
+    if (!isValidPassword(password)) return setError('Password must be at least 8 characters');
     setBusy(true);
     try {
       await authApi.resetPassword(token, password);
       toast.success('Password updated — please sign in');
       navigate('/auth/login', { replace: true });
     } catch (err) {
-      setError((err as { message?: string })?.message ?? 'Reset failed');
+      setError(getErrorMessage(err, 'Reset failed'));
     } finally {
       setBusy(false);
     }
@@ -46,11 +48,7 @@ export function ResetPasswordPage() {
         <h1 className="text-base font-semibold text-text">Set a new password</h1>
         <p className="text-sm text-text-secondary">Choose a strong password.</p>
       </div>
-      {error && (
-        <div className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {error && <Alert>{error}</Alert>}
       <label className="block space-y-1">
         <span className="text-xs font-medium text-text-secondary">New password</span>
         <PasswordInput

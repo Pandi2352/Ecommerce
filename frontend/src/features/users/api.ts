@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api } from '@/lib/api';
+import { api, getList } from '@/lib/api';
+import type { Meta } from '@/lib/types';
+import { useDebounce } from '@/hooks/useDebounce';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 
 export type Role = string;
 export type Status = 'ACTIVE' | 'INVITED' | 'SUSPENDED' | 'BANNED' | 'DELETED';
+
+export type { Meta };
 
 export interface User {
   id: string;
@@ -15,15 +20,9 @@ export interface User {
   createdAt?: string;
 }
 
-export interface Meta {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-}
-
 export interface UsersFilters {
   page: number;
+  pageSize: number;
   search: string;
   role: string;
   status: Status | '';
@@ -38,31 +37,41 @@ export const deleteUser = (id: string) => api.delete(`/users/${id}`).then(() => 
 export const inviteUser = (input: { name: string; email: string; role: string }) =>
   api.post('/auth/invite', input).then(() => undefined);
 
-/** Paginated user list with filters (no TanStack). */
+/** Paginated user list with filters (no TanStack). Search is debounced. */
 export function useUsers() {
-  const [filters, setFilters] = useState<UsersFilters>({ page: 1, search: '', role: '', status: '' });
+  const [filters, setFilters] = useState<UsersFilters>({
+    page: 1,
+    pageSize: 10,
+    search: '',
+    role: '',
+    status: '',
+  });
   const [data, setData] = useState<User[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const debouncedSearch = useDebounce(filters.search, 300);
 
   const reload = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params: Record<string, string | number> = { page: filters.page, pageSize: 10 };
-      if (filters.search) params.search = filters.search;
+      const params: Record<string, string | number> = {
+        page: filters.page,
+        pageSize: filters.pageSize,
+      };
+      if (debouncedSearch) params.search = debouncedSearch;
       if (filters.role) params.role = filters.role;
       if (filters.status) params.status = filters.status;
-      const res = await api.get<User[]>('/users', { params });
+      const res = await getList<User>('/users', { params });
       setData(res.data);
-      setMeta((res as unknown as { meta: Meta }).meta);
+      setMeta(res.meta);
     } catch (e) {
-      setError((e as { message?: string })?.message ?? 'Failed to load users');
+      setError(getErrorMessage(e, 'Failed to load users'));
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters.page, filters.pageSize, filters.role, filters.status, debouncedSearch]);
 
   useEffect(() => {
     void reload();
