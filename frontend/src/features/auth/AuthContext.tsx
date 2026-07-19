@@ -11,6 +11,8 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   acceptInvite: (token: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  /** Merge fields into the current user (e.g. after a profile/avatar update). */
+  updateUser: (patch: Partial<AuthUser>) => void;
   /** Does the current user have a permission (write implies read)? */
   can: (permission: string) => boolean;
 }
@@ -62,10 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUser = (patch: Partial<AuthUser>) =>
+    setUser((current) => (current ? { ...current, ...patch } : current));
+
   const can = (permission: string) => hasPermission(user?.permissions ?? [], permission);
 
   return (
-    <AuthContext.Provider value={{ user, status, login, acceptInvite, logout, can }}>
+    <AuthContext.Provider value={{ user, status, login, acceptInvite, logout, updateUser, can }}>
       {children}
     </AuthContext.Provider>
   );

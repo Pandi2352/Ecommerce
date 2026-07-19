@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/common';
 import { useApi } from '@/hooks/useApi';
 import { useMutation } from '@/hooks/useMutation';
 import { formatDateTime } from '@/utils/formatters';
-import { isValidPassword } from '@/utils/validators';
+import { isValidPassword, PASSWORD_HINT } from '@/utils/validators';
 import { useAuth } from '@/features/auth/AuthContext';
 import { authApi } from '@/features/auth/api';
 
@@ -47,7 +47,7 @@ export function SettingsPage() {
 
   const changePassword = (e: FormEvent) => {
     e.preventDefault();
-    if (!isValidPassword(next)) return toast.error('New password must be at least 8 characters');
+    if (!isValidPassword(next)) return toast.error(PASSWORD_HINT);
     void passwordMutation.run(() => authApi.changePassword(current, next), {
       success: 'Password changed',
       error: 'Change failed',
@@ -88,7 +88,7 @@ export function SettingsPage() {
           <FormField label="Current password">
             <PasswordInput value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="off" required />
           </FormField>
-          <FormField label="New password" hint="At least 8 characters.">
+          <FormField label="New password" hint={PASSWORD_HINT}>
             <PasswordInput value={next} onChange={(e) => setNext(e.target.value)} autoComplete="off" required />
           </FormField>
           <Button type="submit" size="sm" loading={passwordMutation.saving}>

@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, Button, PasswordInput } from '@/components/ui';
 import { BrandLoader } from '@/components/common/BrandLoader';
 import { getErrorMessage } from '@/utils/getErrorMessage';
-import { isValidPassword } from '@/utils/validators';
+import { isValidPassword, PASSWORD_HINT } from '@/utils/validators';
 import { useAuth } from './AuthContext';
 
 export function AcceptInvitePage() {
@@ -19,7 +19,7 @@ export function AcceptInvitePage() {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!isValidPassword(password)) return setError('Password must be at least 8 characters');
+    if (!isValidPassword(password)) return setError(PASSWORD_HINT);
     setBusy(true);
     try {
       await acceptInvite(token, password);

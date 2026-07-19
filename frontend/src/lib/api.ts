@@ -85,3 +85,11 @@ export async function getList<T>(url: string, config?: AxiosRequestConfig): Prom
   const res = await api.get<T[]>(url, config);
   return { data: res.data, meta: (res as unknown as { meta: Meta }).meta };
 }
+
+/** Upload an image (avatars, logos) and return its public URL. */
+export async function uploadImage(file: File): Promise<string> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await api.post<{ url: string }>('/uploads/image', form);
+  return res.data.url;
+}

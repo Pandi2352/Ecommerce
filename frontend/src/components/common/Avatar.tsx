@@ -1,25 +1,36 @@
 import { cn } from '@/utils/cn';
 import { getInitials } from '@/utils/formatters';
 
-type AvatarSize = 'sm' | 'md' | 'lg';
+type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
 const sizes: Record<AvatarSize, string> = {
   sm: 'size-7 text-[11px]',
   md: 'size-8 text-xs',
   lg: 'size-10 text-sm',
+  xl: 'size-20 text-2xl',
 };
 
 export interface AvatarProps {
   name: string;
+  /** Optional image URL; falls back to initials when absent. */
+  src?: string | null;
   size?: AvatarSize;
   className?: string;
 }
 
 /**
- * Initials avatar — the shared version of the indigo initials chip duplicated in
- * the Navbar and the Users table.
+ * Avatar — shows the photo when `src` is set, otherwise an indigo initials chip.
  */
-export function Avatar({ name, size = 'md', className }: AvatarProps) {
+export function Avatar({ name, src, size = 'md', className }: AvatarProps) {
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        className={cn('shrink-0 rounded-full border border-border object-cover', sizes[size], className)}
+      />
+    );
+  }
   return (
     <span
       className={cn(

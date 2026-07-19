@@ -13,9 +13,12 @@ import {
   LayoutTemplate,
   PieChart,
   Sparkles,
-  Settings2,
   ShieldCheck,
   UserCog,
+  ScrollText,
+  KeyRound,
+  UserCircle,
+  Building2,
   Wallet,
 } from 'lucide-react';
 import type { SidebarGroup } from './types';
@@ -89,11 +92,19 @@ export const sidebarConfig: SidebarGroup[] = [
     ],
   },
   {
+    title: 'ACCESS CONTROL',
+    items: [
+      { label: 'Admin Users', icon: UserCog, color: 'red', to: '/users-roles', permission: 'users.read' },
+      { label: 'Roles', icon: ShieldCheck, color: 'violet', to: '/roles', permission: 'roles.read' },
+      { label: 'Permissions', icon: KeyRound, color: 'indigo', to: '/permissions', permission: 'roles.read' },
+      { label: 'Audit log', icon: ScrollText, color: 'amber', to: '/audit', permission: 'audit.read' },
+    ],
+  },
+  {
     title: 'SYSTEM',
     items: [
-      { label: 'Settings', icon: Settings2, color: 'slate', to: '/settings' },
-      { label: 'Users', icon: UserCog, color: 'red', to: '/users-roles', permission: 'users.read' },
-      { label: 'Roles', icon: ShieldCheck, color: 'violet', to: '/roles', permission: 'roles.read' },
+      { label: 'My Profile', icon: UserCircle, color: 'sky', to: '/profile' },
+      { label: 'Business Settings', icon: Building2, color: 'emerald', to: '/settings/business', permission: 'settings.read' },
       { label: 'Billing', icon: Wallet, color: 'lime', to: '/billing' },
     ],
   },

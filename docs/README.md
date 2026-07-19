@@ -35,6 +35,7 @@ Read them in order for the full picture, or jump to what you need.
 | 14 | [Docker & Deployment](./14-docker-deployment.md) | Docker primer, separate FE/BE images, compose, command reference, deploying independently |
 | 15 | [AI Features](./15-ai-features.md) | Phase 30: generators, RAG assistant, recommendations, forecasting + AI architecture |
 | 16 | [Advanced Features](./16-advanced-features.md) | 50 enterprise/stretch feature plans beyond the 30 phases |
+| 17 | [Admin, Access & Identity](./17-admin-access-management.md) | Admin management + authentication + authorization: current state + prioritized feature backlog |
 
 ---
 

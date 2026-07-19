@@ -6,6 +6,7 @@ export interface AuthUser {
   email: string;
   /** Role name (dynamic — see the roles feature). */
   role: string;
+  avatarUrl?: string;
   /** Flattened permission keys granted by the role. */
   permissions: string[];
 }
@@ -51,4 +52,7 @@ export const authApi = {
       .then((r) => r.data),
 
   revokeSession: (id: string) => api.delete(`/auth/sessions/${id}`).then(() => undefined),
+
+  /** Sign out everywhere (revoke all sessions + invalidate access tokens). */
+  revokeAllSessions: () => api.delete('/auth/sessions').then(() => undefined),
 };

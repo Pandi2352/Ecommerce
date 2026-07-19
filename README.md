@@ -166,8 +166,14 @@ Progress is tracked feature-by-feature in [`docs/sprint-plan.csv`](./docs/sprint
 - ✅ **Sprint 3 — User Management + RBAC** — dynamic **Roles** with a read/write
   **permission matrix**, user CRUD (paginate/filter/ban/restore), permission-gated nav.
   **Category CRUD** (nested tree) also landed early.
+- ✅ **Admin security baseline** — global rate-limit + login lockout, password policy,
+  route-level permission guards, role-in-use guard, `tokenVersion` kill-switch, helmet/CSP,
+  and an **audit log** (see [docs/17](./docs/17-admin-access-management.md)).
+- 🟢 **Sprint 4 — Products (v1)** — product CRUD + `/products/stats`, list with
+  search/sort/category+status filters, colorful stat cards, stock badges. Variants, media
+  upload, and SEO/attributes still to come.
 - 🟢 Dashboard UI is built (animated custom SVG charts) — wired to live data as
-  orders/products land in Sprints 4–6.
+  orders land in Sprints 5–6.
 - 🧱 **Reusable common layer** — shared FE hooks/utils/components + BE
   `BaseService`/query utils, server-side `<Pagination>`, and a consistent
   toast + confirm-dialog story (see *Reusable building blocks* above).
@@ -198,6 +204,7 @@ Full design and planning docs live in [`docs/`](./docs/README.md).
 | 14 | [Docker & Deployment](./docs/14-docker-deployment.md) | Containerizing + deploying FE/BE |
 | 15 | [AI Features](./docs/15-ai-features.md) | Phase 30 AI: generators, RAG, recommendations |
 | 16 | [Advanced Features](./docs/16-advanced-features.md) | 50 enterprise/stretch feature plans |
+| 17 | [Admin, Access & Identity](./docs/17-admin-access-management.md) | Admin mgmt + authN + authZ: current state + prioritized backlog |
 
 ## Contributing
 

@@ -34,6 +34,14 @@ export class User {
   @Prop()
   lastLogin?: Date;
 
+  // ── Login security (rate-limit lockout) ──
+  @Prop({ default: 0 })
+  failedLoginCount!: number;
+
+  /** While in the future, login is refused even with the right password. */
+  @Prop()
+  lockedUntil?: Date;
+
   // ── Invitation tracking (set while status = INVITED) ──
   @Prop()
   invitedAt?: Date;
@@ -45,6 +53,35 @@ export class User {
   /** Id of the admin who sent the (latest) invite. */
   @Prop({ type: String })
   invitedBy?: string;
+
+  /** Bump to invalidate every issued access token at once (global kill-switch). */
+  @Prop({ default: 0 })
+  tokenVersion!: number;
+
+  // ── Profile ──
+  @Prop()
+  avatarUrl?: string;
+
+  @Prop()
+  phone?: string;
+
+  @Prop()
+  jobTitle?: string;
+
+  @Prop()
+  department?: string;
+
+  @Prop()
+  bio?: string;
+
+  @Prop()
+  location?: string;
+
+  @Prop()
+  timezone?: string;
+
+  @Prop({ type: Object })
+  links?: { website?: string; twitter?: string; linkedin?: string; github?: string };
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

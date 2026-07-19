@@ -33,6 +33,12 @@ export class RolesController {
   }
 
   @RequirePermission('roles.write')
+  @Patch(':id/default')
+  setDefault(@Param('id') id: string) {
+    return this.roles.setDefault(id);
+  }
+
+  @RequirePermission('roles.write')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.roles.remove(id);

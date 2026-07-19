@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, Button, PasswordInput, toast } from '@/components/ui';
 import { getErrorMessage } from '@/utils/getErrorMessage';
-import { isValidPassword } from '@/utils/validators';
+import { isValidPassword, PASSWORD_HINT } from '@/utils/validators';
 import { authApi } from './api';
 
 export function ResetPasswordPage() {
@@ -17,7 +17,7 @@ export function ResetPasswordPage() {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!isValidPassword(password)) return setError('Password must be at least 8 characters');
+    if (!isValidPassword(password)) return setError(PASSWORD_HINT);
     setBusy(true);
     try {
       await authApi.resetPassword(token, password);

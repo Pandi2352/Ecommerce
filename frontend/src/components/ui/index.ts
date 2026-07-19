@@ -1,6 +1,7 @@
 export { Button } from './Button';
 export type { ButtonProps } from './Button';
 export { Input } from './Input';
+export { Textarea } from './Textarea';
 export { PasswordInput } from './PasswordInput';
 export { SearchInput } from './SearchInput';
 export type { SearchInputProps } from './SearchInput';

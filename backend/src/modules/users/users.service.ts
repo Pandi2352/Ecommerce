@@ -7,10 +7,14 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { SUPER_ADMIN_ROLE, UserStatus } from '@ecommerce/shared';
+import { CUSTOMER_ROLE, SUPER_ADMIN_ROLE, UserStatus } from '@ecommerce/shared';
 import type { PaginatedMeta } from '../../common/dto/pagination.dto';
 import { BaseService } from '../../common/services/base.service';
-import { buildSearchFilter, parseSort } from '../../common/utils';
+import { addMinutes, buildSearchFilter, now, parseSort } from '../../common/utils';
+
+/** Failed logins allowed before a temporary lock, and how long the lock lasts. */
+export const MAX_FAILED_LOGINS = 5;
+export const LOCK_MINUTES = 15;
 import { User, UserDocument } from './schemas/user.schema';
 
 export interface UserListQuery {
@@ -76,17 +80,57 @@ export class UsersService extends BaseService<UserDocument> {
     return this.model.countDocuments().exec();
   }
 
+  /** How many non-deleted users currently hold a given role (for the role-in-use guard). */
+  countByRole(role: string): Promise<number> {
+    return this.model.countDocuments({ role, status: { $ne: UserStatus.DELETED } }).exec();
+  }
+
   async touchLastLogin(id: string): Promise<void> {
     await this.model.findByIdAndUpdate(id, { lastLogin: new Date() }).exec();
   }
 
-  async updateProfile(id: string, data: { name?: string; email?: string }): Promise<UserDocument> {
+  /** Count a failed login; lock the account once the threshold is hit. */
+  async registerFailedLogin(id: string): Promise<void> {
+    const user = await this.model
+      .findByIdAndUpdate(id, { $inc: { failedLoginCount: 1 } }, { new: true })
+      .exec();
+    if (user && user.failedLoginCount >= MAX_FAILED_LOGINS) {
+      await this.model.findByIdAndUpdate(id, { lockedUntil: addMinutes(now(), LOCK_MINUTES) }).exec();
+    }
+  }
+
+  /** Clear the failed-login counter + lock (on a successful login). */
+  async clearFailedLogin(id: string): Promise<void> {
+    await this.model.findByIdAndUpdate(id, { failedLoginCount: 0, lockedUntil: null }).exec();
+  }
+
+  /** Invalidate every issued access token for a user (global kill-switch). */
+  async bumpTokenVersion(id: string): Promise<void> {
+    await this.model.findByIdAndUpdate(id, { $inc: { tokenVersion: 1 } }).exec();
+  }
+
+  async updateProfile(
+    id: string,
+    data: {
+      name?: string;
+      email?: string;
+      avatarUrl?: string;
+      phone?: string;
+      jobTitle?: string;
+      department?: string;
+      bio?: string;
+      location?: string;
+      timezone?: string;
+      links?: Record<string, string>;
+    },
+  ): Promise<UserDocument> {
     if (data.email) {
       const clash = await this.model.findOne({ email: data.email.toLowerCase(), _id: { $ne: id } });
       if (clash) throw new ConflictException('Email already in use');
     }
     const patch: Record<string, unknown> = {};
-    if (data.name) patch.name = data.name;
+    const fields = ['name', 'avatarUrl', 'phone', 'jobTitle', 'department', 'bio', 'location', 'timezone', 'links'] as const;
+    for (const key of fields) if (data[key] !== undefined) patch[key] = data[key];
     if (data.email) {
       patch.email = data.email.toLowerCase();
       patch.emailVerified = false;
@@ -108,7 +152,8 @@ export class UsersService extends BaseService<UserDocument> {
     const filter: Record<string, unknown> = {
       ...buildSearchFilter(['name', 'email'], q.search),
     };
-    if (q.role) filter.role = q.role;
+    // Admin user management is staff-only — customers live in the Customers module.
+    filter.role = q.role && q.role !== CUSTOMER_ROLE ? q.role : { $ne: CUSTOMER_ROLE };
     if (q.status) filter.status = q.status;
     if (q.verified === 'true' || q.verified === 'false') filter.emailVerified = q.verified === 'true';
     return this.paginate({
@@ -131,15 +176,19 @@ export class UsersService extends BaseService<UserDocument> {
     unverified: number;
     byRole: Array<{ role: string; count: number }>;
   }> {
+    // Staff-only stats — exclude storefront customers.
+    const notCustomer = { role: { $ne: CUSTOMER_ROLE } };
     const [byStatus, byRole, verified, total] = await Promise.all([
       this.model.aggregate<{ _id: string; count: number }>([
+        { $match: notCustomer },
         { $group: { _id: '$status', count: { $sum: 1 } } },
       ]),
       this.model.aggregate<{ _id: string; count: number }>([
+        { $match: notCustomer },
         { $group: { _id: '$role', count: { $sum: 1 } } },
       ]),
-      this.model.countDocuments({ emailVerified: true }).exec(),
-      this.model.countDocuments().exec(),
+      this.model.countDocuments({ ...notCustomer, emailVerified: true }).exec(),
+      this.model.countDocuments(notCustomer).exec(),
     ]);
     const s = Object.fromEntries(byStatus.map((r) => [r._id, r.count])) as Record<string, number>;
     return {

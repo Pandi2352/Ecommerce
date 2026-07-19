@@ -40,6 +40,13 @@ Sprint 2,Auth,Sessions,List and revoke active sessions,Done,Verified (curl),Medi
 Sprint 2,Auth,Logout,Revoke refresh session,Done,Verified (curl),High,Done,Clears cookie + deletes session
 Sprint 3,User Management,User CRUD,Admin create/read/update/delete users,Done,Verified (curl + build),High,Done,"ADMIN only; paginated list + search/role/status filters; soft-delete (status DELETED)"
 Sprint 3,User Management,Roles & permissions,Role assignment + permission checks,Done,Verified (curl + build),High,Done,"Dynamic roles collection + CRUD UI; read/write permission matrix per resource; Super Admin seed; @RequirePermission guard; invite/user-role selects use dynamic roles; sidebar gated by can()"
+Sprint 3,User Management,Admin profile page,"Full-width My Profile: avatar local upload, profile fields, change password + PAGINATED login activity all inline; super admin views any admin at /profile/:id",Done,Verified (curl + build + lint),High,Done,"Consolidated the old Account/Settings page into /profile (separate Account menu removed; /settings -> /profile redirect); GET /auth/sessions now paginated ({data,meta}); avatarUrl live-updates navbar via AuthContext.updateUser; Textarea added; SettingsPage.tsx orphaned"
+Sprint 3,Settings,Business Settings,"Store identity/contact/address/localization + file storage driver (local/S3) config; logo upload",Done,Verified (curl + build + lint),High,Done,"Settings singleton doc + GET/PATCH /settings (settings.read/write); s3SecretAccessKey write-only/stripped; UploadsService honors driver; sidebar Business Settings"
+Sprint 3,User Management,Staff-only admin users + Permissions page,"Admin Users excludes storefront Customer role (list+stats+role pickers); sidebar 'Access control' group; /permissions reference page explaining all permissions",Done,Verified (curl + build + lint),High,Done,"CUSTOMER_ROLE constant; users.list/stats filter role != Customer; sidebar grouped (Admin Users/Roles/Permissions/Audit); PermissionsPage lists 14 areas x read/write with descriptions; PERMISSION_RESOURCES gained description field"
+Sprint 3,User Management,Access-control hardening,"Route-level permission guards (403 on forbidden URL, not just hidden); role-in-use delete guard; last-Super-Admin covered",Done,Verified (curl + build + lint),High,Done,"<RequirePermission> gates routes; DELETE /roles/:id -> 409 when assigned (countByRole); Super Admin mutations already blocked so one always remains"
+Sprint 2,Auth,Login security baseline,"Rate limiting (global 120/min + login 5/min) + account lockout (15 min after 5 fails) + password policy (8+ letter+number)",Done,Verified (curl + build + lint),Critical,Done,"@nestjs/throttler ThrottlerGuard + @Throttle on login/forgot; failedLoginCount/lockedUntil on user; shared PASSWORD_REGEX enforced in DTOs + client; 6th attempt 429, lock after 5"
+Sprint 2,Auth,Security hardening finishers,"helmet + strict CSP; tokenVersion global kill-switch; JwtStrategy re-validates live user; audit before/after (input+result)",Done,Verified (curl + build + lint),High,Done,"helmet (CSP default-src none, HSTS, nosniff); tv in JWT checked per-request, bumped on reset + sign-out-everywhere; bans/role-change instant; AuditInterceptor stores meta.input + meta.result; P0 baseline 100%"
+Sprint 3,User Management,Roles UX upgrade,"Configurable default invite role; assign-role-to-many-users; role export/import (JSON); role card actions menu",Done,Verified (curl + build + lint),High,Done,"isDefault on Role + PATCH /roles/:id/default (exactly one, seed self-heals); invite defaults to it; Assign-to-users modal -> /users/bulk; client-side JSON export + import; per-card kebab (Set default/Assign/Export/Edit/Delete); docs/17 rows marked done"
 Sprint 3,User Management,Ban / Restore,Suspend/ban and restore users,Done,Verified (curl),Medium,Done,"ban/restore endpoints + UI; admin can't ban/delete self (400)"
 Sprint 3,User Management,User activity,Activity log per user,Not Started,Not Started,Low,Not Started,Deferred (ActivityLog schema — Phase 27)
 Sprint 3,User Management,Addresses,Multiple addresses per user,Not Started,Not Started,Medium,Not Started,Storefront/customers feature — later sprint
@@ -52,16 +59,16 @@ Sprint 3,Dashboard,Category distribution,Donut chart,In Progress,Not Started,Med
 Sprint 3,Dashboard,Recent orders,Recent orders table,In Progress,Not Started,High,In Progress,UI built (mock); data pending orders
 Sprint 3,Dashboard,Live orders,Realtime order feed,Not Started,Not Started,Medium,Not Started,socket.io; needs realtime gateway + orders
 Sprint 3,Dashboard,Top customers,Top customers list,In Progress,Not Started,Low,In Progress,UI built (Top Products mock); data pending
-Sprint 4,Products,Product CRUD,Create/read/update/delete products,Not Started,Not Started,Critical,Not Started,Largest module
-Sprint 4,Products,SKU / Slug / Barcode,Identifiers + unique slug,Not Started,Not Started,High,Not Started,
+Sprint 4,Products,Product CRUD,Create/read/update/delete products,Done,Verified (curl + build + lint),Critical,Done,"Products module (BaseService); CRUD + /products/stats; list paginate/search/sort/category+status filters; @RequirePermission products.read/write; audited"
+Sprint 4,Products,SKU / Slug / Barcode,Identifiers + unique slug,Done,Verified (curl),High,Done,"sku field + auto unique slug (slugify + assertSlugFree -> 409 on dup); barcode later"
 Sprint 4,Products,SEO fields,Meta title/description,Not Started,Not Started,Medium,Not Started,
 Sprint 4,Products,Media,"Thumbnail, gallery, product video",Not Started,Not Started,High,Not Started,Depends on Uploads
-Sprint 4,Products,Pricing,"Price, tax class, discount",Not Started,Not Started,High,Not Started,
+Sprint 4,Products,Pricing,"Price, tax class, discount",In Progress,Verified (curl),High,In Progress,"price + compareAtPrice (was-price) shipped; tax class/discount later"
 Sprint 4,Products,Attributes,"Weight, dimensions, shipping, tags, collections",Not Started,Not Started,Medium,Not Started,
 Sprint 4,Products,Product type,Physical vs digital,Not Started,Not Started,Medium,Not Started,
 Sprint 4,Products,Relations,"Related, cross-sell, upsell",Not Started,Not Started,Low,Not Started,
-Sprint 4,Products,Flags,"Featured, popular, trending, new arrival",Not Started,Not Started,Low,Not Started,
-Sprint 4,Products,Product list UI,Rich table: image/stock/price/status/sales/actions,Not Started,Not Started,High,Not Started,
+Sprint 4,Products,Flags,"Featured, popular, trending, new arrival",In Progress,Verified (curl),Low,In Progress,"featured flag shipped (schema + form); popular/trending/new-arrival later"
+Sprint 4,Products,Product list UI,Rich table: image/stock/price/status/sales/actions,Done,Verified (build + lint),High,Done,"ProductsPage: colorful stat cards (total/active/draft/archived/low/out), image thumb, stock badges (Out/Low), sortable cols, search + category/status filters, pagination, create/edit modal, delete confirm; wired at /products (gated products.read)"
 Sprint 4,Products,Bulk actions,Bulk archive/delete/edit,Not Started,Not Started,Medium,Not Started,
 Sprint 4,Categories,Category CRUD,Create/read/update/delete categories,Done,Verified (curl + build),High,Done,"Full-stack: NestJS module + Axios/React page. Reads public; writes now @Roles(ADMIN)"
 Sprint 4,Categories,Nested tree,Unlimited nested categories,Done,Verified (curl),High,Done,"parent ref + GET ?tree=true; delete reparents children. Fixed SchemaTypes.ObjectId cast bug"
@@ -153,12 +160,12 @@ Sprint 11,Search,Full-text search,MongoDB Atlas Search,Not Started,Not Started,H
 Sprint 11,Search,Autocomplete,Search suggestions,Not Started,Not Started,Medium,Not Started,
 Sprint 11,Search,Recent/popular,Recent + popular searches,Not Started,Not Started,Low,Not Started,
 Sprint 12,Security,Helmet,Secure HTTP headers,Not Started,Not Started,High,Not Started,
-Sprint 12,Security,Rate limiting,@nestjs/throttler (in-memory),Not Started,Not Started,High,Not Started,Redis-backed later
+Sprint 12,Security,Rate limiting,@nestjs/throttler (in-memory),Done,Verified (curl + build),High,Done,"Delivered early — global ThrottlerGuard 120/min + login/forgot 5/min (429 on 6th); Redis-backed store later"
 Sprint 12,Security,Validation,DTO/Zod on all writes,Not Started,Not Started,Critical,Not Started,
 Sprint 12,Security,XSS/CSRF/CORS,Injection + cross-origin protection,Not Started,Not Started,High,Not Started,
-Sprint 12,Security,Audit logs,Sensitive mutation audit trail,Not Started,Not Started,Medium,Not Started,
+Sprint 12,Security,Audit logs,Sensitive mutation audit trail,Done,Verified (curl + build),Medium,Done,"Global AuditInterceptor records successes AND failures: actor(id/name/email/role), resource+id, status, success, errorMessage, durationMs, real client IP (trust-proxy + XFF, ::ffff/::1 tidied), scrubbed input+result; GET /audit + page gated by audit.read; hash-chain pending"
 Sprint 12,Security,Activity logs,User activity logging,Not Started,Not Started,Low,Not Started,
-Sprint 12,File Management,Upload,Multer to Cloudinary/S3,Not Started,Not Started,High,Not Started,Local disk in dev
+Sprint 12,File Management,Upload,Multer to Cloudinary/S3,In Progress,Verified (curl),High,In Progress,"Local disk upload shipped early — POST /uploads/image (Multer diskStorage, 5MB, image-only) served at /uploads; driver (local/s3) chosen in Business Settings; S3 upload -> 501 until wired"
 Sprint 12,File Management,Image pipeline,"Compress, crop, resize",Not Started,Not Started,Medium,Not Started,
 Sprint 12,File Management,Folders/versions,Media library management,Not Started,Not Started,Low,Not Started,
 Sprint 12,Admin Bulk,Bulk edit/delete,Batch operations,Not Started,Not Started,Medium,Not Started,

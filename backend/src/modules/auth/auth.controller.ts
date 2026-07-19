@@ -6,10 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   Res,
 } from '@nestjs/common';
+import { PaginationQueryDto } from '../../common/dto/pagination.dto';
 import type { Request, Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import {
   LoginDto,
@@ -70,6 +73,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('login')
   async login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     return this.respond(res, await this.auth.login(dto, req.headers['user-agent']));
@@ -98,6 +102,7 @@ export class AuthController {
 
   // ── Password reset ──
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('forgot-password')
   async forgot(@Body() dto: ForgotPasswordDto) {
     await this.auth.forgotPassword(dto.email);
@@ -149,8 +154,8 @@ export class AuthController {
 
   // ── Sessions ──
   @Get('sessions')
-  sessions(@CurrentUser() current: AuthUser) {
-    return this.auth.listSessions(current.id);
+  sessions(@CurrentUser() current: AuthUser, @Query() q: PaginationQueryDto) {
+    return this.auth.listSessions(current.id, q.page, q.pageSize);
   }
 
   @Delete('sessions/:id')

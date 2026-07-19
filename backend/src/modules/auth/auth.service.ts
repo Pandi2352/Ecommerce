@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'node:crypto';
 import { UserStatus } from '@ecommerce/shared';
 import { addDays, addMinutes, now } from '../../common/utils';
+import { buildMeta } from '../../common/dto/pagination.dto';
 import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/schemas/user.schema';
 import { MailService } from '../mail/mail.service';
@@ -18,7 +19,14 @@ import type { JwtPayload } from './strategies/jwt.strategy';
 export interface AuthResult {
   accessToken: string;
   refreshToken: string;
-  user: { id: string; name: string; email: string; role: string; permissions: string[] };
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    avatarUrl?: string;
+    permissions: string[];
+  };
 }
 
 interface MailToken {
@@ -42,12 +50,21 @@ export class AuthService {
 
   async login(dto: LoginDto, userAgent?: string): Promise<AuthResult> {
     const user = await this.users.findByEmailWithPassword(dto.email);
-    if (!user || !user.password || !(await bcrypt.compare(dto.password, user.password))) {
+    if (!user || !user.password) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+    // Temporary lock after too many failed attempts.
+    if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
+      throw new UnauthorizedException('Account temporarily locked after failed logins. Try again later.');
+    }
+    if (!(await bcrypt.compare(dto.password, user.password))) {
+      await this.users.registerFailedLogin(String(user._id));
       throw new UnauthorizedException('Invalid email or password');
     }
     if (user.status !== UserStatus.ACTIVE) {
       throw new UnauthorizedException(`Account is ${user.status.toLowerCase()}`);
     }
+    await this.users.clearFailedLogin(String(user._id));
     await this.users.touchLastLogin(String(user._id));
     return this.issue(user, userAgent);
   }
@@ -164,7 +181,9 @@ export class AuthService {
     const payload = await this.verifyMailToken(token, 'reset');
     const hash = await bcrypt.hash(newPassword, 10);
     await this.users.setPassword(payload.sub, hash);
+    // Kill every existing session + access token after a reset.
     await this.sessions.deleteMany({ user: payload.sub }).exec();
+    await this.users.bumpTokenVersion(payload.sub);
   }
 
   // ── Email verification ───────────────────────────────────────────────────
@@ -192,17 +211,24 @@ export class AuthService {
 
   // ── Sessions ─────────────────────────────────────────────────────────────
 
-  async listSessions(userId: string) {
-    const rows = await this.sessions
-      .find({ user: userId })
-      .sort({ createdAt: -1 })
-      .exec();
-    return rows.map((s) => ({
+  async listSessions(userId: string, page = 1, pageSize = 5) {
+    const filter = { user: userId };
+    const [rows, total] = await Promise.all([
+      this.sessions
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .exec(),
+      this.sessions.countDocuments(filter).exec(),
+    ]);
+    const data = rows.map((s) => ({
       id: String(s._id),
       userAgent: s.userAgent ?? 'Unknown device',
       createdAt: (s as unknown as { createdAt: Date }).createdAt,
       expiresAt: s.expiresAt,
     }));
+    return { data, meta: buildMeta(total, page, pageSize) };
   }
 
   async revokeSession(userId: string, sessionId: string): Promise<void> {
@@ -213,6 +239,8 @@ export class AuthService {
 
   async revokeAllSessions(userId: string): Promise<void> {
     await this.sessions.deleteMany({ user: userId }).exec();
+    // Also invalidate outstanding access tokens → true "sign out everywhere".
+    await this.users.bumpTokenVersion(userId);
   }
 
   // ── OAuth issue (Google) ─────────────────────────────────────────────────
@@ -224,7 +252,12 @@ export class AuthService {
   // ── internals ────────────────────────────────────────────────────────────
 
   private async issue(user: UserDocument, userAgent?: string): Promise<AuthResult> {
-    const payload: JwtPayload = { sub: String(user._id), email: user.email, role: user.role };
+    const payload: JwtPayload = {
+      sub: String(user._id),
+      email: user.email,
+      role: user.role,
+      tv: user.tokenVersion ?? 0,
+    };
     const accessToken = await this.jwt.signAsync(payload, {
       secret: this.config.getOrThrow('JWT_ACCESS_SECRET'),
       expiresIn: this.config.get('JWT_ACCESS_TTL', '15m'),
@@ -250,6 +283,7 @@ export class AuthService {
         name: user.name,
         email: user.email,
         role: user.role,
+        avatarUrl: user.avatarUrl,
         permissions,
       },
     };

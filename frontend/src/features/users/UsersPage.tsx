@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Ban,
   Copy,
@@ -15,7 +16,7 @@ import {
   UserPlus,
   Users,
 } from 'lucide-react';
-import { SUPER_ADMIN_ROLE } from '@ecommerce/shared';
+import { CUSTOMER_ROLE, SUPER_ADMIN_ROLE } from '@ecommerce/shared';
 import {
   Alert,
   Badge,
@@ -39,7 +40,7 @@ import {
 } from '@/components/ui';
 import { Avatar, PageHeader, StatCard, type StatTone } from '@/components/common';
 import { useMutation } from '@/hooks/useMutation';
-import { formatDate, formatDateTime, formatRelative } from '@/utils/formatters';
+import { formatDateTime, formatRelative } from '@/utils/formatters';
 import { isEmail, minLength } from '@/utils/validators';
 import { USER_STATUS_TONE, toneFor } from '@/utils/constants';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -74,11 +75,15 @@ const isExpired = (iso?: string) => (iso ? new Date(iso).getTime() < Date.now() 
 
 export function UsersPage() {
   const { user: me } = useAuth();
+  const navigate = useNavigate();
   const { data, meta, loading, error, filters, setFilters, reload } = useUsers();
   const { data: roles } = useRoles();
   const invitedCount = useInvitedCount();
   const stats = useUserStats();
-  const roleNames = roles.map((r) => r.name);
+  // Admin user management is staff-only — never offer the storefront Customer role here.
+  const roleNames = roles.map((r) => r.name).filter((r) => r !== CUSTOMER_ROLE);
+  const defaultRole =
+    roles.find((r) => r.isDefault && r.name !== CUSTOMER_ROLE)?.name ?? roleNames[0] ?? 'Admin';
 
   const [tab, setTab] = useState<Tab>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -114,7 +119,10 @@ export function UsersPage() {
   const isProtected = (u: User) => u.id === me?.id || u.role === SUPER_ADMIN_ROLE;
 
   const rowMenu = (u: User): DropdownItem[] => {
-    const items: DropdownItem[] = [{ label: 'Change role', onSelect: () => openRoleModal(u) }];
+    const items: DropdownItem[] = [
+      { label: 'View profile', onSelect: () => navigate(`/profile/${u.id}`) },
+      { label: 'Change role', onSelect: () => openRoleModal(u) },
+    ];
     if (u.status === 'ACTIVE' && !u.emailVerified) {
       items.push({ label: 'Resend verification', onSelect: () => act(() => resendVerification(u.id), 'Verification email sent') });
     }
@@ -338,7 +346,7 @@ export function UsersPage() {
       key: 'lastLogin',
       header: 'Last login',
       sortable: true,
-      cell: (u) => <span className="text-xs text-text-secondary">{formatDate(u.lastLogin)}</span>,
+      cell: (u) => <span className="whitespace-nowrap text-xs text-text-secondary">{formatDateTime(u.lastLogin)}</span>,
     },
     {
       key: 'actions',
@@ -400,10 +408,16 @@ export function UsersPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Users & Roles"
-        subtitle="Manage team members and customer accounts."
+        title="Admin Users"
+        subtitle="Admin & staff accounts only — shoppers are managed under Customers."
         action={
-          <Button leftIcon={<UserPlus className="size-4" />} onClick={() => setInviteOpen(true)}>
+          <Button
+            leftIcon={<UserPlus className="size-4" />}
+            onClick={() => {
+              setInvite({ ...emptyInvite, role: defaultRole });
+              setInviteOpen(true);
+            }}
+          >
             Invite user
           </Button>
         }

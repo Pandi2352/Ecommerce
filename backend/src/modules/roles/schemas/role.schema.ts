@@ -22,6 +22,10 @@ export class Role {
   /** System roles (e.g. Super Admin) can't be edited or deleted. */
   @Prop({ default: false })
   isSystem!: boolean;
+
+  /** The role new invites default to (exactly one role should be true). */
+  @Prop({ default: false })
+  isDefault!: boolean;
 }
 
 export const RoleSchema = SchemaFactory.createForClass(Role);

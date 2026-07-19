@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/features/auth/AuthContext';
 import { Dropdown } from '@/components/ui';
-import { Avatar } from '@/components/common';
+import { Avatar, LiveClock } from '@/components/common';
 
 export function Navbar() {
   const { theme, toggle } = useTheme();
@@ -38,6 +38,9 @@ export function Navbar() {
 
       {/* Right Actions Panel */}
       <div className="flex items-center gap-3">
+        {/* Live IST clock */}
+        <LiveClock />
+
         {/* Statistics Icon */}
         <button className="flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-bg hover:text-text transition-colors cursor-pointer" aria-label="Stats">
           <BarChart2 className="h-4.5 w-4.5" />
@@ -75,7 +78,7 @@ export function Navbar() {
           align="right"
           trigger={
             <div className="flex items-center gap-2.5">
-              <Avatar name={user?.name ?? '?'} />
+              <Avatar name={user?.name ?? '?'} src={user?.avatarUrl} />
               <div className="hidden flex-col items-start leading-none sm:flex">
                 <span className="text-xs font-semibold text-text">{user?.name ?? 'Account'}</span>
                 <span className="mt-0.5 text-[9px] font-medium capitalize text-text-secondary">
@@ -85,7 +88,7 @@ export function Navbar() {
             </div>
           }
           items={[
-            { label: 'Profile', onSelect: () => navigate('/settings') },
+            { label: 'My Profile', onSelect: () => navigate('/profile') },
             { label: 'Sign out', onSelect: () => void logout(), danger: true },
           ]}
         />
