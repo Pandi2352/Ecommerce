@@ -102,13 +102,14 @@ Sprint 7,Checkout,Address step,Shipping/billing address selection,Not Started,No
 Sprint 7,Checkout,Delivery method,Choose shipping method,Not Started,Not Started,High,Not Started,
 Sprint 7,Checkout,Checkout quote,Compute order totals pre-payment,Not Started,Not Started,High,Not Started,
 Sprint 7,Checkout,Review & place order,Review cart + create order,Not Started,Not Started,Critical,Not Started,
-Sprint 7,Orders,Order creation,Create order from checkout,Not Started,Not Started,Critical,Not Started,
-Sprint 7,Orders,Status state machine,Created to Delivered/Cancelled transitions,Not Started,Not Started,Critical,Not Started,Enforce valid transitions
-Sprint 7,Orders,Timeline,Order event timeline,Not Started,Not Started,High,Not Started,
+Sprint 7,Orders,Admin Orders (list/stats/detail),"Orders module + admin UI (built early)",Done,Verified (curl + build + lint),Critical,Done,"Order schema (customer snapshot, items, totals, timeline); GET /orders (paginate/search/status+payment filters/sort) + /orders/stats (revenue/avg/by-status); OrdersPage stat cards + filters + table + detail Drawer; 6 sample orders seeded so dashboard is real"
+Sprint 7,Orders,Order creation,Create order from checkout,In Progress,Verified (curl),Critical,In Progress,"Admin manual create (POST /orders, computes subtotal/discount/shipping/tax/total, generates NOVA-#### number) done + seeder; storefront checkout pending"
+Sprint 7,Orders,Status state machine,Created to Delivered/Cancelled transitions,In Progress,Verified (curl),Critical,In Progress,"PATCH /orders/:id/status changes status + appends timeline entry; strict valid-transition enforcement still to add"
+Sprint 7,Orders,Timeline,Order event timeline,Done,Verified (curl),High,Done,"Every status change appends {status,note,at}; shown in the detail drawer (newest first)"
 Sprint 7,Orders,Refund,Full/partial refund,Not Started,Not Started,Medium,Not Started,
 Sprint 7,Orders,Invoice,Generate invoice PDF,Not Started,Not Started,Medium,Not Started,
 Sprint 7,Orders,Tracking,Shipment tracking link,Not Started,Not Started,Medium,Not Started,
-Sprint 7,Orders,Order detail panel,Right context panel: customer/timeline/payment/shipment/notes,Not Started,Not Started,High,Not Started,
+Sprint 7,Orders,Order detail panel,Right context panel: customer/timeline/payment/shipment/notes,Done,Verified (build + lint),High,Done,"Slide-over Drawer: customer, items, totals breakdown, shipping address, timeline, inline status-update control"
 Sprint 7,Orders,Customer order history,GET /me/orders,Not Started,Not Started,High,Not Started,
 Sprint 8,Payments,Stripe,Card payments via payment intent,Not Started,Not Started,High,Not Started,
 Sprint 8,Payments,Razorpay,Razorpay gateway integration,Not Started,Not Started,Medium,Not Started,

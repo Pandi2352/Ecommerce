@@ -184,9 +184,14 @@ Progress is tracked feature-by-feature in [`docs/sprint-plan.csv`](./docs/sprint
       (Fashion / Footwear / Electronics / Grocery). See [docs/18](./docs/18-product-attributes.md).
     - **Categories** — an advanced nested **tree** (expand/collapse, reorder, product counts,
       image + SEO) with cycle-safe reparenting.
-- 🟢 Dashboard UI is built (animated custom SVG charts) — wired to live data as
-  orders land next.
-- 📋 **Next: Sprint 5 — Orders** · full roadmap in [docs/09-roadmap.md](./docs/09-roadmap.md).
+- ✅ **Orders (admin)** — Orders module + admin UI: paginated list with revenue/status
+  **stat cards**, search + status/payment filters, an order **detail drawer** (items,
+  totals, shipping, timeline) and **status transitions** that append to the timeline.
+  Manual order creation + 6 seeded sample orders make the dashboard real. Storefront
+  checkout will feed it next.
+- 🟢 Dashboard UI is built (animated custom SVG charts) — now backed by real order data.
+- 📋 **Next: customer storefront** (separate app in the monorepo) → checkout that creates
+  orders through the same API. Full roadmap in [docs/09-roadmap.md](./docs/09-roadmap.md).
 - 🧱 **Reusable common layer** — shared FE hooks/utils/components + BE
   `BaseService`/query utils, server-side `<Pagination>`, and a consistent
   toast + confirm-dialog story (see *Reusable building blocks* above).

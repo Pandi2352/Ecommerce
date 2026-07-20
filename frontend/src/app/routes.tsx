@@ -19,6 +19,7 @@ import { ProfilePage } from '@/features/profile';
 import { UsersPage } from '@/features/users';
 import { RolesPage, PermissionsPage } from '@/features/roles';
 import { AuditLogPage } from '@/features/audit';
+import { OrdersPage } from '@/features/orders';
 import {
   RouteErrorBoundary,
   NotFound,
@@ -48,7 +49,7 @@ export const router = createBrowserRouter([
       
       // Main
       { path: 'analytics', element: g('reports.read', <Placeholder title="Analytics" />) },
-      { path: 'orders', element: g('orders.read', <Placeholder title="Orders" />) },
+      { path: 'orders', element: g('orders.read', <OrdersPage />) },
       { path: 'products', element: g('products.read', <ProductsPage />) },
       { path: 'products/new', element: g('products.write', <ProductEditorPage />) },
       { path: 'products/:id/edit', element: g('products.write', <ProductEditorPage />) },
