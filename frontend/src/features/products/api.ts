@@ -78,6 +78,7 @@ export interface ProductsFilters {
   sort: string;
 }
 
+export const fetchProduct = (id: string) => api.get<Product>(`/products/${id}`).then((r) => r.data);
 export const createProduct = (input: ProductInput) =>
   api.post<Product>('/products', input).then((r) => r.data);
 export const updateProduct = (id: string, input: Partial<ProductInput>) =>

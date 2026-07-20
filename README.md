@@ -163,17 +163,30 @@ Progress is tracked feature-by-feature in [`docs/sprint-plan.csv`](./docs/sprint
 - ✅ **Sprint 2 — Authentication** — **invite-only** admin (seed + email invites), JWT
   access + refresh (rotating, httpOnly cookie), bcrypt, password reset, email
   verification, change password, sessions; split login screen with a branded loader.
-- ✅ **Sprint 3 — User Management + RBAC** — dynamic **Roles** with a read/write
-  **permission matrix**, user CRUD (paginate/filter/ban/restore), permission-gated nav.
-  **Category CRUD** (nested tree) also landed early.
+- ✅ **Sprint 3 — Admin management + RBAC** — dynamic **Roles** with a read/write
+  **permission matrix**; **Admin Users** (staff-only — customers live elsewhere) with an
+  Invited tab (15-min invites + reinvite/revoke), bulk actions, count cards and a detail
+  drawer; **Roles UX** (configurable default role, assign-to-users, JSON export/import);
+  a **Permissions** reference page; grouped *Access control* nav, gated by permission
+  **and** route guards. Full backlog in [docs/17](./docs/17-admin-access-management.md).
 - ✅ **Admin security baseline** — global rate-limit + login lockout, password policy,
   route-level permission guards, role-in-use guard, `tokenVersion` kill-switch, helmet/CSP,
-  and an **audit log** (see [docs/17](./docs/17-admin-access-management.md)).
-- 🟢 **Sprint 4 — Products (v1)** — product CRUD + `/products/stats`, list with
-  search/sort/category+status filters, colorful stat cards, stock badges. Variants, media
-  upload, and SEO/attributes still to come.
+  and an **audit log** (successes + failures, real client IP).
+- ✅ **Admin profile & settings** — full-page **My Profile** (local avatar upload, bio/links,
+  change password + paginated login activity) and **Business Settings** (store identity,
+  contact, localization, and the **file-storage driver** — local now / S3-ready). Local
+  uploads are served at `/uploads`.
+- ✅ **Sprint 4 — Catalog** — the module that makes NovaShop fit **any shop type**:
+    - **Products** — a full-page create/edit editor with **admin-configurable custom
+      attributes** + a **variant matrix** (per-SKU price/stock), **multi-image gallery
+      upload**, bulk actions, colourful stat cards, and search/sort/filter/pagination.
+    - **Product Fields** — define the attributes your shop needs, or apply a **shop preset**
+      (Fashion / Footwear / Electronics / Grocery). See [docs/18](./docs/18-product-attributes.md).
+    - **Categories** — an advanced nested **tree** (expand/collapse, reorder, product counts,
+      image + SEO) with cycle-safe reparenting.
 - 🟢 Dashboard UI is built (animated custom SVG charts) — wired to live data as
-  orders land in Sprints 5–6.
+  orders land next.
+- 📋 **Next: Sprint 5 — Orders** · full roadmap in [docs/09-roadmap.md](./docs/09-roadmap.md).
 - 🧱 **Reusable common layer** — shared FE hooks/utils/components + BE
   `BaseService`/query utils, server-side `<Pagination>`, and a consistent
   toast + confirm-dialog story (see *Reusable building blocks* above).
