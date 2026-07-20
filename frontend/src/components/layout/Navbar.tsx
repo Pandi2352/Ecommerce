@@ -1,13 +1,15 @@
-import { Bell, MessageSquare, Moon, Search, Sun, BarChart2, Plus, ChevronDown } from 'lucide-react';
+import { Bell, MessageSquare, Moon, Search, Sun, BarChart2, Plus, ChevronDown, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useCart } from '@/features/cart/CartContext';
 import { Dropdown } from '@/components/ui';
 import { Avatar, LiveClock } from '@/components/common';
 
 export function Navbar() {
   const { theme, toggle } = useTheme();
   const { user, logout } = useAuth();
+  const { itemCount, setDrawerOpen } = useCart();
   const navigate = useNavigate();
 
   return (
@@ -60,6 +62,20 @@ export function Navbar() {
           <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white ring-2 ring-surface">
             12
           </span>
+        </button>
+
+        {/* Cart Icon Button with badge */}
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className="relative flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-bg hover:text-text transition-colors cursor-pointer"
+          aria-label="Shopping cart"
+        >
+          <ShoppingBag className="h-4 w-4" />
+          {itemCount > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[9px] font-bold text-white ring-2 ring-surface">
+              {itemCount > 99 ? '99+' : itemCount}
+            </span>
+          )}
         </button>
 
         {/* Theme Toggle Button */}

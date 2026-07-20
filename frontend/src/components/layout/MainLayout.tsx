@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar/Sidebar';
 import { Navbar } from './Navbar';
 import { SidebarProvider } from '@/hooks/useSidebar';
+import { CartDrawer } from '@/features/cart/components/CartDrawer';
 
 /** Admin shell: Sidebar + Navbar + routed content. */
 export function MainLayout() {
@@ -16,6 +17,9 @@ export function MainLayout() {
           </main>
         </div>
       </div>
+      {/* CartDrawer must be inside the router so useNavigate() works */}
+      <CartDrawer />
     </SidebarProvider>
   );
 }
+

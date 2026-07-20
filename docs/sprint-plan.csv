@@ -92,13 +92,13 @@ Sprint 6,Coupons,Coupon types,Percentage / flat / free-shipping / BXGY / Tiered,
 Sprint 6,Coupons,Rules,"Min purchase, max discount, expiry, auto-apply, stackable",Done,Verified (curl + build + lint),High,Done,"DiscountsService validation rules (min purchase, max discount cap, start/end dates, auto-apply, stackability, 1st order only)"
 Sprint 6,Coupons,Usage limits,"Global cap, per-user limit, usage tracking",Done,Verified (curl + build + lint),Medium,Done,"CouponRedemption ledger schema + global redemption cap + per-user usage limits + BatchGeneratorModal tool"
 Sprint 6,Coupons,Validate endpoint,Storefront coupon validation,Done,Verified (curl + build + lint),High,Done,"POST /discounts/validate public endpoint checking date windows, subtotals, caps, limits & return discount amounts"
-Sprint 6,Cart,Guest cart,Session-based cart,Not Started,Not Started,High,Not Started,
-Sprint 6,Cart,User cart,Persisted user cart + merge on login,Not Started,Not Started,High,Not Started,
-Sprint 6,Cart,Cart items,"Add/update/remove, quantity",Not Started,Not Started,Critical,Not Started,
-Sprint 6,Cart,Coupon apply,Apply coupon to cart,Not Started,Not Started,High,Not Started,
-Sprint 6,Cart,Save for later,Move items to saved list,Not Started,Not Started,Low,Not Started,
-Sprint 6,Cart,Gift wrap & notes,Cart-level options,Not Started,Not Started,Low,Not Started,
-Sprint 6,Cart,Totals,Subtotal/discount/shipping/tax/total (server-computed),Not Started,Not Started,High,Not Started,Never trust client totals
+Sprint 6,Cart,Guest cart,Session-based cart,Done,Verified (curl + build + lint),High,Done,"Cart schema with guestId + 30-day TTL index + GET /cart with x-guest-id header + getGuestId() localStorage helper"
+Sprint 6,Cart,User cart,Persisted user cart + merge on login,Done,Verified (curl + build + lint),High,Done,"Cart schema with userId + CartProvider auto-merges guestId cart into user cart on login via POST /cart/merge"
+Sprint 6,Cart,Cart items,"Add/update/remove, quantity",Done,Verified (curl + build + lint),Critical,Done,"POST /cart/items (stock-checked add), PATCH /cart/items/:id (qty+savedForLater), DELETE /cart/items/:id + CartDrawer slide-over + CartPage item list"
+Sprint 6,Cart,Coupon apply,Apply coupon to cart,Done,Verified (curl + build + lint),High,Done,"POST /cart/coupon calls DiscountsService.validateCoupon, attaches appliedCoupon, auto-revalidates on every save. CartPage promo code input."
+Sprint 6,Cart,Save for later,Move items to saved list,Done,Verified (curl + build + lint),Low,Done,"isSavedForLater boolean per CartItem; active items computed in totals only; CartPage Save for Later section + Move to Cart"
+Sprint 6,Cart,Gift wrap & notes,Cart-level options,Done,Verified (curl + build + lint),Low,Done,"isGiftWrap (+$5 fee) + deliveryNotes via POST /cart/options; CartPage gift options section"
+Sprint 6,Cart,Totals,Subtotal/discount/shipping/tax/total (server-computed),Done,Verified (curl + build + lint),High,Done,"cart-calculator.util.ts: subtotal(active items) - coupon discount + gift wrap $5 + shipping $10 (free>=100 or FREE_SHIPPING) + 8% tax; CartPage Order Summary card"
 Sprint 7,Checkout,Address step,Shipping/billing address selection,Not Started,Not Started,High,Not Started,
 Sprint 7,Checkout,Delivery method,Choose shipping method,Not Started,Not Started,High,Not Started,
 Sprint 7,Checkout,Checkout quote,Compute order totals pre-payment,Not Started,Not Started,High,Not Started,
