@@ -28,7 +28,12 @@ async function bootstrap() {
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     }),
   );
-  app.enableCors({ origin: config.get<string>('CLIENT_ORIGIN'), credentials: true });
+  // CLIENT_ORIGIN may be a comma-separated list (e.g. multiple Vite dev ports).
+  const origins = (config.get<string>('CLIENT_ORIGIN') ?? '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  app.enableCors({ origin: origins.length ? origins : true, credentials: true });
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new AllExceptionsFilter());
