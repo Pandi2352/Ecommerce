@@ -36,6 +36,7 @@ Read them in order for the full picture, or jump to what you need.
 | 15 | [AI Features](./15-ai-features.md) | Phase 30: generators, RAG assistant, recommendations, forecasting + AI architecture |
 | 16 | [Advanced Features](./16-advanced-features.md) | 50 enterprise/stretch feature plans beyond the 30 phases |
 | 17 | [Admin, Access & Identity](./17-admin-access-management.md) | Admin management + authentication + authorization: current state + prioritized feature backlog |
+| 18 | [Product Attributes & Variants](./18-product-attributes.md) | Admin-configurable product fields + variant matrix so one codebase fits any shop type |
 
 ---
 

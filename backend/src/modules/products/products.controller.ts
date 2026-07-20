@@ -1,6 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto, ListProductsQueryDto, UpdateProductDto } from './dto/product.dto';
+import {
+  BulkProductsDto,
+  CreateProductDto,
+  ListProductsQueryDto,
+  UpdateProductDto,
+} from './dto/product.dto';
 import { RequirePermission } from '../../common/decorators/require-permission.decorator';
 
 @Controller('products')
@@ -17,6 +22,12 @@ export class ProductsController {
   @Get('stats')
   stats() {
     return this.products.stats();
+  }
+
+  @RequirePermission('products.write')
+  @Post('bulk')
+  bulk(@Body() dto: BulkProductsDto) {
+    return this.products.bulk(dto.ids, dto.action, dto.status);
   }
 
   @RequirePermission('products.read')

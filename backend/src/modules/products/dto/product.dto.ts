@@ -1,9 +1,12 @@
 import {
+  ArrayNotEmpty,
   IsArray,
   IsBoolean,
   IsEnum,
+  IsIn,
   IsInt,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Min,
@@ -65,6 +68,29 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   featured?: boolean;
+
+  /** Custom attribute values, validated server-side against the definitions. */
+  @IsOptional()
+  @IsObject()
+  attributes?: Record<string, unknown>;
+
+  /** Variant option axes, e.g. [{ name:'Size', values:['S','M'] }]. */
+  @IsOptional()
+  @IsArray()
+  options?: { name: string; values: string[] }[];
+
+  /** Generated variant matrix (per-SKU price/stock). */
+  @IsOptional()
+  @IsArray()
+  variants?: Array<{
+    sku?: string;
+    optionValues: Record<string, string>;
+    price: number;
+    stock: number;
+    image?: string;
+    barcode?: string;
+    isActive?: boolean;
+  }>;
 }
 
 export class UpdateProductDto {
@@ -121,6 +147,45 @@ export class UpdateProductDto {
   @IsOptional()
   @IsBoolean()
   featured?: boolean;
+
+  /** Custom attribute values, validated server-side against the definitions. */
+  @IsOptional()
+  @IsObject()
+  attributes?: Record<string, unknown>;
+
+  /** Variant option axes, e.g. [{ name:'Size', values:['S','M'] }]. */
+  @IsOptional()
+  @IsArray()
+  options?: { name: string; values: string[] }[];
+
+  /** Generated variant matrix (per-SKU price/stock). */
+  @IsOptional()
+  @IsArray()
+  variants?: Array<{
+    sku?: string;
+    optionValues: Record<string, string>;
+    price: number;
+    stock: number;
+    image?: string;
+    barcode?: string;
+    isActive?: boolean;
+  }>;
+}
+
+export type BulkProductAction = 'delete' | 'setStatus' | 'feature' | 'unfeature';
+
+export class BulkProductsDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  ids!: string[];
+
+  @IsIn(['delete', 'setStatus', 'feature', 'unfeature'])
+  action!: BulkProductAction;
+
+  @IsOptional()
+  @IsEnum(ProductStatus)
+  status?: ProductStatus;
 }
 
 export class ListProductsQueryDto extends PaginationQueryDto {

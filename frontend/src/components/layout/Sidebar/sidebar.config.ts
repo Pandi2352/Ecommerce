@@ -3,6 +3,7 @@ import {
   LineChart,
   Shirt,
   LayoutGrid,
+  SlidersHorizontal,
   PackageOpen,
   ShoppingCart,
   UsersRound,
@@ -45,6 +46,7 @@ export const sidebarConfig: SidebarGroup[] = [
         ],
       },
       { label: 'Categories', icon: LayoutGrid, color: 'amber', to: '/categories' },
+      { label: 'Product Fields', icon: SlidersHorizontal, color: 'violet', to: '/product-fields', permission: 'attributes.read' },
       {
         label: 'Inventory',
         icon: PackageOpen,

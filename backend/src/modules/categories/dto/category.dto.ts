@@ -1,5 +1,10 @@
-import { IsBoolean, IsInt, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, MinLength } from 'class-validator';
 import { IsUuidId } from '../../../common/decorators/is-uuid-id.decorator';
+
+export class MoveCategoryDto {
+  @IsIn(['up', 'down'])
+  direction!: 'up' | 'down';
+}
 
 export class CreateCategoryDto {
   @IsString()

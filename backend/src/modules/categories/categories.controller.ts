@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
-import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import { CreateCategoryDto, MoveCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { RequirePermission } from '../../common/decorators/require-permission.decorator';
 
@@ -21,7 +21,7 @@ export class CategoriesController {
   @Public()
   @Get()
   list(@Query('tree') tree?: string) {
-    return tree === 'true' ? this.categories.findTree() : this.categories.findAll();
+    return tree === 'true' ? this.categories.tree() : this.categories.list();
   }
 
   @Public()
@@ -40,6 +40,12 @@ export class CategoriesController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
     return this.categories.update(id, dto);
+  }
+
+  @RequirePermission('categories.write')
+  @Patch(':id/move')
+  move(@Param('id') id: string, @Body() dto: MoveCategoryDto) {
+    return this.categories.reorder(id, dto.direction);
   }
 
   @RequirePermission('categories.write')

@@ -205,6 +205,7 @@ Full design and planning docs live in [`docs/`](./docs/README.md).
 | 15 | [AI Features](./docs/15-ai-features.md) | Phase 30 AI: generators, RAG, recommendations |
 | 16 | [Advanced Features](./docs/16-advanced-features.md) | 50 enterprise/stretch feature plans |
 | 17 | [Admin, Access & Identity](./docs/17-admin-access-management.md) | Admin mgmt + authN + authZ: current state + prioritized backlog |
+| 18 | [Product Attributes & Variants](./docs/18-product-attributes.md) | Admin-configurable product fields + variant matrix — one codebase, any shop type |
 
 ## Contributing
 

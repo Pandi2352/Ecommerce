@@ -6,6 +6,7 @@ import { KitchenSink } from '@/pages/KitchenSink';
 import { Placeholder } from '@/pages/Placeholder';
 import { CategoriesPage } from '@/features/categories';
 import { ProductsPage } from '@/features/products';
+import { ProductFieldsPage } from '@/features/attributes';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { RequirePermission } from '@/features/auth/RequirePermission';
 import { LoginPage } from '@/features/auth/LoginPage';
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       { path: 'products/new', element: g('products.write', <Placeholder title="Add Product" />) },
       { path: 'collections', element: g('products.read', <Placeholder title="Collections" />) },
       { path: 'categories', element: g('categories.read', <CategoriesPage />) },
+      { path: 'product-fields', element: g('attributes.read', <ProductFieldsPage />) },
       { path: 'inventory', element: g('inventory.read', <Placeholder title="Inventory" />) },
       { path: 'inventory/low', element: g('inventory.read', <Placeholder title="Low Stock" />) },
       { path: 'inventory/warehouses', element: g('inventory.read', <Placeholder title="Warehouses" />) },

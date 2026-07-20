@@ -62,18 +62,21 @@ Sprint 3,Dashboard,Top customers,Top customers list,In Progress,Not Started,Low,
 Sprint 4,Products,Product CRUD,Create/read/update/delete products,Done,Verified (curl + build + lint),Critical,Done,"Products module (BaseService); CRUD + /products/stats; list paginate/search/sort/category+status filters; @RequirePermission products.read/write; audited"
 Sprint 4,Products,SKU / Slug / Barcode,Identifiers + unique slug,Done,Verified (curl),High,Done,"sku field + auto unique slug (slugify + assertSlugFree -> 409 on dup); barcode later"
 Sprint 4,Products,SEO fields,Meta title/description,Not Started,Not Started,Medium,Not Started,
-Sprint 4,Products,Media,"Thumbnail, gallery, product video",Not Started,Not Started,High,Not Started,Depends on Uploads
+Sprint 4,Products,Media,"Thumbnail, gallery, product video",Done,Verified (curl + build + lint),High,Done,"Multi-image gallery via reusable ImageUploader -> POST /uploads/image (local/driver-aware); first image = primary, make-primary + remove; product.images[]. Video later"
+Sprint 4,Products,Bulk actions,"Select many -> set status / feature / delete",Done,Verified (curl + build + lint),Medium,Done,"POST /products/bulk (delete/setStatus/feature/unfeature); checkbox select + bulk toolbar + bulk-delete confirm; setStatus without status -> 400"
 Sprint 4,Products,Pricing,"Price, tax class, discount",In Progress,Verified (curl),High,In Progress,"price + compareAtPrice (was-price) shipped; tax class/discount later"
-Sprint 4,Products,Attributes,"Weight, dimensions, shipping, tags, collections",Not Started,Not Started,Medium,Not Started,
+Sprint 4,Products,Attributes,"Weight, dimensions, shipping, tags, collections",Done,Verified (curl + build + lint),Medium,Done,"docs/18 stages 1-4 complete: modules/attributes (CRUD + presets + attributes.read/write) + Product Fields page; product schema gained attributes{}/options[]/variants[]; product form renders dynamic fields (typed, grouped, category-scoped) + variant options->matrix editor (per-SKU sku/price/stock); server validates attributes (required/unknown/type/select) + variant option-values. Remaining: storefront filtering"
+Sprint 4,Products,Variants,"Option combinations, per-variant SKU/price/stock",Done,Verified (curl + build + lint),High,Done,"Product.options[] + variants[]; admin options editor + Generate-variants (cartesian, merges existing) + per-variant price/stock/sku table; validated backend"
 Sprint 4,Products,Product type,Physical vs digital,Not Started,Not Started,Medium,Not Started,
 Sprint 4,Products,Relations,"Related, cross-sell, upsell",Not Started,Not Started,Low,Not Started,
 Sprint 4,Products,Flags,"Featured, popular, trending, new arrival",In Progress,Verified (curl),Low,In Progress,"featured flag shipped (schema + form); popular/trending/new-arrival later"
 Sprint 4,Products,Product list UI,Rich table: image/stock/price/status/sales/actions,Done,Verified (build + lint),High,Done,"ProductsPage: colorful stat cards (total/active/draft/archived/low/out), image thumb, stock badges (Out/Low), sortable cols, search + category/status filters, pagination, create/edit modal, delete confirm; wired at /products (gated products.read)"
 Sprint 4,Products,Bulk actions,Bulk archive/delete/edit,Not Started,Not Started,Medium,Not Started,
 Sprint 4,Categories,Category CRUD,Create/read/update/delete categories,Done,Verified (curl + build),High,Done,"Full-stack: NestJS module + Axios/React page. Reads public; writes now @Roles(ADMIN)"
-Sprint 4,Categories,Nested tree,Unlimited nested categories,Done,Verified (curl),High,Done,"parent ref + GET ?tree=true; delete reparents children. Fixed SchemaTypes.ObjectId cast bug"
-Sprint 4,Categories,Tree view + reorder,Drag-drop ordering,Not Started,Not Started,Medium,Not Started,React DnD; flat table + parent column for now
-Sprint 4,Categories,Category SEO/media,"Banner, image, SEO",In Progress,Not Started,Low,In Progress,Schema+DTO support metaTitle/metaDescription/image; not yet in the UI form
+Sprint 4,Categories,Nested tree,Unlimited nested categories,Done,Verified (curl),High,Done,"parent ref + GET ?tree=true (nodes carry productCount + children); delete reparents children AND moves products up to parent"
+Sprint 4,Categories,Tree view + reorder,Expand/collapse tree + sibling ordering,Done,Verified (curl + build + lint),Medium,Done,"CategoriesPage rebuilt as a tree (expand/collapse, indent, product-count badge, add-subcategory, move up/down); PATCH /categories/:id/move normalizes+swaps sibling sortOrder; cycle guard (self/descendant parent -> 400)"
+Sprint 4,Categories,Category SEO/media,"Banner, image, SEO",Done,Verified (build + lint),Low,Done,"Image upload (ImageUploader) + metaTitle/metaDescription now in the category form"
+Sprint 4,Categories,Product counts,Show product count per category,Done,Verified (curl),Low,Done,"Aggregated in tree/list responses; badge in tree UI"
 Sprint 4,Categories,Status,Active/inactive,Done,Verified (build),Low,Done,isActive toggle + badge
 Sprint 5,Brands,Brand CRUD,"Logo, banner, description, SEO",Not Started,Not Started,Medium,Not Started,
 Sprint 5,Variants,Variant options,Size/color/storage/material/flavor/pack,Not Started,Not Started,High,Not Started,

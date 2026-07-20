@@ -48,6 +48,26 @@ export class Product {
 
   @Prop({ default: false })
   featured!: boolean;
+
+  // ── Custom attributes (validated against AttributeDefinitions) ──
+  @Prop({ type: Object, default: {} })
+  attributes!: Record<string, unknown>;
+
+  // ── Variant options + generated matrix (docs/18 §4) ──
+  @Prop({ type: [Object], default: [] })
+  options!: { name: string; values: string[] }[];
+
+  @Prop({ type: [Object], default: [] })
+  variants!: Array<{
+    id?: string;
+    sku?: string;
+    optionValues: Record<string, string>;
+    price: number;
+    stock: number;
+    image?: string;
+    barcode?: string;
+    isActive?: boolean;
+  }>;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

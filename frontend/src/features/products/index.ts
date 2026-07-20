@@ -7,4 +7,12 @@ export {
   deleteProduct,
   fetchProductStats,
 } from './api';
-export type { Product, ProductInput, ProductStats, ProductsFilters, ProductStatus } from './api';
+export type {
+  Product,
+  ProductInput,
+  ProductStats,
+  ProductsFilters,
+  ProductStatus,
+  ProductVariant,
+  VariantOption,
+} from './api';

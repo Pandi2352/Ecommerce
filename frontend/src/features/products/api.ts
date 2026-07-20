@@ -8,6 +8,22 @@ import { getErrorMessage } from '@/utils/getErrorMessage';
 
 export type { ProductStatus };
 
+export interface VariantOption {
+  name: string;
+  values: string[];
+}
+
+export interface ProductVariant {
+  id?: string;
+  sku?: string;
+  optionValues: Record<string, string>;
+  price: number;
+  stock: number;
+  image?: string;
+  barcode?: string;
+  isActive?: boolean;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -22,6 +38,9 @@ export interface Product {
   stock: number;
   tags: string[];
   featured: boolean;
+  attributes?: Record<string, unknown>;
+  options?: VariantOption[];
+  variants?: ProductVariant[];
   createdAt?: string;
 }
 
@@ -36,6 +55,9 @@ export interface ProductInput {
   status?: ProductStatus;
   stock?: number;
   featured?: boolean;
+  attributes?: Record<string, unknown>;
+  options?: VariantOption[];
+  variants?: ProductVariant[];
 }
 
 export interface ProductStats {
@@ -62,6 +84,10 @@ export const updateProduct = (id: string, input: Partial<ProductInput>) =>
   api.patch<Product>(`/products/${id}`, input).then((r) => r.data);
 export const deleteProduct = (id: string) => api.delete(`/products/${id}`).then(() => undefined);
 export const fetchProductStats = () => api.get<ProductStats>('/products/stats').then((r) => r.data);
+
+export type BulkProductAction = 'delete' | 'setStatus' | 'feature' | 'unfeature';
+export const bulkProducts = (ids: string[], action: BulkProductAction, status?: ProductStatus) =>
+  api.post<{ affected: number }>('/products/bulk', { ids, action, status }).then((r) => r.data);
 
 /** Paginated products with debounced search + category/status filters. */
 export function useProducts() {
