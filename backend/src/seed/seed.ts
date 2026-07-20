@@ -1,19 +1,166 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { OrderStatus, PaymentStatus, SUPER_ADMIN_ROLE, UserStatus } from '@ecommerce/shared';
+import {
+  OrderStatus,
+  PaymentStatus,
+  ProductStatus,
+  SUPER_ADMIN_ROLE,
+  UserStatus,
+} from '@ecommerce/shared';
 import { AppModule } from '../app.module';
 import { UsersService } from '../modules/users/users.service';
 import { RolesService } from '../modules/roles/roles.service';
 import { OrdersService } from '../modules/orders/orders.service';
+import { ProductsService } from '../modules/products/products.service';
+
+const img = (seed: string) => `https://picsum.photos/seed/${seed}/700/700`;
+
+const SIZE = { name: 'Size', values: ['S', 'M', 'L', 'XL'] };
+const COLOR = (values: string[]) => ({ name: 'Color', values });
+
+// Build a full Size×Color variant matrix with a shared base price.
+const matrix = (base: number, colors: string[]) =>
+  SIZE.values.flatMap((size) =>
+    colors.map((color) => ({
+      sku: `${size}-${color}`.toUpperCase(),
+      optionValues: { Size: size, Color: color },
+      price: base,
+      stock: 12,
+      isActive: true,
+    })),
+  );
+
+const SAMPLE_PRODUCTS = [
+  {
+    name: 'Linen Wrap Dress',
+    description: 'Breathable linen wrap dress with a flattering tie waist. A warm-weather staple.',
+    price: 2499,
+    compareAtPrice: 2999,
+    images: [img('linen-dress'), img('linen-dress-2')],
+    featured: true,
+    options: [SIZE, COLOR(['Sand', 'Olive'])],
+    variants: matrix(2499, ['Sand', 'Olive']),
+  },
+  {
+    name: 'Summer Maxi Dress',
+    description: 'Flowing maxi dress in a lightweight print. Effortless from day to evening.',
+    price: 1999,
+    images: [img('maxi-dress')],
+    featured: true,
+    options: [SIZE, COLOR(['Blue', 'Coral'])],
+    variants: matrix(1999, ['Blue', 'Coral']),
+  },
+  {
+    name: 'Denim Jacket',
+    description: 'Classic mid-wash denim jacket with a relaxed fit. Layers over everything.',
+    price: 3499,
+    images: [img('denim-jacket')],
+    options: [SIZE],
+    variants: SIZE.values.map((s) => ({
+      sku: `DENIM-${s}`,
+      optionValues: { Size: s },
+      price: 3499,
+      stock: 8,
+      isActive: true,
+    })),
+  },
+  {
+    name: 'Wool Coat',
+    description: 'Tailored wool-blend coat for colder days.',
+    price: 6999,
+    images: [img('wool-coat')],
+    stock: 15,
+  },
+  {
+    name: 'Silk Scarf',
+    description: 'Hand-finished silk scarf with a subtle sheen.',
+    price: 899,
+    images: [img('silk-scarf')],
+    stock: 40,
+  },
+  {
+    name: 'Cotton Tote',
+    description: 'Sturdy organic-cotton tote for everyday carry.',
+    price: 599,
+    images: [img('cotton-tote')],
+    stock: 60,
+  },
+  {
+    name: 'Leather Belt',
+    description: 'Full-grain leather belt with a brushed buckle.',
+    price: 1299,
+    images: [img('leather-belt')],
+    stock: 25,
+  },
+  {
+    name: 'Cashmere Sweater',
+    description: 'Soft cashmere-blend crew neck. Lightweight warmth.',
+    price: 4299,
+    compareAtPrice: 4999,
+    images: [img('cashmere-sweater')],
+    featured: true,
+    stock: 18,
+  },
+];
 
 const SAMPLE_ORDERS = [
-  { customer: { name: 'Aisha Khan', email: 'aisha@example.com', phone: '+91 90000 11111' }, items: [{ name: 'Linen Wrap Dress', price: 2499, quantity: 1, variant: { Size: 'M', Color: 'Sand' } }], paymentMethod: 'Card', status: OrderStatus.DELIVERED, paymentStatus: PaymentStatus.PAID },
-  { customer: { name: 'Ravi Menon', email: 'ravi@example.com' }, items: [{ name: 'Silk Scarf', price: 899, quantity: 2 }, { name: 'Cotton Tote', price: 599, quantity: 1 }], paymentMethod: 'UPI', status: OrderStatus.SHIPPED, paymentStatus: PaymentStatus.PAID, shipping: 60 },
-  { customer: { name: 'Meera Nair', email: 'meera@example.com' }, items: [{ name: 'Wool Coat', price: 6999, quantity: 1, variant: { Size: 'L' } }], paymentMethod: 'Card', status: OrderStatus.PACKED, paymentStatus: PaymentStatus.PAID },
-  { customer: { name: 'John Doe', email: 'john@example.com' }, items: [{ name: 'Denim Jacket', price: 3499, quantity: 1 }], paymentMethod: 'COD', status: OrderStatus.CREATED, paymentStatus: PaymentStatus.PENDING },
-  { customer: { name: 'Priya Sharma', email: 'priya@example.com' }, items: [{ name: 'Summer Maxi Dress', price: 1999, quantity: 3, variant: { Size: 'S', Color: 'Blue' } }], paymentMethod: 'UPI', status: OrderStatus.DELIVERED, paymentStatus: PaymentStatus.PAID, shipping: 80 },
-  { customer: { name: 'Sam Lee', email: 'sam@example.com' }, items: [{ name: 'Leather Belt', price: 1299, quantity: 1 }], paymentMethod: 'Card', status: OrderStatus.CANCELLED, paymentStatus: PaymentStatus.FAILED },
+  {
+    customer: { name: 'Aisha Khan', email: 'aisha@example.com', phone: '+91 90000 11111' },
+    items: [
+      { name: 'Linen Wrap Dress', price: 2499, quantity: 1, variant: { Size: 'M', Color: 'Sand' } },
+    ],
+    paymentMethod: 'Card',
+    status: OrderStatus.DELIVERED,
+    paymentStatus: PaymentStatus.PAID,
+  },
+  {
+    customer: { name: 'Ravi Menon', email: 'ravi@example.com' },
+    items: [
+      { name: 'Silk Scarf', price: 899, quantity: 2 },
+      { name: 'Cotton Tote', price: 599, quantity: 1 },
+    ],
+    paymentMethod: 'UPI',
+    status: OrderStatus.SHIPPED,
+    paymentStatus: PaymentStatus.PAID,
+    shipping: 60,
+  },
+  {
+    customer: { name: 'Meera Nair', email: 'meera@example.com' },
+    items: [{ name: 'Wool Coat', price: 6999, quantity: 1, variant: { Size: 'L' } }],
+    paymentMethod: 'Card',
+    status: OrderStatus.PACKED,
+    paymentStatus: PaymentStatus.PAID,
+  },
+  {
+    customer: { name: 'John Doe', email: 'john@example.com' },
+    items: [{ name: 'Denim Jacket', price: 3499, quantity: 1 }],
+    paymentMethod: 'COD',
+    status: OrderStatus.CREATED,
+    paymentStatus: PaymentStatus.PENDING,
+  },
+  {
+    customer: { name: 'Priya Sharma', email: 'priya@example.com' },
+    items: [
+      {
+        name: 'Summer Maxi Dress',
+        price: 1999,
+        quantity: 3,
+        variant: { Size: 'S', Color: 'Blue' },
+      },
+    ],
+    paymentMethod: 'UPI',
+    status: OrderStatus.DELIVERED,
+    paymentStatus: PaymentStatus.PAID,
+    shipping: 80,
+  },
+  {
+    customer: { name: 'Sam Lee', email: 'sam@example.com' },
+    items: [{ name: 'Leather Belt', price: 1299, quantity: 1 }],
+    paymentMethod: 'Card',
+    status: OrderStatus.CANCELLED,
+    paymentStatus: PaymentStatus.FAILED,
+  },
 ];
 
 /**
@@ -47,6 +194,17 @@ async function seed() {
     });
     await users.setEmailVerified(String(admin._id));
     console.log(`✓ Seeded SUPER ADMIN\n  email:    ${email}\n  password: ${password}`);
+  }
+
+  // Sample catalog (only when empty) so the storefront has products to show.
+  const products = app.get(ProductsService);
+  if ((await products.stats()).total === 0) {
+    for (const p of SAMPLE_PRODUCTS) {
+      await products.create({ ...p, status: ProductStatus.ACTIVE });
+    }
+    console.log(`✓ Seeded ${SAMPLE_PRODUCTS.length} sample products`);
+  } else {
+    console.log('✓ Products already present — skipped samples');
   }
 
   // Sample orders (only when there are none) so the dashboard shows real data.

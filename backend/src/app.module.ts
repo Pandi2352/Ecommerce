@@ -22,6 +22,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
+import { StorefrontModule } from './modules/storefront/storefront.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
@@ -55,6 +56,7 @@ import { AuditInterceptor } from './common/interceptors/audit.interceptor';
     AuditModule,
     SettingsModule,
     UploadsModule,
+    StorefrontModule,
   ],
   providers: [
     // Rate limit first, before auth.

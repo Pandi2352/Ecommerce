@@ -35,8 +35,9 @@ custom hooks** — no TanStack/Zustand by design.
 
 ```
 ecommerce/
-├─ frontend/   # Vite + React (admin panel + customer storefront)
-├─ backend/    # NestJS API
+├─ frontend/   # Vite + React (admin panel)
+├─ storefront/ # Vite + React (customer-facing shop)
+├─ backend/    # NestJS API (serves both apps)
 ├─ packages/
 │  └─ shared/  # Shared types + Zod schemas
 ├─ docs/       # Full project documentation
@@ -60,6 +61,7 @@ npm install
 
 # 2. configure env (defaults work for local dev)
 cp frontend/.env.example frontend/.env
+cp storefront/.env.example storefront/.env
 cp backend/.env.example backend/.env
 #    optional: edit backend/.env → JWT secrets, SMTP (for real invite emails),
 #    and ADMIN_EMAIL / ADMIN_PASSWORD (the seeded super admin)
@@ -67,15 +69,17 @@ cp backend/.env.example backend/.env
 # 3. start MongoDB (skip if mongod already runs locally)
 docker compose up -d mongo
 
-# 4. seed the super admin + default roles
+# 4. seed the super admin, default roles, sample products + orders
 npm run seed --workspace backend
 
-# 5. run the apps (two terminals)
+# 5. run the apps (separate terminals)
 npm run dev:api     # NestJS API → http://localhost:4000/api
-npm run dev         # Vite app   → http://localhost:5173
+npm run dev         # Admin panel → http://localhost:5173
+npm run dev:shop    # Storefront  → http://localhost:5175
 ```
 
-Then open **http://localhost:5173** and sign in.
+Then open **http://localhost:5173** (admin) and sign in, or
+**http://localhost:5175** (storefront) to browse the shop.
 
 ### 🔑 Default login (from the seed)
 
@@ -139,10 +143,11 @@ to the server (it never slices data on the client).
 
 | Command | What it does |
 |---------|--------------|
-| `npm run dev` | Start the frontend (Vite) |
+| `npm run dev` | Start the admin panel (Vite → :5173) |
+| `npm run dev:shop` | Start the customer storefront (Vite → :5175) |
 | `npm run dev:api` | Start the backend (NestJS, watch mode) |
-| `npm run seed --workspace backend` | Seed the super admin + default roles (idempotent) |
-| `npm run build` | Build shared → backend → frontend |
+| `npm run seed --workspace backend` | Seed the super admin, roles, sample products + orders (idempotent) |
+| `npm run build` | Build shared → backend → frontend → storefront |
 | `npm run lint` | ESLint across the monorepo |
 | `npm run format` | Prettier write |
 | `npm run typecheck` | Type-check every workspace |
@@ -187,11 +192,17 @@ Progress is tracked feature-by-feature in [`docs/sprint-plan.csv`](./docs/sprint
 - ✅ **Orders (admin)** — Orders module + admin UI: paginated list with revenue/status
   **stat cards**, search + status/payment filters, an order **detail drawer** (items,
   totals, shipping, timeline) and **status transitions** that append to the timeline.
-  Manual order creation + 6 seeded sample orders make the dashboard real. Storefront
-  checkout will feed it next.
+  Manual order creation + 6 seeded sample orders make the dashboard real. **Storefront
+  checkout now feeds it** through the same `OrdersService`.
+- ✅ **Customer storefront** — a **separate Vite app** (`storefront/`, :5175) sharing the
+  same design tokens and the same API. Public, unauthenticated endpoints
+  (`GET /storefront/products`, `/:slug`, `POST /storefront/checkout`); catalog with
+  debounced search + pagination, a PDP with an image gallery and **variant selection**,
+  a **localStorage cart**, and a checkout that **recomputes every price server-side**
+  (client prices are never trusted) → creates a real order and shows a confirmation.
 - 🟢 Dashboard UI is built (animated custom SVG charts) — now backed by real order data.
-- 📋 **Next: customer storefront** (separate app in the monorepo) → checkout that creates
-  orders through the same API. Full roadmap in [docs/09-roadmap.md](./docs/09-roadmap.md).
+- 📋 **Next: storefront account + order history, reviews, and payments.**
+  Full roadmap in [docs/09-roadmap.md](./docs/09-roadmap.md).
 - 🧱 **Reusable common layer** — shared FE hooks/utils/components + BE
   `BaseService`/query utils, server-side `<Pagination>`, and a consistent
   toast + confirm-dialog story (see *Reusable building blocks* above).

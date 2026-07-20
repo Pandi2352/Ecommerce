@@ -104,7 +104,7 @@ Sprint 7,Checkout,Delivery method,Choose shipping method,Not Started,Not Started
 Sprint 7,Checkout,Checkout quote,Compute order totals pre-payment,Not Started,Not Started,High,Not Started,
 Sprint 7,Checkout,Review & place order,Review cart + create order,Not Started,Not Started,Critical,Not Started,
 Sprint 7,Orders,Admin Orders (list/stats/detail),"Orders module + admin UI (built early)",Done,Verified (curl + build + lint),Critical,Done,"Order schema (customer snapshot, items, totals, timeline); GET /orders (paginate/search/status+payment filters/sort) + /orders/stats (revenue/avg/by-status); OrdersPage stat cards + filters + table + detail Drawer; 6 sample orders seeded so dashboard is real"
-Sprint 7,Orders,Order creation,Create order from checkout,In Progress,Verified (curl),Critical,In Progress,"Admin manual create (POST /orders, computes subtotal/discount/shipping/tax/total, generates NOVA-#### number) done + seeder; storefront checkout pending"
+Sprint 7,Orders,Order creation,Create order from checkout,Done,Verified (curl + build + lint),Critical,Done,"Admin manual create (POST /orders) + public storefront checkout (POST /storefront/checkout) both create orders via OrdersService.create (computes subtotal/discount/shipping/tax/total, generates NOVA-#### number); prices resolved server-side from products/variants — client-sent prices ignored. Verified: scarf x2 + dress[M/Sand] = subtotal 4297"
 Sprint 7,Orders,Status state machine,Created to Delivered/Cancelled transitions,In Progress,Verified (curl),Critical,In Progress,"PATCH /orders/:id/status changes status + appends timeline entry; strict valid-transition enforcement still to add"
 Sprint 7,Orders,Timeline,Order event timeline,Done,Verified (curl),High,Done,"Every status change appends {status,note,at}; shown in the detail drawer (newest first)"
 Sprint 7,Orders,Refund,Full/partial refund,Not Started,Not Started,Medium,Not Started,
@@ -122,12 +122,14 @@ Sprint 8,Shipping,Shipping methods,Carriers + base/per-kg rates,Not Started,Not 
 Sprint 8,Shipping,Charge calculation,Weight-based charge calc,Not Started,Not Started,Medium,Not Started,
 Sprint 8,Shipping,Tracking,Track by tracking number,Not Started,Not Started,Medium,Not Started,
 Sprint 8,Shipping,Delivery estimate,ETA calculation,Not Started,Not Started,Low,Not Started,
-Sprint 9,Storefront,Home,"Hero, featured, deals",Not Started,Not Started,High,Not Started,Customer-facing
-Sprint 9,Storefront,Catalog,Category product listing,Not Started,Not Started,High,Not Started,
-Sprint 9,Storefront,Search + filters,"Search, filter, sort",Not Started,Not Started,High,Not Started,Depends on Search module
-Sprint 9,Storefront,Product detail page,"PDP: gallery, variants, reviews, add-to-cart",Not Started,Not Started,Critical,Not Started,
-Sprint 9,Storefront,Cart page,Storefront cart view,Not Started,Not Started,High,Not Started,
-Sprint 9,Storefront,Checkout flow,Storefront checkout UI,Not Started,Not Started,Critical,Not Started,
+Sprint 9,Storefront,App scaffold,Separate Vite storefront app in monorepo,Done,Verified (build + lint),Critical,Done,"New storefront/ workspace (Vite+React+TS+Tailwind, port 5175, shared design tokens, own lib/api unwrapping {data,meta}); root workspaces + build script + dev:shop; CLIENT_ORIGIN includes 5175"
+Sprint 9,Storefront,Public API,Public catalog + checkout endpoints,Done,Verified (curl + build + lint),Critical,Done,"backend modules/storefront (all @Public): GET /storefront/products (ACTIVE-only, paginate/search/sort), GET /storefront/products/:slug, POST /storefront/checkout (resolves prices server-side, calls OrdersService.create)"
+Sprint 9,Storefront,Home,"Hero, featured, deals",Not Started,Not Started,High,Not Started,"Landing currently shows the catalog grid; dedicated hero/featured/deals section still to build"
+Sprint 9,Storefront,Catalog,Category product listing,Done,Verified (curl + build + lint),High,Done,"CatalogPage: responsive product grid, skeleton loading (no spinners), on-sale compare-at price, pagination; 8 fashion products seeded"
+Sprint 9,Storefront,Search + filters,"Search, filter, sort",In Progress,Verified (build + lint),High,In Progress,"Debounced search box wired to GET /storefront/products?search; category/price filters + sort UI still to add"
+Sprint 9,Storefront,Product detail page,"PDP: gallery, variants, reviews, add-to-cart",Done,Verified (curl + build + lint),Critical,Done,"ProductDetailPage: image gallery + thumbnails, Size/Color option selectors resolving the matching variant (price/stock/image), stock hint, Add to cart + Buy now; reviews still pending"
+Sprint 9,Storefront,Cart page,Storefront cart view,Done,Verified (build + lint),High,Done,"CartProvider (Context + localStorage, line key = product+variant); CartPage: qty steppers, remove, per-line + subtotal totals, header cart badge"
+Sprint 9,Storefront,Checkout flow,Storefront checkout UI,Done,Verified (curl + build + lint),Critical,Done,"CheckoutPage: contact + shipping address + payment method form, order summary, POST /storefront/checkout then clears cart -> OrderConfirmationPage (NOVA-#### + totals). Server recomputes all prices"
 Sprint 9,Storefront,Account,Profile + addresses,Not Started,Not Started,High,Not Started,
 Sprint 9,Storefront,Order history & invoices,Customer orders + invoices,Not Started,Not Started,High,Not Started,
 Sprint 9,Storefront,Wishlist page,Wishlist UI,Not Started,Not Started,Medium,Not Started,

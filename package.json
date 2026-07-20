@@ -5,12 +5,14 @@
   "workspaces": [
     "packages/*",
     "frontend",
-    "backend"
+    "backend",
+    "storefront"
   ],
   "scripts": {
     "dev": "npm run dev --workspace frontend",
     "dev:api": "npm run start:dev --workspace backend",
-    "build": "npm run build --workspace @ecommerce/shared && npm run build --workspace backend && npm run build --workspace frontend",
+    "dev:shop": "npm run dev --workspace storefront",
+    "build": "npm run build --workspace @ecommerce/shared && npm run build --workspace backend && npm run build --workspace frontend && npm run build --workspace storefront",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
