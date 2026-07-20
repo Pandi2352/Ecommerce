@@ -78,15 +78,16 @@ Sprint 4,Categories,Tree view + reorder,Expand/collapse tree + sibling ordering,
 Sprint 4,Categories,Category SEO/media,"Banner, image, SEO",Done,Verified (build + lint),Low,Done,"Image upload (ImageUploader) + metaTitle/metaDescription now in the category form"
 Sprint 4,Categories,Product counts,Show product count per category,Done,Verified (curl),Low,Done,"Aggregated in tree/list responses; badge in tree UI"
 Sprint 4,Categories,Status,Active/inactive,Done,Verified (build),Low,Done,isActive toggle + badge
-Sprint 5,Brands,Brand CRUD,"Logo, banner, description, SEO",Not Started,Not Started,Medium,Not Started,
-Sprint 5,Variants,Variant options,Size/color/storage/material/flavor/pack,Not Started,Not Started,High,Not Started,
-Sprint 5,Variants,Variant matrix,Per-combination SKU/price/stock/barcode/weight,Not Started,Not Started,High,Not Started,
+Sprint 5,Brands,Brand CRUD,"Logo, banner, description, SEO",Done,Verified (curl + build + lint),Medium,Done,"Full-stack: Brands module (/brands, /brands/stats, auto-slugs) + BrandCard grid + BrandEditorDrawer + product editor integration"
+Sprint 5,Vendors,Vendor CRUD,"Supplier code, commission rate, status, contact info",Done,Verified (curl + build + lint),High,Done,"Full-stack: Vendors module (/vendors, /vendors/stats, unique code) + Vendor table + VendorEditorDrawer + product editor integration"
+Sprint 5,Variants,Variant options,Size/color/storage/material/flavor/pack,Done,Verified (curl + build + lint),High,Done,"Delivered in Sprint 4 (docs/18): Product.options[] + variants[] matrix editor"
+Sprint 5,Variants,Variant matrix,Per-combination SKU/price/stock/barcode/weight,Done,Verified (curl + build + lint),High,Done,"Delivered in Sprint 4 (docs/18): per-combination SKU/price/stock matrix"
 Sprint 5,Variants,Variant images,Images per variant,Not Started,Not Started,Medium,Not Started,
-Sprint 5,Inventory,Stock tracking,Per-variant stock levels,Not Started,Not Started,High,Not Started,
-Sprint 5,Inventory,Warehouses,Multiple warehouses,Not Started,Not Started,Medium,Not Started,
-Sprint 5,Inventory,Stock adjustments,Purchase/transfer/damage/adjustment,Not Started,Not Started,Medium,Not Started,
-Sprint 5,Inventory,Low-stock alerts,Threshold-based alerts,Not Started,Not Started,Medium,Not Started,Notify (sync now)
-Sprint 5,Inventory,Stock history,Transaction ledger + audit,Not Started,Not Started,Medium,Not Started,
+Sprint 5,Inventory,Stock tracking,Per-variant stock levels,Done,Verified (curl + build + lint),High,Done,"InventoryRecord schema + /inventory & /inventory/stats + StockPage FE with stat cards & filter toolbar"
+Sprint 5,Inventory,Warehouses,Multiple warehouses,Done,Verified (curl + build + lint),High,Done,"WarehousesModule (/inventory/warehouses) + primary WH auto-seed (WH-MAIN) + setPrimary() + WarehousesPage grid & drawer"
+Sprint 5,Inventory,Stock adjustments,Purchase/transfer/damage/adjustment,Done,Verified (curl + build + lint),High,Done,"POST /inventory/adjust & POST /inventory/transfer + StockAdjustmentModal FE for restock/damage/transfers"
+Sprint 5,Inventory,Low-stock alerts,Threshold-based alerts,Done,Verified (curl + build + lint),High,Done,"GET /inventory/low + LowStockPage FE alert dashboard for items below threshold"
+Sprint 5,Inventory,Stock history,Transaction ledger + audit,Done,Verified (curl + build + lint),High,Done,"StockAdjustment ledger schema + GET /inventory/ledger + StockLedgerDrawer FE timeline panel per SKU"
 Sprint 6,Coupons,Coupon types,Percentage / flat / free-shipping,Not Started,Not Started,High,Not Started,
 Sprint 6,Coupons,Rules,"Min purchase, max discount, expiry",Not Started,Not Started,High,Not Started,
 Sprint 6,Coupons,Usage limits,"Single-use, per-user, usage tracking",Not Started,Not Started,Medium,Not Started,

@@ -9,6 +9,7 @@ import { BrandsPage } from '@/features/brands';
 import { VendorsPage } from '@/features/vendors';
 import { ProductsPage, ProductEditorPage } from '@/features/products';
 import { ProductFieldsPage } from '@/features/attributes';
+import { StockPage, LowStockPage, WarehousesPage } from '@/features/inventory';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { RequirePermission } from '@/features/auth/RequirePermission';
 import { LoginPage } from '@/features/auth/LoginPage';
@@ -60,9 +61,9 @@ export const router = createBrowserRouter([
       { path: 'brands', element: g('brands.read', <BrandsPage />) },
       { path: 'vendors', element: g('vendors.read', <VendorsPage />) },
       { path: 'product-fields', element: g('attributes.read', <ProductFieldsPage />) },
-      { path: 'inventory', element: g('inventory.read', <Placeholder title="Inventory" />) },
-      { path: 'inventory/low', element: g('inventory.read', <Placeholder title="Low Stock" />) },
-      { path: 'inventory/warehouses', element: g('inventory.read', <Placeholder title="Warehouses" />) },
+      { path: 'inventory', element: g('inventory.read', <StockPage />) },
+      { path: 'inventory/low', element: g('inventory.read', <LowStockPage />) },
+      { path: 'inventory/warehouses', element: g('inventory.read', <WarehousesPage />) },
       { path: 'orders/returns', element: g('orders.read', <Placeholder title="Returns" />) },
       { path: 'orders/abandoned', element: g('orders.read', <Placeholder title="Abandoned Carts" />) },
       { path: 'pages', element: <Placeholder title="Pages" /> },

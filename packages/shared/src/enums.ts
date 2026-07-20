@@ -53,3 +53,14 @@ export const VendorStatus = {
 } as const;
 export type VendorStatus = (typeof VendorStatus)[keyof typeof VendorStatus];
 
+export const StockAdjustmentType = {
+  PURCHASE: 'PURCHASE',
+  TRANSFER: 'TRANSFER',
+  DAMAGE: 'DAMAGE',
+  SALE: 'SALE',
+  ADJUSTMENT: 'ADJUSTMENT',
+  RETURN: 'RETURN',
+} as const;
+export type StockAdjustmentType = (typeof StockAdjustmentType)[keyof typeof StockAdjustmentType];
+
+

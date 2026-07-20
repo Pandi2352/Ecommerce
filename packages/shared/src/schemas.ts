@@ -52,3 +52,36 @@ export const vendorSchema = z.object({
 });
 export type VendorInput = z.infer<typeof vendorSchema>;
 
+export const warehouseSchema = z.object({
+  name: z.string().min(1, 'Warehouse name is required').max(100),
+  code: z.string().min(1, 'Warehouse code is required').max(50),
+  contactName: z.string().optional().or(z.literal('')),
+  email: z.string().email('Invalid email address').optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
+  address: z.string().optional().or(z.literal('')),
+  isPrimary: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+});
+export type WarehouseInput = z.infer<typeof warehouseSchema>;
+
+export const stockAdjustmentSchema = z.object({
+  type: z.enum(['PURCHASE', 'TRANSFER', 'DAMAGE', 'SALE', 'ADJUSTMENT', 'RETURN']),
+  warehouseId: z.string().min(1, 'Warehouse is required'),
+  productId: z.string().min(1, 'Product is required'),
+  variantSku: z.string().min(1, 'SKU is required'),
+  quantityDelta: z.number().int('Quantity delta must be an integer'),
+  reason: z.string().optional().or(z.literal('')),
+});
+export type StockAdjustmentInput = z.infer<typeof stockAdjustmentSchema>;
+
+export const stockTransferSchema = z.object({
+  sourceWarehouseId: z.string().min(1, 'Source warehouse is required'),
+  targetWarehouseId: z.string().min(1, 'Target warehouse is required'),
+  productId: z.string().min(1, 'Product is required'),
+  variantSku: z.string().min(1, 'SKU is required'),
+  quantity: z.number().int().min(1, 'Transfer quantity must be at least 1'),
+  reason: z.string().optional().or(z.literal('')),
+});
+export type StockTransferInput = z.infer<typeof stockTransferSchema>;
+
+
