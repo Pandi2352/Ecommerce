@@ -23,3 +23,32 @@ export const signupSchema = loginSchema.extend({
   name: z.string().min(2),
 });
 export type SignupInput = z.infer<typeof signupSchema>;
+
+export const brandSchema = z.object({
+  name: z.string().min(1, 'Brand name is required').max(100),
+  slug: z.string().optional(),
+  logo: z.string().optional().or(z.literal('')),
+  banner: z.string().optional().or(z.literal('')),
+  website: z.string().optional().or(z.literal('')),
+  description: z.string().optional().or(z.literal('')),
+  isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(false),
+  metaTitle: z.string().optional().or(z.literal('')),
+  metaDescription: z.string().optional().or(z.literal('')),
+});
+export type BrandInput = z.infer<typeof brandSchema>;
+
+export const vendorSchema = z.object({
+  name: z.string().min(1, 'Vendor name is required').max(100),
+  code: z.string().min(1, 'Vendor code is required').max(50),
+  contactName: z.string().optional().or(z.literal('')),
+  email: z.string().email('Invalid email address').optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
+  address: z.string().optional().or(z.literal('')),
+  website: z.string().optional().or(z.literal('')),
+  commissionRate: z.number().min(0).max(100).default(0),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'PENDING_APPROVAL']).default('ACTIVE'),
+  notes: z.string().optional().or(z.literal('')),
+});
+export type VendorInput = z.infer<typeof vendorSchema>;
+

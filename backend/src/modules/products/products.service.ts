@@ -41,6 +41,8 @@ export class ProductsService extends BaseService<ProductDocument> {
       ...buildSearchFilter(['name', 'sku'], q.search),
     };
     if (q.category) filter.category = q.category;
+    if (q.brandId) filter.brandId = q.brandId;
+    if (q.vendorId) filter.vendorId = q.vendorId;
     if (q.status) filter.status = q.status;
     return this.paginate({
       filter,

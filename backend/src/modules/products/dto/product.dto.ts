@@ -47,6 +47,14 @@ export class CreateProductDto {
   category?: string | null;
 
   @IsOptional()
+  @IsUuidId()
+  brandId?: string | null;
+
+  @IsOptional()
+  @IsUuidId()
+  vendorId?: string | null;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   images?: string[];
@@ -126,6 +134,14 @@ export class UpdateProductDto {
   category?: string | null;
 
   @IsOptional()
+  @IsUuidId()
+  brandId?: string | null;
+
+  @IsOptional()
+  @IsUuidId()
+  vendorId?: string | null;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   images?: string[];
@@ -192,6 +208,14 @@ export class ListProductsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   category?: string;
+
+  @IsOptional()
+  @IsString()
+  brandId?: string;
+
+  @IsOptional()
+  @IsString()
+  vendorId?: string;
 
   @IsOptional()
   @IsEnum(ProductStatus)

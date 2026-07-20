@@ -22,6 +22,9 @@ import { useMutation } from '@/hooks/useMutation';
 import { formatCurrency } from '@/utils/formatters';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useCategories } from '@/features/categories';
+import { fetchBrands } from '@/features/brands/api';
+import { fetchVendors } from '@/features/vendors/api';
+import { useApi } from '@/hooks/useApi';
 import { bulkProducts, deleteProduct, useProducts, useProductStats, type Product } from './api';
 
 const statusTone: Record<string, BadgeTone> = { ACTIVE: 'success', DRAFT: 'info', ARCHIVED: 'neutral' };
@@ -32,6 +35,10 @@ export function ProductsPage() {
   const navigate = useNavigate();
   const { data, meta, loading, error, filters, setFilters, reload } = useProducts();
   const { data: categories } = useCategories();
+  const { data: brandsRes } = useApi(fetchBrands, { errorMessage: 'Failed to load brands' });
+  const { data: vendorsRes } = useApi(fetchVendors, { errorMessage: 'Failed to load vendors' });
+  const brands = brandsRes?.data ?? [];
+  const vendors = vendorsRes?.data ?? [];
   const stats = useProductStats();
 
   const [toDelete, setToDelete] = useState<Product | null>(null);
@@ -167,6 +174,14 @@ export function ProductsPage() {
         <Select className="w-44" value={filters.category} onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value, page: 1 }))}>
           <option value="">All categories</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </Select>
+        <Select className="w-40" value={filters.brandId} onChange={(e) => setFilters((f) => ({ ...f, brandId: e.target.value, page: 1 }))}>
+          <option value="">All brands</option>
+          {brands.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
+        </Select>
+        <Select className="w-40" value={filters.vendorId} onChange={(e) => setFilters((f) => ({ ...f, vendorId: e.target.value, page: 1 }))}>
+          <option value="">All vendors</option>
+          {vendors.map((v) => <option key={v._id} value={v._id}>{v.name}</option>)}
         </Select>
         <Select className="w-40" value={filters.status} onChange={(e) => applyStatus(e.target.value as ProductStatus | '')}>
           <option value="">All statuses</option>

@@ -11,6 +11,8 @@ export const PERMISSION_RESOURCES: PermissionResourceDef[] = [
   { key: 'dashboard', label: 'Dashboard', description: 'The admin dashboard and its summary metrics.' },
   { key: 'products', label: 'Products', description: 'The product catalog — items, pricing, media and stock.' },
   { key: 'categories', label: 'Categories', description: 'Product categories and their nesting.' },
+  { key: 'brands', label: 'Brands', description: 'Product brands, logos, banners and SEO metadata.' },
+  { key: 'vendors', label: 'Vendors', description: 'Suppliers, distributors, codes, contacts and commission rates.' },
   { key: 'attributes', label: 'Product fields', description: 'Custom product fields (attributes) + variant options config.' },
   { key: 'inventory', label: 'Inventory', description: 'Stock levels, warehouses and adjustments.' },
   { key: 'orders', label: 'Orders', description: 'Customer orders, fulfilment, returns and refunds.' },

@@ -5,6 +5,8 @@ import { Dashboard } from '@/pages/Dashboard';
 import { KitchenSink } from '@/pages/KitchenSink';
 import { Placeholder } from '@/pages/Placeholder';
 import { CategoriesPage } from '@/features/categories';
+import { BrandsPage } from '@/features/brands';
+import { VendorsPage } from '@/features/vendors';
 import { ProductsPage, ProductEditorPage } from '@/features/products';
 import { ProductFieldsPage } from '@/features/attributes';
 import { RequireAuth } from '@/features/auth/RequireAuth';
@@ -55,6 +57,8 @@ export const router = createBrowserRouter([
       { path: 'products/:id/edit', element: g('products.write', <ProductEditorPage />) },
       { path: 'collections', element: g('products.read', <Placeholder title="Collections" />) },
       { path: 'categories', element: g('categories.read', <CategoriesPage />) },
+      { path: 'brands', element: g('brands.read', <BrandsPage />) },
+      { path: 'vendors', element: g('vendors.read', <VendorsPage />) },
       { path: 'product-fields', element: g('attributes.read', <ProductFieldsPage />) },
       { path: 'inventory', element: g('inventory.read', <Placeholder title="Inventory" />) },
       { path: 'inventory/low', element: g('inventory.read', <Placeholder title="Low Stock" />) },

@@ -19,6 +19,8 @@ import {
   ScrollText,
   KeyRound,
   UserCircle,
+  Award,
+  Truck,
   Building2,
   Wallet,
 } from 'lucide-react';
@@ -46,6 +48,8 @@ export const sidebarConfig: SidebarGroup[] = [
         ],
       },
       { label: 'Categories', icon: LayoutGrid, color: 'amber', to: '/categories' },
+      { label: 'Brands', icon: Award, color: 'fuchsia', to: '/brands', permission: 'brands.read' },
+      { label: 'Vendors', icon: Truck, color: 'sky', to: '/vendors', permission: 'vendors.read' },
       { label: 'Product Fields', icon: SlidersHorizontal, color: 'violet', to: '/product-fields', permission: 'attributes.read' },
       {
         label: 'Inventory',

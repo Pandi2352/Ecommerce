@@ -33,6 +33,8 @@ export interface Product {
   price: number;
   compareAtPrice?: number;
   category?: string | null;
+  brandId?: string | null;
+  vendorId?: string | null;
   images: string[];
   status: ProductStatus;
   stock: number;
@@ -51,6 +53,8 @@ export interface ProductInput {
   price: number;
   compareAtPrice?: number;
   category?: string | null;
+  brandId?: string | null;
+  vendorId?: string | null;
   images?: string[];
   status?: ProductStatus;
   stock?: number;
@@ -74,6 +78,8 @@ export interface ProductsFilters {
   pageSize: number;
   search: string;
   category: string;
+  brandId: string;
+  vendorId: string;
   status: ProductStatus | '';
   sort: string;
 }
@@ -97,6 +103,8 @@ export function useProducts() {
     pageSize: 10,
     search: '',
     category: '',
+    brandId: '',
+    vendorId: '',
     status: '',
     sort: '-createdAt',
   });
@@ -117,6 +125,8 @@ export function useProducts() {
       };
       if (debouncedSearch) params.search = debouncedSearch;
       if (filters.category) params.category = filters.category;
+      if (filters.brandId) params.brandId = filters.brandId;
+      if (filters.vendorId) params.vendorId = filters.vendorId;
       if (filters.status) params.status = filters.status;
       const res = await getList<Product>('/products', { params });
       setData(res.data);
@@ -126,7 +136,7 @@ export function useProducts() {
     } finally {
       setLoading(false);
     }
-  }, [filters.page, filters.pageSize, filters.category, filters.status, filters.sort, debouncedSearch]);
+  }, [filters.page, filters.pageSize, filters.category, filters.brandId, filters.vendorId, filters.status, filters.sort, debouncedSearch]);
 
   useEffect(() => {
     void reload();

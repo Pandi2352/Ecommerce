@@ -34,6 +34,14 @@ export class Product {
   @Prop({ type: String, ref: 'Category', default: null, index: true })
   category?: string | null;
 
+  /** Reference to a Brand document (UUID string), or null. */
+  @Prop({ type: String, ref: 'Brand', default: null, index: true })
+  brandId?: string | null;
+
+  /** Reference to a Vendor document (UUID string), or null. */
+  @Prop({ type: String, ref: 'Vendor', default: null, index: true })
+  vendorId?: string | null;
+
   @Prop({ type: [String], default: [] })
   images!: string[];
 

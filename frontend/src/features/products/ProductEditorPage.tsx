@@ -34,6 +34,8 @@ import { useApi } from '@/hooks/useApi';
 import { minLength } from '@/utils/validators';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useCategories } from '@/features/categories';
+import { fetchBrands } from '@/features/brands/api';
+import { fetchVendors } from '@/features/vendors/api';
 import { useAttributes, type AttributeDefinition } from '@/features/attributes';
 import { createProduct, fetchProduct, updateProduct, type Product, type ProductInput } from './api';
 
@@ -65,11 +67,12 @@ interface OptionRow { name: string; valuesText: string }
 interface VariantRow { sig: string; optionValues: Record<string, string>; sku: string; price: string; stock: string }
 interface FormState {
   name: string; sku: string; price: string; compareAtPrice: string; category: string;
+  brandId: string; vendorId: string;
   status: ProductStatus; stock: string; description: string; images: string[]; featured: boolean;
   attributes: Record<string, unknown>; options: OptionRow[]; variants: VariantRow[];
 }
 const emptyForm: FormState = {
-  name: '', sku: '', price: '', compareAtPrice: '', category: '', status: ProductStatus.DRAFT,
+  name: '', sku: '', price: '', compareAtPrice: '', category: '', brandId: '', vendorId: '', status: ProductStatus.DRAFT,
   stock: '0', description: '', images: [], featured: false, attributes: {}, options: [], variants: [],
 };
 const parseValues = (t: string) => t.split(',').map((v) => v.trim()).filter(Boolean);
@@ -82,6 +85,10 @@ export function ProductEditorPage() {
   const { can } = useAuth();
   const { data: categories } = useCategories();
   const { data: attributes } = useAttributes();
+  const { data: brandsRes } = useApi(fetchBrands, { errorMessage: 'Failed to load brands' });
+  const { data: vendorsRes } = useApi(fetchVendors, { errorMessage: 'Failed to load vendors' });
+  const brands = brandsRes?.data ?? [];
+  const vendors = vendorsRes?.data ?? [];
   const save = useMutation();
 
   const { data: product, loading } = useApi<Product | null>(
@@ -97,7 +104,10 @@ export function ProductEditorPage() {
     setForm({
       name: product.name, sku: product.sku ?? '', price: String(product.price),
       compareAtPrice: product.compareAtPrice != null ? String(product.compareAtPrice) : '',
-      category: product.category ?? '', status: product.status, stock: String(product.stock),
+      category: product.category ?? '',
+      brandId: (product as any).brandId ?? '',
+      vendorId: (product as any).vendorId ?? '',
+      status: product.status, stock: String(product.stock),
       description: product.description ?? '', images: product.images ?? [], featured: product.featured,
       attributes: product.attributes ?? {},
       options: (product.options ?? []).map((o) => ({ name: o.name, valuesText: o.values.join(', ') })),
@@ -152,7 +162,10 @@ export function ProductEditorPage() {
     const payload: ProductInput = {
       name: form.name, sku: form.sku || undefined, description: form.description || undefined,
       price, compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : undefined,
-      category: form.category || null, status: form.status, stock: Number(form.stock) || 0,
+      category: form.category || null,
+      brandId: form.brandId || null,
+      vendorId: form.vendorId || null,
+      status: form.status, stock: Number(form.stock) || 0,
       images: form.images, featured: form.featured, attributes: attributesPayload, options,
       variants: form.variants.map((v) => ({ optionValues: v.optionValues, sku: v.sku || undefined, price: Number(v.price) || 0, stock: Number(v.stock) || 0 })),
     };
@@ -313,8 +326,26 @@ export function ProductEditorPage() {
             </Section>
 
             <Section icon={<Tag className="size-4" />} tone="sky" title="Organization">
-              <FormField label="Category"><Select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}><option value="">— None —</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</Select></FormField>
-              <p className="mt-2 text-[11px] text-text-secondary">Category can add its own custom fields above.</p>
+              <div className="space-y-3">
+                <FormField label="Category">
+                  <Select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}>
+                    <option value="">— None —</option>
+                    {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </Select>
+                </FormField>
+                <FormField label="Brand">
+                  <Select value={form.brandId} onChange={(e) => setForm((f) => ({ ...f, brandId: e.target.value }))}>
+                    <option value="">— None —</option>
+                    {brands.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
+                  </Select>
+                </FormField>
+                <FormField label="Vendor / Supplier">
+                  <Select value={form.vendorId} onChange={(e) => setForm((f) => ({ ...f, vendorId: e.target.value }))}>
+                    <option value="">— None —</option>
+                    {vendors.map((v) => <option key={v._id} value={v._id}>{v.name} ({v.code})</option>)}
+                  </Select>
+                </FormField>
+              </div>
             </Section>
           </div>
         </div>

@@ -45,3 +45,11 @@ export const PaymentStatus = {
   FAILED: 'FAILED',
 } as const;
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
+
+export const VendorStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  PENDING_APPROVAL: 'PENDING_APPROVAL',
+} as const;
+export type VendorStatus = (typeof VendorStatus)[keyof typeof VendorStatus];
+
