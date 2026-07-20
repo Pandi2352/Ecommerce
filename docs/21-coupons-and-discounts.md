@@ -6,11 +6,15 @@ This document outlines the architecture, data models, validation rules, API endp
 
 ## 1. Executive Summary
 
-Discounts and promotional vouchers drive customer acquisition and order volume. This module provides a flexible rule engine for:
-- **Coupon Types**: Percentage off (`20%`), Fixed amount off (`$15`), or Free Shipping.
-- **Rule Constraints**: Minimum purchase amount, maximum discount cap, start & end date windows, category & brand scoping.
-- **Usage & Redemptions**: Total global usage limits, per-user redemption caps, and transaction redemption tracking.
-- **Validation Engine**: Real-time validation endpoint (`POST /discounts/validate`) for cart calculation.
+Discounts and promotional vouchers drive customer acquisition and order volume. This enterprise module provides a flexible rule engine supporting:
+- **Discount Types**: Percentage off (`20%`), Fixed amount off (`$15`), Free Shipping, Buy X Get Y (BXGY) deals, and Tiered spend rules.
+- **Rule Constraints**: Minimum purchase subtotal, maximum discount cap, start & end date windows, category & brand scoping.
+- **Advanced Controls**:
+  - `isAutoApplied`: Automatically applies in cart when criteria are met (no code required).
+  - `isStackable`: Controls whether the promo can be combined with other discounts.
+  - `firstTimeUserOnly`: Restricts redemptions to new first-time customers.
+- **Batch Code Generator**: Tool for generating bulk randomized single-use promo codes (e.g. `VIP-9821-X410`).
+- **Usage & Redemptions**: Global redemption caps, per-user redemption limits, and transaction audit tracking.
 
 ---
 
@@ -23,6 +27,8 @@ export enum DiscountType {
   PERCENTAGE = 'PERCENTAGE',
   FIXED_AMOUNT = 'FIXED_AMOUNT',
   FREE_SHIPPING = 'FREE_SHIPPING',
+  BUY_X_GET_Y = 'BUY_X_GET_Y',
+  TIERED = 'TIERED',
 }
 
 export enum DiscountStatus {
@@ -38,6 +44,16 @@ export interface Coupon {
   value: number;                   // 20 for percentage, 15.00 for fixed
   minPurchaseAmount: number;       // Minimum subtotal required (default 0)
   maxDiscountAmount?: number;      // Maximum cap for percentage discount
+  
+  // Advanced Deal Rules
+  tierRules?: Array<{ minSpend: number; discountValue: number }>;
+  buyXGetYRule?: { buyQty: number; getQty: number; getDiscountPercent: number };
+  
+  // Settings & Scoping
+  isAutoApplied: boolean;          // Auto-applies to cart without code entry
+  isStackable: boolean;            // Allows combining with other coupons
+  firstTimeUserOnly: boolean;      // Restricts to user's 1st completed order
+  
   startDate: Date;
   endDate: Date;
   usageLimitTotal?: number;        // Global redemption limit
@@ -77,9 +93,10 @@ export interface CouponRedemption {
 | `GET` | `/discounts/stats` | Metrics (Total Coupons, Active, Total Redemptions, Total Saved) | `discounts.read` |
 | `GET` | `/discounts/:id` | Get coupon details | `discounts.read` |
 | `POST` | `/discounts` | Create new promo coupon | `discounts.write` |
+| `POST` | `/discounts/batch-generate` | Batch promo code generator tool | `discounts.write` |
 | `PATCH` | `/discounts/:id` | Update coupon details or status | `discounts.write` |
 | `DELETE` | `/discounts/:id` | Delete promo coupon | `discounts.write` |
-| `POST` | `/discounts/validate` | Validate promo code against subtotal & user | Public / Auth |
+| `POST` | `/discounts/validate` | Validate promo code against cart items, subtotal & user | Public / Auth |
 
 ---
 
@@ -87,8 +104,11 @@ export interface CouponRedemption {
 
 1. **Discounts Page (`/discounts`)**:
    - Stat Cards: Total Coupons, Active Promos, Total Redemptions, Total Saved.
-   - Filter Bar: Search promo code, Type dropdown (`ALL`, `PERCENTAGE`, `FIXED_AMOUNT`, `FREE_SHIPPING`), Status dropdown (`ALL`, `ACTIVE`, `EXPIRED`, `DISABLED`).
+   - Filter Bar: Search promo code, Type dropdown (`ALL`, `PERCENTAGE`, `FIXED_AMOUNT`, `FREE_SHIPPING`, `BUY_X_GET_Y`, `TIERED`), Status dropdown (`ALL`, `ACTIVE`, `EXPIRED`, `DISABLED`).
    - Table: Code Badge, Type Badge, Discount Value, Min Purchase & Cap, Date Range, Redemptions Progress (`X / Total`), Status Badge, Kebab Actions.
 
 2. **Discount Editor Drawer (`DiscountEditorDrawer`)**:
-   - Slide-over form for creating/editing coupons with live discount rules summary.
+   - Slide-over drawer with tabs: General Info, Rules & Advanced (Auto-apply, Stackable, First-time buyer), Scope (Categories/Brands).
+
+3. **Batch Generator Modal (`BatchGeneratorModal`)**:
+   - Modal tool to quickly batch-generate $N$ single-use promo codes.

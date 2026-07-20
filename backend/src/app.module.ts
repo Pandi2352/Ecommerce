@@ -13,6 +13,7 @@ import { WarehousesModule } from './modules/warehouses/warehouses.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { AttributesModule } from './modules/attributes/attributes.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { DiscountsModule } from './modules/discounts/discounts.module';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -48,6 +49,7 @@ import { AuditInterceptor } from './common/interceptors/audit.interceptor';
     InventoryModule,
     AttributesModule,
     OrdersModule,
+    DiscountsModule,
     AuditModule,
     SettingsModule,
     UploadsModule,

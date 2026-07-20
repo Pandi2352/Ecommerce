@@ -84,4 +84,69 @@ export const stockTransferSchema = z.object({
 });
 export type StockTransferInput = z.infer<typeof stockTransferSchema>;
 
+export const couponSchema = z.object({
+  code: z.string().min(1, 'Promo code is required').max(50),
+  type: z.enum(['PERCENTAGE', 'FIXED_AMOUNT', 'FREE_SHIPPING', 'BUY_X_GET_Y', 'TIERED']).default('PERCENTAGE'),
+  value: z.number().min(0, 'Discount value must be at least 0').default(0),
+  minPurchaseAmount: z.number().min(0).default(0),
+  maxDiscountAmount: z.number().min(0).optional(),
+  tierRules: z
+    .array(
+      z.object({
+        minSpend: z.number().min(0),
+        discountValue: z.number().min(0),
+      }),
+    )
+    .optional(),
+  buyXGetYRule: z
+    .object({
+      buyQty: z.number().min(1),
+      getQty: z.number().min(1),
+      getDiscountPercent: z.number().min(0).max(100).default(100),
+    })
+    .optional(),
+  isAutoApplied: z.boolean().default(false),
+  isStackable: z.boolean().default(false),
+  firstTimeUserOnly: z.boolean().default(false),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  usageLimitTotal: z.number().min(1).optional(),
+  usageLimitPerUser: z.number().min(1).default(1),
+  applicableCategoryIds: z.array(z.string()).optional(),
+  applicableBrandIds: z.array(z.string()).optional(),
+  status: z.enum(['ACTIVE', 'EXPIRED', 'DISABLED']).default('ACTIVE'),
+});
+export type CouponInput = z.infer<typeof couponSchema>;
+
+export const batchGenerateCodesSchema = z.object({
+  count: z.number().int().min(1).max(500).default(10),
+  prefix: z.string().max(20).default('PROMO'),
+  type: z.enum(['PERCENTAGE', 'FIXED_AMOUNT', 'FREE_SHIPPING']).default('PERCENTAGE'),
+  value: z.number().min(0).default(10),
+  minPurchaseAmount: z.number().min(0).default(0),
+  usageLimitPerUser: z.number().min(1).default(1),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+export type BatchGenerateCodesInput = z.infer<typeof batchGenerateCodesSchema>;
+
+export const validateCouponSchema = z.object({
+  code: z.string().min(1, 'Coupon code is required'),
+  cartSubtotal: z.number().min(0),
+  cartItems: z
+    .array(
+      z.object({
+        productId: z.string(),
+        variantSku: z.string(),
+        quantity: z.number().min(1),
+        price: z.number().min(0),
+        categoryId: z.string().optional(),
+        brandId: z.string().optional(),
+      }),
+    )
+    .optional(),
+});
+export type ValidateCouponInput = z.infer<typeof validateCouponSchema>;
+
+
 

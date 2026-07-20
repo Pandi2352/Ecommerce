@@ -63,4 +63,21 @@ export const StockAdjustmentType = {
 } as const;
 export type StockAdjustmentType = (typeof StockAdjustmentType)[keyof typeof StockAdjustmentType];
 
+export const DiscountType = {
+  PERCENTAGE: 'PERCENTAGE',
+  FIXED_AMOUNT: 'FIXED_AMOUNT',
+  FREE_SHIPPING: 'FREE_SHIPPING',
+  BUY_X_GET_Y: 'BUY_X_GET_Y',
+  TIERED: 'TIERED',
+} as const;
+export type DiscountType = (typeof DiscountType)[keyof typeof DiscountType];
+
+export const DiscountStatus = {
+  ACTIVE: 'ACTIVE',
+  EXPIRED: 'EXPIRED',
+  DISABLED: 'DISABLED',
+} as const;
+export type DiscountStatus = (typeof DiscountStatus)[keyof typeof DiscountStatus];
+
+
 

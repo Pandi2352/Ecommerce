@@ -88,10 +88,10 @@ Sprint 5,Inventory,Warehouses,Multiple warehouses,Done,Verified (curl + build + 
 Sprint 5,Inventory,Stock adjustments,Purchase/transfer/damage/adjustment,Done,Verified (curl + build + lint),High,Done,"POST /inventory/adjust & POST /inventory/transfer + StockAdjustmentModal FE for restock/damage/transfers"
 Sprint 5,Inventory,Low-stock alerts,Threshold-based alerts,Done,Verified (curl + build + lint),High,Done,"GET /inventory/low + LowStockPage FE alert dashboard for items below threshold"
 Sprint 5,Inventory,Stock history,Transaction ledger + audit,Done,Verified (curl + build + lint),High,Done,"StockAdjustment ledger schema + GET /inventory/ledger + StockLedgerDrawer FE timeline panel per SKU"
-Sprint 6,Coupons,Coupon types,Percentage / flat / free-shipping,Not Started,Not Started,High,Not Started,
-Sprint 6,Coupons,Rules,"Min purchase, max discount, expiry",Not Started,Not Started,High,Not Started,
-Sprint 6,Coupons,Usage limits,"Single-use, per-user, usage tracking",Not Started,Not Started,Medium,Not Started,
-Sprint 6,Coupons,Validate endpoint,Storefront coupon validation,Not Started,Not Started,High,Not Started,
+Sprint 6,Coupons,Coupon types,Percentage / flat / free-shipping / BXGY / Tiered,Done,Verified (curl + build + lint),High,Done,"DiscountType enum (PERCENTAGE, FIXED_AMOUNT, FREE_SHIPPING, BUY_X_GET_Y, TIERED) + DiscountsModule + DiscountsPage FE"
+Sprint 6,Coupons,Rules,"Min purchase, max discount, expiry, auto-apply, stackable",Done,Verified (curl + build + lint),High,Done,"DiscountsService validation rules (min purchase, max discount cap, start/end dates, auto-apply, stackability, 1st order only)"
+Sprint 6,Coupons,Usage limits,"Global cap, per-user limit, usage tracking",Done,Verified (curl + build + lint),Medium,Done,"CouponRedemption ledger schema + global redemption cap + per-user usage limits + BatchGeneratorModal tool"
+Sprint 6,Coupons,Validate endpoint,Storefront coupon validation,Done,Verified (curl + build + lint),High,Done,"POST /discounts/validate public endpoint checking date windows, subtotals, caps, limits & return discount amounts"
 Sprint 6,Cart,Guest cart,Session-based cart,Not Started,Not Started,High,Not Started,
 Sprint 6,Cart,User cart,Persisted user cart + merge on login,Not Started,Not Started,High,Not Started,
 Sprint 6,Cart,Cart items,"Add/update/remove, quantity",Not Started,Not Started,Critical,Not Started,
