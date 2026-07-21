@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Star, Grid3x3, LayoutList } from 'lucide-react';
 import { getList } from '@/lib/api';
-import { money } from '@/lib/utils';
+import { money, DEFAULT_PRODUCT_IMAGE } from '@/lib/utils';
 import type { Meta, Product } from '@/lib/types';
 import { useStorefrontConfig } from '@/app/StorefrontConfigContext';
+import { useCategories } from '@/app/CategoryContext';
 import { BannerCarousel } from '@/components/BannerCarousel';
 import { LeftSidebar } from '@/components/LeftSidebar';
 import { HotDealsSection } from '@/components/HotDealsSection';
@@ -12,6 +13,7 @@ import { CategorySectionBlock } from '@/components/CategorySectionBlock';
 
 export function CatalogPage() {
   const { config } = useStorefrontConfig();
+  const { categories, selectedCategory } = useCategories();
   const [products, setProducts] = useState<Product[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [search, setSearch] = useState('');
@@ -28,11 +30,17 @@ export function CatalogPage() {
     return () => clearTimeout(t);
   }, [search]);
 
+  // Fetch catalog products (filtered by category if selected)
   useEffect(() => {
     let active = true;
     setLoading(true);
     getList<Product>('/storefront/products', {
-      params: { page, pageSize: 12, search: term || undefined },
+      params: {
+        page,
+        pageSize: 12,
+        search: term || undefined,
+        category: selectedCategory || undefined,
+      },
     })
       .then((res) => {
         if (!active) return;
@@ -44,7 +52,18 @@ export function CatalogPage() {
     return () => {
       active = false;
     };
-  }, [page, term]);
+  }, [page, term, selectedCategory]);
+
+  // Top 2 dynamic categories for showcase blocks
+  const firstCategory = categories[0]?.name || 'FEATURED COLLECTION';
+  const secondCategory = categories[1]?.name || 'SPECIAL SELECTION';
+
+  // Homepage section visibility is controlled by the admin "Storefront
+  // Customization → Sections" tab. Undefined = show (opt-out, not opt-in).
+  const sections = config?.homepageSections ?? {};
+  const showBanners = sections.showBanners !== false;
+  const showDeals = sections.showDeals !== false;
+  const showCategories = sections.showCategories !== false;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-4 sm:gap-5 items-start">
@@ -54,40 +73,46 @@ export function CatalogPage() {
       {/* ── RIGHT COLUMN: MAIN CONTENT & PRODUCTS ─────────────────────────── */}
       <div className="space-y-8 min-w-0">
         {/* 1. Main Hero Banner Slider */}
-        <BannerCarousel banners={config?.banners} />
+        {showBanners && <BannerCarousel banners={config?.banners} />}
 
         {/* 2. Hot Deals Section with Live Timers */}
-        <HotDealsSection products={products} />
+        {showDeals && <HotDealsSection products={products} />}
 
-        {/* 3. Electronics Category Block */}
-        <CategorySectionBlock
-          title="ELECTRONICS"
-          subTabs={['Accessories', 'Book & Magazine', 'Gift', 'Screen-Protectors', 'Sony']}
-          bannerText="NEW ARRIVALS"
-          bannerSubtext="Curabitur luctus ipsum eget convallis"
-          bannerDiscount="50% OFF"
-          bannerImage="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300"
-          bannerBg="linear-gradient(135deg, #f97316 0%, #e62e04 100%)"
-          products={products}
-        />
+        {/* 3. Dynamic Category Block 1 */}
+        {showCategories && (
+          <CategorySectionBlock
+            title={firstCategory.toUpperCase()}
+            subTabs={['All', 'New Arrivals', 'Best Value', 'Top Rated']}
+            bannerText="NEW ARRIVALS - SPECIAL OFFER"
+            bannerSubtext="Curabitur luctus ipsum eget convallis"
+            bannerDiscount="50% OFF"
+            bannerImage="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300"
+            bannerBg="linear-gradient(135deg, #f97316 0%, #e62e04 100%)"
+            products={products}
+          />
+        )}
 
-        {/* 4. Mobiles Category Block */}
-        <CategorySectionBlock
-          title="MOBILES"
-          subTabs={['Accessories', 'Cables & Connectors', 'Croma', 'Mobile Brands']}
-          bannerText="END OF SEASON SAVE 50% OFF"
-          bannerSubtext="NEW WATCHES Up to 25% OFF on all items"
-          bannerDiscount="50% OFF"
-          bannerImage="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300"
-          bannerBg="linear-gradient(135deg, #2563eb 0%, #1e40af 100%)"
-          products={products}
-        />
+        {/* 4. Dynamic Category Block 2 */}
+        {showCategories && (
+          <CategorySectionBlock
+            title={secondCategory.toUpperCase()}
+            subTabs={['All', 'Featured', 'Popular', 'Discounted']}
+            bannerText="END OF SEASON DISCOUNTS"
+            bannerSubtext="Limited time offers on selected store items"
+            bannerDiscount="50% OFF"
+            bannerImage="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300"
+            bannerBg="linear-gradient(135deg, #2563eb 0%, #1e40af 100%)"
+            products={products}
+          />
+        )}
 
         {/* 5. Main Catalog Product Grid */}
         <div className="space-y-4 pt-4 border-t border-border">
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
             <div className="maxshop-ribbon text-xs font-black tracking-wider uppercase">
-              FEATURED CATALOG
+              {selectedCategory
+                ? `CATEGORY: ${selectedCategory.toUpperCase()}`
+                : 'FEATURED CATALOG'}
               {meta && <span className="ml-2 font-normal">({meta.total} items)</span>}
             </div>
             <div className="flex items-center gap-3">
@@ -135,7 +160,7 @@ export function CatalogPage() {
             </div>
           ) : products.length === 0 ? (
             <div className="p-8 text-center text-xs text-text-secondary border border-border rounded-sm">
-              No products found matching your criteria.
+              No products found matching your selected category or search.
             </div>
           ) : (
             <div
@@ -178,7 +203,9 @@ export function CatalogPage() {
 }
 
 function ProductCard({ product, viewMode }: { product: Product; viewMode: 'grid' | 'list' }) {
-  const img = product.images?.[0];
+  const { config } = useStorefrontConfig();
+  const fallbackImg = config?.defaultProductImageUrl || DEFAULT_PRODUCT_IMAGE;
+  const img = product.images?.[0] || fallbackImg;
   const onSale = product.compareAtPrice && product.compareAtPrice > product.price;
 
   if (viewMode === 'list') {
@@ -188,11 +215,7 @@ function ProductCard({ product, viewMode }: { product: Product; viewMode: 'grid'
         className="product-card flex gap-4 p-3 rounded-sm items-center hover:border-danger transition-colors"
       >
         <div className="h-20 w-20 shrink-0 bg-surface-2 overflow-hidden border border-border">
-          {img ? (
-            <img src={img} alt={product.name} className="h-full w-full object-cover" />
-          ) : (
-            <div className="grid h-full place-items-center text-xs">📦</div>
-          )}
+          <img src={img} alt={product.name} className="h-full w-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="text-xs font-semibold text-text truncate hover:text-danger">
@@ -227,15 +250,11 @@ function ProductCard({ product, viewMode }: { product: Product; viewMode: 'grid'
         to={`/products/${product.slug}`}
         className="aspect-square overflow-hidden bg-surface-2 mb-2 block"
       >
-        {img ? (
-          <img
-            src={img}
-            alt={product.name}
-            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="grid h-full place-items-center text-2xl">📦</div>
-        )}
+        <img
+          src={img}
+          alt={product.name}
+          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
       </Link>
       <div className="text-center space-y-1">
         <div className="flex justify-center text-amber-400">

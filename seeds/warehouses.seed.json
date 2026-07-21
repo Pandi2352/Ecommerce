@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Main Fulfilment Center",
+    "code": "WH-MAIN",
+    "contactName": "Operations Team",
+    "email": "ops@nova.shop",
+    "phone": "+91 80 4000 1000",
+    "address": "100 Fulfilment Hub Blvd, Logistics Park, Bengaluru, KA 560100",
+    "isPrimary": true,
+    "isActive": true
+  },
+  {
+    "name": "North Distribution Hub",
+    "code": "WH-NORTH",
+    "contactName": "Rohit Verma",
+    "email": "north@nova.shop",
+    "phone": "+91 11 4200 2000",
+    "address": "42 Transit Way, Okhla Industrial Area, New Delhi, DL 110020",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "name": "West Regional Depot",
+    "code": "WH-WEST",
+    "contactName": "Sneha Patil",
+    "email": "west@nova.shop",
+    "phone": "+91 22 6100 3000",
+    "address": "7 Dockside Estate, Bhiwandi, Mumbai, MH 421302",
+    "isPrimary": false,
+    "isActive": true
+  },
+  {
+    "name": "South Overflow Store",
+    "code": "WH-SOUTH",
+    "contactName": "Karthik Raja",
+    "email": "south@nova.shop",
+    "phone": "+91 44 3300 4000",
+    "address": "19 Coastal Logistics Rd, Ambattur, Chennai, TN 600058",
+    "isPrimary": false,
+    "isActive": false
+  }
+]

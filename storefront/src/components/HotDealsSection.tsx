@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Star } from 'lucide-react';
-import { money } from '@/lib/utils';
+import { money, DEFAULT_PRODUCT_IMAGE } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import type { Product } from '@/lib/types';
 
@@ -109,7 +109,7 @@ export function HotDealsSection({ products }: { products?: Product[] }) {
           slug: p.slug,
           price: p.price,
           compareAtPrice: p.compareAtPrice || Math.round(p.price * 1.25),
-          image: p.images?.[0] || SAMPLE_DEALS[idx].image,
+          image: p.images?.[0] || SAMPLE_DEALS[idx]?.image || DEFAULT_PRODUCT_IMAGE,
         }))
       : SAMPLE_DEALS;
 

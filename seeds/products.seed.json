@@ -1,0 +1,405 @@
+[
+  {
+    "name": "Linen Wrap Summer Dress",
+    "categorySlug": "womens-dresses",
+    "brandSlug": "zara",
+    "vendorCode": "VND-STYLEHUB",
+    "description": "Breathable pure linen wrap dress with an adjustable tie waist and soft ruffled hem.",
+    "price": 2499,
+    "compareAtPrice": 2999,
+    "images": [
+      "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=600",
+      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=600"
+    ],
+    "featured": true,
+    "stock": 25,
+    "tags": ["summer", "linen", "dress", "women"],
+    "attributes": {
+      "material": "100% Pure Linen",
+      "fit": "Regular",
+      "pattern": "Solid Neutral",
+      "care": "Machine Wash Cold",
+      "gender": "Women"
+    }
+  },
+  {
+    "name": "Floral Chiffon Maxi Dress",
+    "categorySlug": "womens-dresses",
+    "brandSlug": "hm",
+    "vendorCode": "VND-STYLEHUB",
+    "description": "Flowing bohemian chiffon maxi dress featuring vibrant floral prints and elasticated sleeve cuffs.",
+    "price": 3199,
+    "compareAtPrice": 3999,
+    "images": ["https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=600"],
+    "featured": true,
+    "stock": 18,
+    "tags": ["maxi", "floral", "boho", "women"],
+    "attributes": {
+      "material": "Chiffon Georgette",
+      "fit": "Relaxed",
+      "pattern": "Floral Print",
+      "care": "Dry Clean Only",
+      "gender": "Women"
+    }
+  },
+  {
+    "name": "Classic Mid-Wash Denim Jacket",
+    "categorySlug": "winter-jackets",
+    "brandSlug": "levis",
+    "vendorCode": "VND-URBAN",
+    "description": "Timeless vintage mid-wash denim jacket with button chest pockets and relaxed unisex fit.",
+    "price": 3499,
+    "compareAtPrice": 4299,
+    "images": ["https://images.unsplash.com/photo-1544441893-675973e31985?w=600"],
+    "featured": true,
+    "stock": 30,
+    "tags": ["denim", "jacket", "unisex", "outerwear"],
+    "attributes": {
+      "material": "100% Denim Cotton",
+      "fit": "Relaxed",
+      "pattern": "Vintage Wash",
+      "care": "Machine Wash Warm",
+      "gender": "Unisex"
+    }
+  },
+  {
+    "name": "Tailored Double-Breasted Wool Coat",
+    "categorySlug": "winter-jackets",
+    "brandSlug": "raymond",
+    "vendorCode": "VND-URBAN",
+    "description": "Premium heavyweight wool-blend trench coat with notch lapels and deep welt pockets.",
+    "price": 6999,
+    "compareAtPrice": 8499,
+    "images": ["https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=600"],
+    "featured": false,
+    "stock": 12,
+    "tags": ["coat", "wool", "winter", "luxury"],
+    "attributes": {
+      "material": "80% Wool, 20% Cashmere Blend",
+      "fit": "Slim",
+      "pattern": "Solid Charcoal",
+      "care": "Dry Clean Only",
+      "gender": "Men"
+    }
+  },
+  {
+    "name": "Men's Slim Fit Oxford Cotton Shirt",
+    "categorySlug": "mens-apparel",
+    "brandSlug": "allen-solly",
+    "vendorCode": "VND-URBAN",
+    "description": "Crisp 100% breathable cotton Oxford shirt perfect for workdays and weekend outings.",
+    "price": 1899,
+    "compareAtPrice": 2299,
+    "images": ["https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600"],
+    "featured": true,
+    "stock": 40,
+    "tags": ["shirt", "men", "formal", "cotton"],
+    "attributes": {
+      "material": "100% Organic Oxford Cotton",
+      "fit": "Slim",
+      "pattern": "Classic Solid",
+      "care": "Machine Washable",
+      "gender": "Men"
+    }
+  },
+  {
+    "name": "Men's Stretch Tapered Chino Trousers",
+    "categorySlug": "mens-apparel",
+    "brandSlug": "allen-solly",
+    "vendorCode": "VND-URBAN",
+    "description": "Comfortable stretch twill chinos engineered for slim taper styling and easy daylong wear.",
+    "price": 2199,
+    "compareAtPrice": 2699,
+    "images": ["https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600"],
+    "featured": false,
+    "stock": 35,
+    "tags": ["trousers", "chinos", "men", "pants"],
+    "attributes": {
+      "material": "Cotton Elastane Stretch",
+      "fit": "Slim",
+      "pattern": "Solid Khaki",
+      "care": "Machine Wash Warm",
+      "gender": "Men"
+    }
+  },
+  {
+    "name": "Silk Embroidered Anarkali Kurta Set",
+    "categorySlug": "ethnic-traditional",
+    "brandSlug": "biba",
+    "vendorCode": "VND-VOGUE",
+    "description": "Rich chanderi silk Anarkali kurta accompanied by a matching dupatta and embellished neckline.",
+    "price": 4999,
+    "compareAtPrice": 5999,
+    "images": ["https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600"],
+    "featured": true,
+    "stock": 15,
+    "tags": ["kurta", "ethnic", "festive", "traditional"],
+    "attributes": {
+      "material": "Chanderi Silk Blend",
+      "fit": "Regular",
+      "pattern": "Hand Zari Embroidery",
+      "care": "Dry Clean Only",
+      "gender": "Women"
+    }
+  },
+  {
+    "name": "Hand-Block Printed Cotton Saree",
+    "categorySlug": "ethnic-traditional",
+    "brandSlug": "fabindia",
+    "vendorCode": "VND-VOGUE",
+    "description": "Traditional Jaipur hand-block printed cotton saree with unstitched blouse piece.",
+    "price": 2799,
+    "compareAtPrice": 3499,
+    "images": ["https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600"],
+    "featured": false,
+    "stock": 20,
+    "tags": ["saree", "ethnic", "cotton", "handblock"],
+    "attributes": {
+      "material": "100% Mulmul Cotton",
+      "fit": "Regular",
+      "pattern": "Hand-Block Print",
+      "care": "Hand Wash Separately",
+      "gender": "Women"
+    }
+  },
+  {
+    "name": "White Minimalist Leather Sneakers",
+    "categorySlug": "footwear-shoes",
+    "brandSlug": "nike",
+    "vendorCode": "VND-ROYAL",
+    "description": "Sleek low-top white leather sneakers with cushioned insoles and durable rubber outsoles.",
+    "price": 3299,
+    "compareAtPrice": 3999,
+    "images": ["https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600"],
+    "featured": true,
+    "stock": 50,
+    "tags": ["sneakers", "shoes", "leather", "white"],
+    "attributes": {
+      "material": "Genuine Nappa Leather",
+      "fit": "Regular",
+      "pattern": "Minimalist Low Top",
+      "care": "Wipe with Clean Cloth",
+      "gender": "Unisex"
+    }
+  },
+  {
+    "name": "Pointed Toe Strappy Stiletto Heels",
+    "categorySlug": "footwear-shoes",
+    "brandSlug": "zara",
+    "vendorCode": "VND-ROYAL",
+    "description": "Elegant evening stiletto heels crafted with soft ankle straps and anti-slip outer soles.",
+    "price": 2899,
+    "compareAtPrice": 3599,
+    "images": ["https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600"],
+    "featured": false,
+    "stock": 16,
+    "tags": ["heels", "shoes", "party", "women"],
+    "attributes": {
+      "material": "Satin & Vegan Leather",
+      "fit": "Slim",
+      "pattern": "Strappy Ankle",
+      "care": "Spot Clean",
+      "gender": "Women"
+    }
+  },
+  {
+    "name": "High-Waist Seamless Gym Leggings",
+    "categorySlug": "activewear-gymwear",
+    "brandSlug": "nike",
+    "vendorCode": "VND-STYLEHUB",
+    "description": "Squat-proof high-waisted seamless activewear leggings with tummy control compression.",
+    "price": 1499,
+    "compareAtPrice": 1899,
+    "images": ["https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600"],
+    "featured": false,
+    "stock": 45,
+    "tags": ["leggings", "gym", "activewear", "sports"],
+    "attributes": {
+      "material": "Nylon Spandex Blend",
+      "fit": "Slim",
+      "pattern": "Solid Ribbed",
+      "care": "Machine Wash Cold",
+      "gender": "Women"
+    }
+  },
+  {
+    "name": "Quick-Dry Performance Workout Tee",
+    "categorySlug": "activewear-gymwear",
+    "brandSlug": "nike",
+    "vendorCode": "VND-STYLEHUB",
+    "description": "Moisture-wicking athletic t-shirt designed for heavy gym sessions and outdoor running.",
+    "price": 999,
+    "compareAtPrice": 1299,
+    "images": ["https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600"],
+    "featured": false,
+    "stock": 60,
+    "tags": ["tee", "gym", "sports", "activewear"],
+    "attributes": {
+      "material": "Polyester Mesh Dri-Fit",
+      "fit": "Regular",
+      "pattern": "Solid Reflective",
+      "care": "Machine Wash Cold",
+      "gender": "Unisex"
+    }
+  },
+  {
+    "name": "Pure Cashmere Cable Knit Sweater",
+    "categorySlug": "winter-jackets",
+    "brandSlug": "hm",
+    "vendorCode": "VND-URBAN",
+    "description": "Ultra-soft 100% Mongolian cashmere cable knit crewneck sweater for warm winter comfort.",
+    "price": 4299,
+    "compareAtPrice": 4999,
+    "images": ["https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600"],
+    "featured": true,
+    "stock": 22,
+    "tags": ["cashmere", "sweater", "winter", "knit"],
+    "attributes": {
+      "material": "100% Mongolian Cashmere",
+      "fit": "Relaxed",
+      "pattern": "Cable Knit",
+      "care": "Hand Wash Cold Only",
+      "gender": "Unisex"
+    }
+  },
+  {
+    "name": "Organic Cotton Pyjama Set",
+    "categorySlug": "innerwear-sleepwear",
+    "brandSlug": "hm",
+    "vendorCode": "VND-STYLEHUB",
+    "description": "Super soft 100% organic cotton printed pyjama set with button-front top and elastic waist.",
+    "price": 1699,
+    "compareAtPrice": 1999,
+    "images": ["https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600"],
+    "featured": false,
+    "stock": 30,
+    "tags": ["sleepwear", "pyjamas", "cotton", "nightwear"],
+    "attributes": {
+      "material": "100% Organic Combed Cotton",
+      "fit": "Relaxed",
+      "pattern": "Pinstripe Print",
+      "care": "Machine Washable",
+      "gender": "Women"
+    }
+  },
+  {
+    "name": "Kids Denim Overalls & Tee Set",
+    "categorySlug": "kids-baby-wear",
+    "brandSlug": "hm",
+    "vendorCode": "VND-URBAN",
+    "description": "Adorable cotton denim dungarees paired with a soft striped crew neck t-shirt for kids.",
+    "price": 1499,
+    "compareAtPrice": 1799,
+    "images": ["https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=600"],
+    "featured": false,
+    "stock": 25,
+    "tags": ["kids", "dungarees", "children", "baby"],
+    "attributes": {
+      "material": "Soft Stretch Denim & Cotton",
+      "fit": "Regular",
+      "pattern": "Striped Tee + Denim",
+      "care": "Machine Wash Warm",
+      "gender": "Kids"
+    }
+  },
+  {
+    "name": "Girl's Party Tulle Princess Dress",
+    "categorySlug": "kids-baby-wear",
+    "brandSlug": "zara",
+    "vendorCode": "VND-STYLEHUB",
+    "description": "Layered tulle princess gown with sequin bodice for birthday celebrations and parties.",
+    "price": 1899,
+    "compareAtPrice": 2299,
+    "images": ["https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=600"],
+    "featured": false,
+    "stock": 18,
+    "tags": ["kids", "dress", "party", "girls"],
+    "attributes": {
+      "material": "Polyester Tulle & Satin Lining",
+      "fit": "Regular",
+      "pattern": "Sequin Embellished",
+      "care": "Hand Wash Cold",
+      "gender": "Kids"
+    }
+  },
+  {
+    "name": "Full-Grain Italian Leather Belt",
+    "categorySlug": "fashion-accessories",
+    "brandSlug": "levis",
+    "vendorCode": "VND-ROYAL",
+    "description": "Handcrafted full-grain Italian leather dress belt finished with a brushed silver buckle.",
+    "price": 1299,
+    "compareAtPrice": 1599,
+    "images": ["https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=600"],
+    "featured": false,
+    "stock": 50,
+    "tags": ["belt", "leather", "accessories"],
+    "attributes": {
+      "material": "Full-Grain Italian Calfskin",
+      "fit": "Regular",
+      "pattern": "Smooth Matte Finish",
+      "care": "Wipe Clean",
+      "gender": "Men"
+    }
+  },
+  {
+    "name": "Hand-Printed Pure Silk Scarf",
+    "categorySlug": "fashion-accessories",
+    "brandSlug": "fabindia",
+    "vendorCode": "VND-VOGUE",
+    "description": "Luxurious 100% mulberry silk neck scarf featuring hand-rolled edges and botanical motifs.",
+    "price": 899,
+    "compareAtPrice": 1199,
+    "images": ["https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=600"],
+    "featured": false,
+    "stock": 40,
+    "tags": ["scarf", "silk", "accessories"],
+    "attributes": {
+      "material": "100% Mulberry Silk",
+      "fit": "Regular",
+      "pattern": "Botanical Floral Print",
+      "care": "Dry Clean Only",
+      "gender": "Women"
+    }
+  },
+  {
+    "name": "Structured Leather Tote Bag",
+    "categorySlug": "bags-handbags",
+    "brandSlug": "zara",
+    "vendorCode": "VND-ROYAL",
+    "description": "Spacious premium leather tote bag with zip-top closure and dedicated 14-inch laptop compartment.",
+    "price": 3899,
+    "compareAtPrice": 4599,
+    "images": ["https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600"],
+    "featured": true,
+    "stock": 20,
+    "tags": ["bag", "tote", "leather", "handbag"],
+    "attributes": {
+      "material": "Full Grain Leather",
+      "fit": "Relaxed",
+      "pattern": "Textured Pebble Grain",
+      "care": "Leather Conditioner",
+      "gender": "Women"
+    }
+  },
+  {
+    "name": "Quilted Evening Crossbody Clutch",
+    "categorySlug": "bags-handbags",
+    "brandSlug": "hm",
+    "vendorCode": "VND-ROYAL",
+    "description": "Chic quilted faux-leather crossbody handbag with detachable gold chain strap.",
+    "price": 1999,
+    "compareAtPrice": 2499,
+    "images": ["https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=600"],
+    "featured": false,
+    "stock": 28,
+    "tags": ["clutch", "crossbody", "bag", "handbag"],
+    "attributes": {
+      "material": "Quilted Vegan Leather",
+      "fit": "Slim",
+      "pattern": "Diamond Quilted",
+      "care": "Wipe Clean",
+      "gender": "Women"
+    }
+  }
+]

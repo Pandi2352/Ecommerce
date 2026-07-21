@@ -75,7 +75,7 @@ export function BrandEditorDrawer({ open, onClose, brand, onSaved }: BrandEditor
       };
 
       if (brand) {
-        await updateBrand(brand._id, payload);
+        await updateBrand(brand.id, payload);
         toast.success(`Brand "${name}" updated`);
       } else {
         await createBrand(payload);
@@ -118,11 +118,7 @@ export function BrandEditorDrawer({ open, onClose, brand, onSaved }: BrandEditor
         </FormField>
 
         <FormField label="URL Slug" hint="Leave blank to auto-generate from name">
-          <Input
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            placeholder="e.g. apple"
-          />
+          <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="e.g. apple" />
         </FormField>
 
         <div className="grid grid-cols-2 gap-4">

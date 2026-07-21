@@ -9,12 +9,21 @@ import type {
   StockAdjustmentItem,
   TransferStockInput,
   UpdateWarehouseInput,
+  WarehouseFilterQuery,
   WarehouseItem,
+  WarehouseStats,
 } from './types';
 
 // ── Warehouses ──
-export const fetchWarehouses = async (): Promise<{ data: WarehouseItem[]; meta: Meta }> => {
-  return getList<WarehouseItem>('/inventory/warehouses');
+export const fetchWarehouses = async (
+  query: Partial<WarehouseFilterQuery> = {},
+): Promise<{ data: WarehouseItem[]; meta: Meta }> => {
+  return getList<WarehouseItem>('/inventory/warehouses', { params: query });
+};
+
+export const fetchWarehouseStats = async (): Promise<WarehouseStats> => {
+  const res = await api.get<WarehouseStats>('/inventory/warehouses/stats');
+  return res.data;
 };
 
 export const createWarehouse = async (input: CreateWarehouseInput): Promise<WarehouseItem> => {

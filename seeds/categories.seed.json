@@ -1,0 +1,173 @@
+[
+  {
+    "name": "Women",
+    "slug": "women",
+    "description": "Everything for women — dresses, ethnic wear, innerwear and more.",
+    "image": "https://picsum.photos/seed/cat-women/400/300",
+    "sortOrder": 1,
+    "isActive": true,
+    "metaTitle": "Women's Fashion & Clothing Online",
+    "metaDescription": "Shop the latest women's fashion — dresses, ethnic wear, loungewear and seasonal collections."
+  },
+  {
+    "name": "Men",
+    "slug": "men",
+    "description": "Men's apparel, jackets and everyday essentials.",
+    "image": "https://picsum.photos/seed/cat-men/400/300",
+    "sortOrder": 2,
+    "isActive": true,
+    "metaTitle": "Men's Fashion & Clothing Online",
+    "metaDescription": "Discover men's shirts, trousers, denim, jackets and winter wear at NovaShop."
+  },
+  {
+    "name": "Kids & Baby",
+    "slug": "kids",
+    "description": "Playful, comfortable outfits for kids, toddlers and babies.",
+    "image": "https://picsum.photos/seed/cat-kids/400/300",
+    "sortOrder": 3,
+    "isActive": true,
+    "metaTitle": "Kids & Baby Clothing Online",
+    "metaDescription": "Adorable and durable clothing for boys, girls, toddlers and babies."
+  },
+  {
+    "name": "Footwear",
+    "slug": "footwear",
+    "description": "Shoes for every occasion — sneakers, formals, heels and sandals.",
+    "image": "https://picsum.photos/seed/cat-footwear/400/300",
+    "sortOrder": 4,
+    "isActive": true,
+    "metaTitle": "Footwear & Shoes Online",
+    "metaDescription": "Step out in style with sneakers, leather shoes, heels, boots and sandals."
+  },
+  {
+    "name": "Sports & Active",
+    "slug": "sports",
+    "description": "Performance activewear and gym essentials.",
+    "image": "https://picsum.photos/seed/cat-sports/400/300",
+    "sortOrder": 5,
+    "isActive": true,
+    "metaTitle": "Activewear & Sportswear Online",
+    "metaDescription": "Breathable activewear, gym tees, leggings and track pants built to move."
+  },
+  {
+    "name": "Accessories",
+    "slug": "accessories",
+    "description": "Finish the look with bags, belts, scarves and jewelry.",
+    "image": "https://picsum.photos/seed/cat-accessories/400/300",
+    "sortOrder": 6,
+    "isActive": true,
+    "metaTitle": "Fashion Accessories & Bags Online",
+    "metaDescription": "Belts, sunglasses, scarves, jewelry, handbags and travel bags."
+  },
+
+  {
+    "name": "Women's Dresses",
+    "slug": "womens-dresses",
+    "parentSlug": "women",
+    "description": "Elegant summer dresses, maxi dresses, floral gowns, and evening wear.",
+    "image": "https://picsum.photos/seed/cat-womens-dresses/400/300",
+    "sortOrder": 1,
+    "isActive": true,
+    "metaTitle": "Women's Dresses — Maxi, Floral & Evening",
+    "metaDescription": "Summer dresses, maxi dresses, floral gowns and evening wear for every occasion."
+  },
+  {
+    "name": "Ethnic & Traditional",
+    "slug": "ethnic-traditional",
+    "parentSlug": "women",
+    "description": "Kurtas, sarees, lehengas, and festival traditional attire.",
+    "image": "https://picsum.photos/seed/cat-ethnic-traditional/400/300",
+    "sortOrder": 2,
+    "isActive": true,
+    "metaTitle": "Ethnic & Traditional Wear",
+    "metaDescription": "Kurtas, sarees, lehengas and festive traditional attire for celebrations."
+  },
+  {
+    "name": "Innerwear & Sleepwear",
+    "slug": "innerwear-sleepwear",
+    "parentSlug": "women",
+    "description": "Comfortable cotton sleepwear, loungewear, and intimates.",
+    "image": "https://picsum.photos/seed/cat-innerwear-sleepwear/400/300",
+    "sortOrder": 3,
+    "isActive": true,
+    "metaTitle": "Innerwear & Sleepwear",
+    "metaDescription": "Soft cotton sleepwear, loungewear and everyday intimates."
+  },
+  {
+    "name": "Men's Apparel",
+    "slug": "mens-apparel",
+    "parentSlug": "men",
+    "description": "Casual shirts, formal trousers, denim jeans, and t-shirts for men.",
+    "image": "https://picsum.photos/seed/cat-mens-apparel/400/300",
+    "sortOrder": 1,
+    "isActive": true,
+    "metaTitle": "Men's Apparel — Shirts, Trousers & Jeans",
+    "metaDescription": "Casual shirts, formal trousers, denim jeans and t-shirts for men."
+  },
+  {
+    "name": "Winter Wear & Jackets",
+    "slug": "winter-jackets",
+    "parentSlug": "men",
+    "description": "Coats, denim jackets, wool sweaters, and hoodies.",
+    "image": "https://picsum.photos/seed/cat-winter-jackets/400/300",
+    "sortOrder": 2,
+    "isActive": true,
+    "metaTitle": "Winter Wear & Jackets",
+    "metaDescription": "Stay warm with coats, denim jackets, wool sweaters and hoodies."
+  },
+  {
+    "name": "Kids & Baby Wear",
+    "slug": "kids-baby-wear",
+    "parentSlug": "kids",
+    "description": "Cute outfits, t-shirts, and dresses for boys, girls, and toddlers.",
+    "image": "https://picsum.photos/seed/cat-kids-baby-wear/400/300",
+    "sortOrder": 1,
+    "isActive": true,
+    "metaTitle": "Kids & Baby Wear",
+    "metaDescription": "Cute, comfortable outfits, t-shirts and dresses for boys, girls and toddlers."
+  },
+  {
+    "name": "Footwear & Shoes",
+    "slug": "footwear-shoes",
+    "parentSlug": "footwear",
+    "description": "Sneakers, leather shoes, heels, boots, and casual sandals.",
+    "image": "https://picsum.photos/seed/cat-footwear-shoes/400/300",
+    "sortOrder": 1,
+    "isActive": true,
+    "metaTitle": "Shoes — Sneakers, Formals & Heels",
+    "metaDescription": "Sneakers, leather shoes, heels, boots and casual sandals for all occasions."
+  },
+  {
+    "name": "Activewear & Gymwear",
+    "slug": "activewear-gymwear",
+    "parentSlug": "sports",
+    "description": "Breathable workout tees, leggings, sports bras, and track pants.",
+    "image": "https://picsum.photos/seed/cat-activewear-gymwear/400/300",
+    "sortOrder": 1,
+    "isActive": true,
+    "metaTitle": "Activewear & Gymwear",
+    "metaDescription": "Breathable workout tees, leggings, sports bras and track pants."
+  },
+  {
+    "name": "Fashion Accessories",
+    "slug": "fashion-accessories",
+    "parentSlug": "accessories",
+    "description": "Belts, sunglasses, silk scarves, and fashion jewelry.",
+    "image": "https://picsum.photos/seed/cat-fashion-accessories/400/300",
+    "sortOrder": 1,
+    "isActive": true,
+    "metaTitle": "Fashion Accessories",
+    "metaDescription": "Belts, sunglasses, silk scarves and fashion jewelry to complete your look."
+  },
+  {
+    "name": "Bags & Handbags",
+    "slug": "bags-handbags",
+    "parentSlug": "accessories",
+    "description": "Leather totes, backpacks, clutches, and travel duffel bags.",
+    "image": "https://picsum.photos/seed/cat-bags-handbags/400/300",
+    "sortOrder": 2,
+    "isActive": true,
+    "metaTitle": "Bags & Handbags",
+    "metaDescription": "Leather totes, backpacks, clutches and travel duffel bags."
+  }
+]

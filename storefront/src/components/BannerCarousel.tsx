@@ -1,34 +1,43 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { BannerSlide } from '@/app/StorefrontConfigContext';
+import { useStorefrontConfig } from '@/app/StorefrontConfigContext';
 
 interface Props {
   banners?: BannerSlide[];
 }
 
-const DEFAULT_SLIDES = [
-  {
-    id: 'maxshop-tablet-banner',
-    subtitleTop: 'OUR NEW RANGE OF',
-    title: 'TABLET',
-    subtitleBottom: 'FOR LESS THAN $99.00',
-    link: '/products',
-  },
-  {
-    id: 'maxshop-watch-banner',
-    subtitleTop: 'SMART & STYLISH',
-    title: 'WATCHES',
-    subtitleBottom: 'UP TO 40% OFF THIS WEEK',
-    link: '/products',
-  },
-];
-
 export function BannerCarousel({ banners = [] }: Props) {
+  const { config } = useStorefrontConfig();
   const activeBanners = banners.filter((b) => b.isActive);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const totalSlides = activeBanners.length > 0 ? activeBanners.length : DEFAULT_SLIDES.length;
+  const storeName = config?.storeName || 'OUR STORE';
+
+  // Universal Default Slides (Abstract CSS gradient design, 100% neutral for any store type)
+  const defaultSlides = [
+    {
+      id: 'default-banner-1',
+      title: `WELCOME TO ${storeName.toUpperCase()}`,
+      subtitle: 'Explore thousands of premium products across all categories with fast delivery.',
+      ctaText: 'SHOP CATALOG',
+      ctaLink: '/products',
+      badgeText: 'FEATURED MARKETPLACE',
+      bgGradient: 'linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #334155 100%)',
+    },
+    {
+      id: 'default-banner-2',
+      title: 'EXCLUSIVE PROMOTIONS & DEALS',
+      subtitle: 'Save big on selected items. New arrivals updated daily by store management.',
+      ctaText: 'EXPLORE OFFERS',
+      ctaLink: '/products',
+      badgeText: 'SPECIAL OFFERS',
+      bgGradient: 'linear-gradient(135deg, #312e81 0%, #1e1b4b 50%, #4338ca 100%)',
+    },
+  ];
+
+  const totalSlides = activeBanners.length > 0 ? activeBanners.length : defaultSlides.length;
 
   // Auto-advance slide every 5 seconds
   useEffect(() => {
@@ -39,11 +48,12 @@ export function BannerCarousel({ banners = [] }: Props) {
     return () => clearInterval(interval);
   }, [totalSlides]);
 
-  // If custom admin image slide is active
+  // ── 1. CUSTOM ADMIN BANNERS (When Admin Uploads Banners in Settings) ──────
   if (activeBanners.length > 0) {
+    const current = activeBanners[currentIndex];
     return (
       <section className="relative overflow-hidden rounded-sm border border-border bg-surface mb-6 shadow-sm">
-        <div className="relative min-h-[360px] sm:min-h-[420px] flex items-center overflow-hidden">
+        <div className="relative min-h-[350px] sm:min-h-[400px] flex items-center overflow-hidden">
           {activeBanners.map((slide, idx) => (
             <div
               key={slide.id}
@@ -54,39 +64,84 @@ export function BannerCarousel({ banners = [] }: Props) {
               {slide.imageUrl ? (
                 <img
                   src={slide.imageUrl}
-                  alt={slide.title}
+                  alt={slide.title || 'Storefront Banner'}
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="h-full w-full bg-slate-800" />
+                <div
+                  className="h-full w-full"
+                  style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}
+                />
               )}
+              {/* Dark overlay for text legibility */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    'linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)',
+                }}
+              />
             </div>
           ))}
 
-          {/* Controls */}
+          {/* Slide Text Content */}
+          <div className="relative z-20 flex flex-col items-start px-8 sm:px-12 py-10 max-w-xl text-left text-white">
+            {current.badgeText && (
+              <span className="bg-danger text-white text-[11px] font-extrabold tracking-widest uppercase px-2.5 py-1 rounded-xs mb-3 shadow-sm">
+                {current.badgeText}
+              </span>
+            )}
+
+            {current.title && (
+              <h1
+                className="text-3xl sm:text-5xl font-black uppercase tracking-tight leading-tight mb-3 drop-shadow-md"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                {current.title}
+              </h1>
+            )}
+
+            {current.subtitle && (
+              <p className="text-xs sm:text-sm text-white/80 max-w-md mb-6 leading-relaxed drop-shadow">
+                {current.subtitle}
+              </p>
+            )}
+
+            <Link
+              to={current.ctaLink || '/products'}
+              className="inline-flex items-center gap-2 bg-danger hover:bg-danger/90 text-white font-extrabold text-xs uppercase px-6 py-3 rounded-xs tracking-wider shadow-lg transition-transform hover:scale-105"
+            >
+              <Sparkles className="h-4 w-4" />
+              {current.ctaText || 'SHOP NOW'}
+            </Link>
+          </div>
+
+          {/* Navigation Controls */}
           {activeBanners.length > 1 && (
             <>
               <button
                 onClick={() =>
                   setCurrentIndex((prev) => (prev === 0 ? activeBanners.length - 1 : prev - 1))
                 }
-                className="absolute left-0 z-30 flex h-12 w-9 items-center justify-center bg-black/40 text-white hover:bg-danger transition-colors"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-30 flex h-12 w-8 items-center justify-center bg-black/40 text-white hover:bg-danger transition-colors"
+                aria-label="Previous Slide"
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setCurrentIndex((prev) => (prev + 1) % activeBanners.length)}
-                className="absolute right-0 z-30 flex h-12 w-9 items-center justify-center bg-black/40 text-white hover:bg-danger transition-colors"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-30 flex h-12 w-8 items-center justify-center bg-black/40 text-white hover:bg-danger transition-colors"
+                aria-label="Next Slide"
               >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-5 w-5" />
               </button>
-              <div className="absolute bottom-4 left-1/2 z-30 flex -translate-x-1/2 gap-2">
+              <div className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 gap-2">
                 {activeBanners.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentIndex(i)}
                     className={`h-2.5 rounded-full transition-all ${
-                      i === currentIndex ? 'w-5 bg-danger' : 'w-2.5 bg-white border border-gray-400'
+                      i === currentIndex ? 'w-6 bg-danger' : 'w-2.5 bg-white/70 hover:bg-white'
                     }`}
                   />
                 ))}
@@ -98,88 +153,67 @@ export function BannerCarousel({ banners = [] }: Props) {
     );
   }
 
-  // ── MaxShop Exact Tablet Hero Banner (Matching Image Reference) ───────────
-  const currentDefault = DEFAULT_SLIDES[currentIndex];
+  // ── 2. NEUTRAL MULTI-STORE DEFAULT BANNER (When No Custom Banner Uploaded) ─
+  const currentDefault = defaultSlides[currentIndex];
 
   return (
-    <section className="relative overflow-hidden rounded-sm border border-border mb-6 select-none bg-gradient-to-b from-[#b4d5e8] via-[#e2ded9] to-[#c7b9a5]">
-      <div className="relative min-h-[350px] sm:min-h-[400px] flex items-center px-6 sm:px-12 py-8 overflow-hidden">
-        {/* Background Scenic Atmospheric Glow */}
-        <div
-          className="absolute inset-0 opacity-40 pointer-events-none"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.8) 0%, transparent 60%)',
-          }}
-        />
-
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 items-center gap-6 w-full">
-          {/* Left Column: Tablet Graphic with Floating App Badges (7 cols) */}
-          <div className="md:col-span-7 flex justify-center items-center relative py-4">
-            {/* White Tablet Mockup Frame */}
-            <div className="relative w-full max-w-md bg-white p-3 rounded-2xl shadow-2xl border-4 border-slate-200 transform -rotate-1 hover:rotate-0 transition-transform duration-500">
-              {/* Tablet Screen */}
-              <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-sky-500 border border-slate-300">
-                <img
-                  src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600"
-                  alt="Tablet display"
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-tr from-sky-600/40 via-transparent to-white/20 pointer-events-none" />
-              </div>
-              <div className="text-center mt-1">
-                <span className="text-[10px] font-bold tracking-widest text-slate-400">AOC</span>
-              </div>
-
-              {/* Floating App Badges (Youtube, Chrome, Google+, Maps, Gmail, Android) */}
-              <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-white px-2 py-0.5 rounded shadow border border-slate-200 text-[10px] font-bold text-red-600 flex items-center gap-1 animate-bounce">
-                <span className="bg-red-600 text-white rounded-xs px-1 text-[8px]">▶</span> YouTube
-              </div>
-              <div className="absolute -top-2 right-4 bg-white p-1 rounded-full shadow-md border border-slate-200 text-base">
-                🌐
-              </div>
-              <div className="absolute top-1/2 -right-4 bg-red-600 text-white font-bold text-[10px] p-1.5 rounded shadow-lg">
-                g+
-              </div>
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white px-2 py-0.5 rounded shadow border border-slate-200 text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                📍 Maps
-              </div>
-              <div className="absolute -bottom-4 left-6 bg-white px-2 py-1 rounded shadow-md border border-slate-200 text-xs font-bold text-red-500 flex items-center gap-1">
-                ✉️ Gmail
-              </div>
-              <div className="absolute bottom-2 right-6 text-2xl animate-pulse">🤖</div>
-            </div>
+    <section className="relative overflow-hidden rounded-sm border border-border mb-6 shadow-sm select-none">
+      <div className="relative min-h-[350px] sm:min-h-[380px] flex items-center px-8 sm:px-12 py-10 overflow-hidden">
+        {/* Animated Abstract Atmospheric Gradient Background */}
+        {defaultSlides.map((slide, idx) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            }`}
+            style={{ background: slide.bgGradient }}
+          >
+            {/* Ambient geometric light orbs */}
+            <div
+              className="absolute top-[-50px] right-[-50px] w-96 h-96 rounded-full opacity-20 pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle, rgba(230,46,4,0.8) 0%, transparent 70%)',
+              }}
+            />
+            <div
+              className="absolute bottom-[-60px] left-[-40px] w-80 h-80 rounded-full opacity-20 pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle, rgba(59,130,246,0.8) 0%, transparent 70%)',
+              }}
+            />
           </div>
+        ))}
 
-          {/* Right Column: Hero Typography (5 cols) */}
-          <div className="md:col-span-5 text-center md:text-left space-y-2">
-            <p className="text-sm sm:text-base font-bold text-slate-700 tracking-wider uppercase">
-              {currentDefault.subtitleTop}
-            </p>
-            <h1
-              className="text-5xl sm:text-6xl lg:text-7xl font-black text-danger tracking-tight uppercase leading-none drop-shadow-sm"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              {currentDefault.title}
-            </h1>
-            <p className="text-sm sm:text-base font-bold text-slate-700 tracking-wider uppercase pt-1">
-              {currentDefault.subtitleBottom}
-            </p>
-            <div className="pt-3">
-              <Link
-                to={currentDefault.link}
-                className="inline-block bg-danger hover:bg-danger/90 text-white font-black text-xs uppercase px-6 py-2.5 rounded-xs tracking-wider shadow-md transition-transform hover:scale-105"
-              >
-                SHOP NOW
-              </Link>
-            </div>
-          </div>
+        {/* Hero Content */}
+        <div className="relative z-20 flex flex-col items-start max-w-xl text-left text-white">
+          <span className="bg-danger text-white text-[11px] font-extrabold tracking-widest uppercase px-2.5 py-1 rounded-xs mb-3 shadow-sm">
+            {currentDefault.badgeText}
+          </span>
+
+          <h1
+            className="text-3xl sm:text-5xl font-black uppercase tracking-tight leading-tight mb-3 drop-shadow-md"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            {currentDefault.title}
+          </h1>
+
+          <p className="text-xs sm:text-sm text-white/80 max-w-md mb-6 leading-relaxed drop-shadow">
+            {currentDefault.subtitle}
+          </p>
+
+          <Link
+            to={currentDefault.ctaLink}
+            className="inline-flex items-center gap-2 bg-danger hover:bg-danger/90 text-white font-extrabold text-xs uppercase px-6 py-3 rounded-xs tracking-wider shadow-lg transition-transform hover:scale-105"
+          >
+            <Sparkles className="h-4 w-4" />
+            {currentDefault.ctaText}
+          </Link>
         </div>
 
-        {/* Left & Right Edge Navigation Arrows */}
+        {/* Navigation Controls */}
         <button
           onClick={() =>
-            setCurrentIndex((prev) => (prev === 0 ? DEFAULT_SLIDES.length - 1 : prev - 1))
+            setCurrentIndex((prev) => (prev === 0 ? defaultSlides.length - 1 : prev - 1))
           }
           className="absolute left-0 top-1/2 -translate-y-1/2 z-30 flex h-12 w-8 items-center justify-center bg-black/40 text-white hover:bg-danger transition-colors"
           aria-label="Previous Slide"
@@ -187,23 +221,22 @@ export function BannerCarousel({ banners = [] }: Props) {
           <ChevronLeft className="h-5 w-5" />
         </button>
         <button
-          onClick={() => setCurrentIndex((prev) => (prev + 1) % DEFAULT_SLIDES.length)}
+          onClick={() => setCurrentIndex((prev) => (prev + 1) % defaultSlides.length)}
           className="absolute right-0 top-1/2 -translate-y-1/2 z-30 flex h-12 w-8 items-center justify-center bg-black/40 text-white hover:bg-danger transition-colors"
           aria-label="Next Slide"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
 
-        {/* Bottom Pagination Dots */}
+        {/* Dots */}
         <div className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 gap-2">
-          {DEFAULT_SLIDES.map((_, i) => (
+          {defaultSlides.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
               className={`h-2.5 rounded-full transition-all ${
-                i === currentIndex ? 'w-5 bg-danger' : 'w-2.5 bg-white border border-gray-400'
+                i === currentIndex ? 'w-6 bg-danger' : 'w-2.5 bg-white/70 hover:bg-white'
               }`}
-              aria-label={`Go to slide ${i + 1}`}
             />
           ))}
         </div>

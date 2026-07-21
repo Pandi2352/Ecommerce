@@ -77,7 +77,7 @@ export function BrandsPage() {
 
   const handleToggleFeatured = async (b: BrandItem) => {
     try {
-      await updateBrand(b._id, { isFeatured: !b.isFeatured });
+      await updateBrand(b.id, { isFeatured: !b.isFeatured });
       toast.success(
         b.isFeatured ? `Unmarked "${b.name}" as featured` : `Marked "${b.name}" as featured ⭐`,
       );
@@ -91,7 +91,7 @@ export function BrandsPage() {
     if (!deletingBrand) return;
     setDeleting(true);
     try {
-      const res = await deleteBrand(deletingBrand._id);
+      const res = await deleteBrand(deletingBrand.id);
       if (res.detachedProducts > 0) {
         toast.success(
           `Deleted brand "${deletingBrand.name}" and detached ${res.detachedProducts} products`,
@@ -154,7 +154,7 @@ export function BrandsPage() {
       )}
 
       {/* Toolbar / Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-border bg-surface p-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-md border border-border bg-surface p-3">
         <div className="flex flex-1 items-center gap-3">
           <SearchInput
             value={search}
@@ -193,11 +193,7 @@ export function BrandsPage() {
           </Select>
         </div>
 
-        <Select
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          className="w-44"
-        >
+        <Select value={sort} onChange={(e) => setSort(e.target.value)} className="w-44">
           <option value="name:asc">Sort: Name (A-Z)</option>
           <option value="name:desc">Sort: Name (Z-A)</option>
           <option value="productCount:desc">Sort: Most Products</option>
@@ -209,9 +205,9 @@ export function BrandsPage() {
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-border bg-surface p-4 space-y-3">
+            <div key={i} className="rounded-md border border-border bg-surface p-4 space-y-3">
               <div className="flex items-center gap-3">
-                <Skeleton className="h-12 w-12 rounded-lg" />
+                <Skeleton className="h-12 w-12 rounded-md" />
                 <div className="space-y-1 flex-1">
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-3 w-16" />
@@ -242,7 +238,7 @@ export function BrandsPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {brands.map((b) => (
             <BrandCard
-              key={b._id}
+              key={b.id}
               brand={b}
               onEdit={handleEdit}
               onDelete={setDeletingBrand}
@@ -253,12 +249,7 @@ export function BrandsPage() {
       )}
 
       {/* Pagination */}
-      {meta && (
-        <Pagination
-          meta={meta}
-          onPageChange={(p) => setPage(p)}
-        />
-      )}
+      {meta && <Pagination meta={meta} onPageChange={(p) => setPage(p)} />}
 
       {/* Drawer Editor */}
       <BrandEditorDrawer

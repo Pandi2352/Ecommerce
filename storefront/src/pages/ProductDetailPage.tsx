@@ -17,13 +17,15 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '@/lib/api';
-import { cn, money } from '@/lib/utils';
+import { cn, money, DEFAULT_PRODUCT_IMAGE } from '@/lib/utils';
 import { useCart } from '@/cart/CartContext';
+import { useStorefrontConfig } from '@/app/StorefrontConfigContext';
 import type { Product } from '@/lib/types';
 
 const TABS = ['Description', 'Features', 'Shipping', 'Reviews'];
 
 export function ProductDetailPage() {
+  const { config } = useStorefrontConfig();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { add } = useCart();
@@ -143,15 +145,11 @@ export function ProductDetailPage() {
         {/* Gallery */}
         <div className="space-y-4 animate-fadeInLeft">
           <div className="relative aspect-square overflow-hidden rounded-3xl bg-surface-2 border border-border group">
-            {image ? (
-              <img
-                src={image}
-                alt={product.name}
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            ) : (
-              <div className="grid h-full place-items-center text-7xl">📦</div>
-            )}
+            <img
+              src={image || config?.defaultProductImageUrl || DEFAULT_PRODUCT_IMAGE}
+              alt={product.name}
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
 
             {/* Sale badge */}
             {onSale && (

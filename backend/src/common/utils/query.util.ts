@@ -24,12 +24,24 @@ export async function findByIdOrThrow<TDoc>(
  * Parse a `?sort=` string into a Mongoose sort object.
  * `"-createdAt,name"` → `{ createdAt: -1, name: 1 }`. Falls back when empty/invalid.
  */
-export function parseSort(sort: string | undefined, fallback: SortSpec = { createdAt: -1 }): SortSpec {
+export function parseSort(
+  sort: string | undefined,
+  fallback: SortSpec = { createdAt: -1 },
+): SortSpec {
   if (!sort) return fallback;
   const out: SortSpec = {};
-  for (const raw of sort.split(',').map((s) => s.trim()).filter(Boolean)) {
-    if (raw.startsWith('-')) out[raw.slice(1)] = -1;
-    else out[raw] = 1;
+  for (const raw of sort
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)) {
+    if (raw.includes(':')) {
+      const [field, dir] = raw.split(':');
+      out[field] = dir.toLowerCase() === 'desc' || dir === '-1' ? -1 : 1;
+    } else if (raw.startsWith('-')) {
+      out[raw.slice(1)] = -1;
+    } else {
+      out[raw] = 1;
+    }
   }
   return Object.keys(out).length ? out : fallback;
 }

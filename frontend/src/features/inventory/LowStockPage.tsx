@@ -1,18 +1,38 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, Building2, Package, SlidersHorizontal } from 'lucide-react';
-import { Badge, Button, EmptyState, Pagination, SearchInput, Table, type Column } from '@/components/ui';
+import {
+  AlertTriangle,
+  Boxes,
+  Building2,
+  PackageX,
+  Package,
+  SlidersHorizontal,
+} from 'lucide-react';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  Pagination,
+  SearchInput,
+  Select,
+  Table,
+  type Column,
+} from '@/components/ui';
+import { StatCard } from '@/components/common/StatCard';
+import type { Meta } from '@/lib/types';
 import { toast } from '@/components/ui/toast';
 import { getErrorMessage } from '@/utils/getErrorMessage';
-import { fetchLowStock, fetchWarehouses } from './api';
+import { fetchInventoryStats, fetchLowStock, fetchWarehouses } from './api';
 import { StockAdjustmentModal } from './components/StockAdjustmentModal';
-import type { InventoryItem, WarehouseItem } from './types';
+import type { InventoryItem, InventoryStats, WarehouseItem } from './types';
 
 export function LowStockPage() {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [warehouses, setWarehouses] = useState<WarehouseItem[]>([]);
-  const [meta, setMeta] = useState<any | null>(null);
+  const [stats, setStats] = useState<InventoryStats | null>(null);
+  const [meta, setMeta] = useState<Meta | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [warehouseFilter, setWarehouseFilter] = useState('ALL');
   const [page, setPage] = useState(1);
 
   const [adjustingItem, setAdjustingItem] = useState<InventoryItem | null>(null);
@@ -20,23 +40,26 @@ export function LowStockPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [res, whRes] = await Promise.all([
+      const [res, whRes, statsRes] = await Promise.all([
         fetchLowStock({
           page,
           pageSize: 15,
           search: search.trim() || undefined,
+          warehouseId: warehouseFilter !== 'ALL' ? warehouseFilter : undefined,
         }),
-        fetchWarehouses(),
+        fetchWarehouses({ pageSize: 100 }),
+        fetchInventoryStats(),
       ]);
       setItems(res.data);
       setMeta(res.meta);
       setWarehouses(whRes.data);
+      setStats(statsRes);
     } catch (err) {
       toast.error(getErrorMessage(err, 'Failed to load low stock items'));
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, warehouseFilter]);
 
   useEffect(() => {
     loadData();
@@ -61,7 +84,9 @@ export function LowStockPage() {
           )}
           <div className="leading-tight">
             <p className="text-xs font-bold text-text">{item.productName}</p>
-            <span className="font-mono text-[11px] font-semibold text-indigo-500">{item.variantSku}</span>
+            <span className="font-mono text-[11px] font-semibold text-indigo-500">
+              {item.variantSku}
+            </span>
           </div>
         </div>
       ),
@@ -87,7 +112,9 @@ export function LowStockPage() {
       header: 'Available',
       className: 'text-right',
       cell: (item) => (
-        <span className={`font-mono text-xs font-bold ${item.available === 0 ? 'text-danger' : 'text-amber-500'}`}>
+        <span
+          className={`font-mono text-xs font-bold ${item.available === 0 ? 'text-danger' : 'text-amber-500'}`}
+        >
           {item.available}
         </span>
       ),
@@ -96,16 +123,18 @@ export function LowStockPage() {
       key: 'threshold',
       header: 'Alert Threshold',
       className: 'text-right',
-      cell: (item) => <span className="font-mono text-xs text-text-secondary">≤ {item.lowStockThreshold}</span>,
+      cell: (item) => (
+        <span className="font-mono text-xs text-text-secondary">≤ {item.lowStockThreshold}</span>
+      ),
     },
     {
       key: 'status',
       header: 'Alert Level',
       cell: (item) =>
         item.available === 0 ? (
-          <Badge tone="danger">Out of Stock 🚨</Badge>
+          <Badge tone="danger">Out of Stock</Badge>
         ) : (
-          <Badge tone="warning">Low Stock ⚠️</Badge>
+          <Badge tone="warning">Low Stock</Badge>
         ),
     },
     {
@@ -133,16 +162,45 @@ export function LowStockPage() {
         <div>
           <h1 className="text-xl font-bold tracking-tight text-text flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
-            <span>Low Stock & Out of Stock Alerts</span>
+            <span>Low Stock &amp; Out of Stock Alerts</span>
           </h1>
           <p className="text-xs text-text-secondary">
-            Inventory items currently at or below their low-stock threshold needing restock.
+            Inventory items currently at or below their low-stock threshold and needing restock.
           </p>
         </div>
       </div>
 
+      {/* Stats */}
+      {stats && (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatCard
+            label="Low Stock Items"
+            value={stats.lowStockCount}
+            icon={<AlertTriangle className="h-5 w-5" />}
+            tone="amber"
+          />
+          <StatCard
+            label="Out of Stock"
+            value={stats.outOfStockCount}
+            icon={<PackageX className="h-5 w-5" />}
+            tone="rose"
+          />
+          <StatCard
+            label="Total On-Hand"
+            value={stats.totalOnHand}
+            icon={<Boxes className="h-5 w-5" />}
+          />
+          <StatCard
+            label="Reserved"
+            value={stats.totalReserved}
+            icon={<Package className="h-5 w-5" />}
+            tone="sky"
+          />
+        </div>
+      )}
+
       {/* Filter Toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-border bg-surface p-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center rounded-md border border-border bg-surface p-3">
         <SearchInput
           value={search}
           onValueChange={(val) => {
@@ -152,6 +210,21 @@ export function LowStockPage() {
           placeholder="Filter low stock by product name or SKU..."
           containerClassName="w-full max-w-md"
         />
+        <Select
+          value={warehouseFilter}
+          onChange={(e) => {
+            setWarehouseFilter(e.target.value);
+            setPage(1);
+          }}
+          className="w-52"
+        >
+          <option value="ALL">All Warehouses</option>
+          {warehouses.map((w) => (
+            <option key={w._id} value={w._id}>
+              {w.name} ({w.code})
+            </option>
+          ))}
+        </Select>
       </div>
 
       {/* Table */}
@@ -163,8 +236,8 @@ export function LowStockPage() {
         emptyState={
           <EmptyState
             icon={<AlertTriangle className="size-8 text-emerald-500" />}
-            title="All inventory levels are healthy! 🎉"
-            description="No items are currently below their low-stock threshold across any warehouse."
+            title="All inventory levels are healthy"
+            description="No items are currently at or below their low-stock threshold in the selected scope."
           />
         }
       />

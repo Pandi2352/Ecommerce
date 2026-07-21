@@ -36,11 +36,16 @@ export class BrandsService extends BaseService<BrandDocument> {
 
     if (q.status === 'ACTIVE') filter.isActive = true;
     if (q.status === 'INACTIVE') filter.isActive = false;
-    if (q.featured !== undefined) filter.isFeatured = q.featured;
+    if (q.featured === 'true') filter.isFeatured = true;
+    else if (q.featured === 'false') filter.isFeatured = false;
+
+    const sortSpec = parseSort(q.sort);
+    const isProductCountSort = 'productCount' in sortSpec;
+    const dbSort = isProductCountSort ? { createdAt: -1 as const } : sortSpec;
 
     const result = await this.paginate({
       filter,
-      sort: parseSort(q.sort),
+      sort: dbSort,
       page: q.page,
       pageSize: q.pageSize,
     });
@@ -61,6 +66,11 @@ export class BrandsService extends BaseService<BrandDocument> {
         productCount: countMap.get(brand._id) || 0,
       };
     });
+
+    if (isProductCountSort) {
+      const dir = sortSpec.productCount === -1 ? -1 : 1;
+      data.sort((a, b) => (a.productCount - b.productCount) * dir);
+    }
 
     return { data, meta: result.meta };
   }

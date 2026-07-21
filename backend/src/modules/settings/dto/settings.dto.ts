@@ -2,6 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -30,7 +31,7 @@ export class BannerSlideDto {
   @IsOptional() @IsString() ctaLink?: string;
   @IsOptional() @IsString() badgeText?: string;
   @IsOptional() @IsBoolean() isActive?: boolean;
-  @IsOptional() isActive2?: boolean;
+  @IsOptional() @IsNumber() order?: number;
 }
 
 export class HomepageSectionsDto {
@@ -58,6 +59,7 @@ export class UpdateBusinessSettingsDto {
   @IsOptional() @IsString() tagline?: string;
   @IsOptional() @IsString() logoUrl?: string;
   @IsOptional() @IsString() faviconUrl?: string;
+  @IsOptional() @IsString() defaultProductImageUrl?: string;
   @IsOptional() @IsString() footerText?: string;
 
   // Contact
@@ -89,6 +91,8 @@ export class UpdateBusinessSettingsDto {
   // Hero Banners
   @IsOptional()
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BannerSlideDto)
   banners?: BannerSlideDto[];
 
   // Homepage Sections

@@ -12,6 +12,7 @@
     "dev": "npm run dev --workspace frontend",
     "dev:api": "npm run start:dev --workspace backend",
     "dev:shop": "npm run dev --workspace storefront",
+    "seed:dressing": "npm run seed:dressing --workspace backend",
     "build": "npm run build --workspace @ecommerce/shared && npm run build --workspace backend && npm run build --workspace frontend && npm run build --workspace storefront",
     "lint": "eslint .",
     "format": "prettier --write .",

@@ -2,20 +2,16 @@ import { useState } from 'react';
 import { ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import { money } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { useCategories } from '@/app/CategoryContext';
 
-const CATEGORIES = [
-  'MOBILE & TABLET',
-  'COMPUTER & ACCESSORIES',
-  'ELECTRONIC & CAMERA',
-  'BOOK & MAGAZINE',
-  'GIFT',
-  'FASHION & ACCESSORIES',
-  'BABY CARE & TOYS',
-  'HOME & KITCHEN',
-  'MOVIE & MUSIC',
-  'BEAUTY & HEALTH',
-  'SPORT & FITNESS',
-  'FOOD & DRINK',
+const DEFAULT_CATEGORIES = [
+  { id: '1', name: 'MOBILE & TABLET', slug: 'mobile-tablet' },
+  { id: '2', name: 'COMPUTER & ACCESSORIES', slug: 'computer-accessories' },
+  { id: '3', name: 'ELECTRONIC & CAMERA', slug: 'electronic-camera' },
+  { id: '4', name: 'FASHION & ACCESSORIES', slug: 'fashion-accessories' },
+  { id: '5', name: 'HOME & KITCHEN', slug: 'home-kitchen' },
+  { id: '6', name: 'BEAUTY & HEALTH', slug: 'beauty-health' },
+  { id: '7', name: 'SPORTS & FITNESS', slug: 'sports-fitness' },
 ];
 
 const BEST_SELLERS = [
@@ -73,8 +69,11 @@ const FAQS = [
 ];
 
 export function LeftSidebar() {
+  const { categories, selectedCategory, setSelectedCategory } = useCategories();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [bestSellerPage, setBestSellerPage] = useState(0);
+
+  const displayCategories = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
 
   return (
     <aside className="space-y-6 w-full">
@@ -87,15 +86,34 @@ export function LeftSidebar() {
           </div>
         </div>
         <ul className="divide-y divide-border text-xs font-semibold text-text-secondary">
-          {CATEGORIES.map((cat, i) => (
+          {selectedCategory && (
             <li
-              key={i}
-              className="group flex items-center justify-between px-3 py-2.5 hover:bg-surface-2 hover:text-danger cursor-pointer transition-colors"
+              onClick={() => setSelectedCategory(null)}
+              className="px-3 py-2 text-danger font-bold cursor-pointer hover:bg-surface-2 flex items-center justify-between"
             >
-              <span>{cat}</span>
-              <ChevronRight className="h-3 w-3 text-text-muted group-hover:text-danger" />
+              <span>← All Categories</span>
+              <span className="text-[10px] bg-danger text-white px-1.5 py-0.5 rounded-xs">
+                Reset
+              </span>
             </li>
-          ))}
+          )}
+          {displayCategories.map((cat) => {
+            const isSelected = selectedCategory === cat.id || selectedCategory === cat.slug;
+            return (
+              <li
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id || cat.slug)}
+                className={`group flex items-center justify-between px-3 py-2.5 hover:bg-surface-2 hover:text-danger cursor-pointer transition-colors ${
+                  isSelected ? 'bg-danger/10 text-danger font-bold' : ''
+                }`}
+              >
+                <span className="uppercase">{cat.name}</span>
+                <ChevronRight
+                  className={`h-3 w-3 ${isSelected ? 'text-danger' : 'text-text-muted group-hover:text-danger'}`}
+                />
+              </li>
+            );
+          })}
         </ul>
       </div>
 
@@ -136,7 +154,6 @@ export function LeftSidebar() {
                 />
               </div>
               <div className="space-y-0.5 min-w-0">
-                {/* Stars */}
                 <div className="flex items-center text-amber-400">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
@@ -180,11 +197,10 @@ export function LeftSidebar() {
             />
           </div>
           <h4 className="text-xs font-bold text-text hover:text-danger cursor-pointer">
-            Zima daxe sima
+            Special Store Updates
           </h4>
           <p className="text-[11px] text-text-secondary leading-relaxed line-clamp-3">
-            Pellentesque et venenatis tortor, vitae sagittis massa. Aliquam erat volutpat. Quisque
-            eu purus convallis, iaculis nisl id, iaculis lacus.
+            Explore our new arrivals and special promotional offers across all store collections.
           </p>
         </div>
       </div>

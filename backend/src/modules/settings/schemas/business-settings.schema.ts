@@ -79,6 +79,9 @@ export class BusinessSettings {
   faviconUrl?: string;
 
   @Prop()
+  defaultProductImageUrl?: string;
+
+  @Prop()
   footerText?: string;
 
   // ── Contact ─────────────────────────────────────────────────

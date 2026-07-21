@@ -11,7 +11,10 @@ export function AppRoutes() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<CatalogPage />} />
+        <Route path="/products" element={<CatalogPage />} />
         <Route path="/products/:slug" element={<ProductDetailPage />} />
+        {/* Unknown routes fall back to the catalog instead of a blank page. */}
+        <Route path="*" element={<CatalogPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:orderNumber" element={<OrderConfirmationPage />} />

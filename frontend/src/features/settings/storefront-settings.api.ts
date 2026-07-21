@@ -42,6 +42,7 @@ export interface StorefrontSettings {
   tagline?: string;
   logoUrl?: string;
   faviconUrl?: string;
+  defaultProductImageUrl?: string;
   footerText?: string;
   supportEmail?: string;
   supportPhone?: string;

@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString, IsUrl, MinLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MinLength } from 'class-validator';
 import { PaginationQueryDto } from '../../../common/dto/pagination.dto';
 
 export class CreateBrandDto {
@@ -91,7 +91,8 @@ export class ListBrandsQueryDto extends PaginationQueryDto {
   @IsString()
   status?: string;
 
+  // Query params arrive as strings ('true' | 'false'); the service coerces to a boolean.
   @IsOptional()
-  @IsBoolean()
-  featured?: boolean;
+  @IsString()
+  featured?: string;
 }

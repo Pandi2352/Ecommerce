@@ -10,8 +10,25 @@ export interface WarehouseItem {
   address?: string;
   isPrimary: boolean;
   isActive: boolean;
+  itemCount?: number;
+  totalOnHand?: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface WarehouseStats {
+  total: number;
+  active: number;
+  inactive: number;
+  primary: string | null;
+}
+
+export interface WarehouseFilterQuery {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+  sort?: string;
 }
 
 export interface InventoryItem {

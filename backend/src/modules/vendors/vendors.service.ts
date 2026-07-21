@@ -35,11 +35,17 @@ export class VendorsService extends BaseService<VendorDocument> {
       ...buildSearchFilter(['name', 'code', 'contactName', 'email'], q.search),
     };
 
-    if (q.status) filter.status = q.status;
+    if (q.status && q.status !== ('ALL' as any)) {
+      filter.status = q.status;
+    }
+
+    const sortSpec = parseSort(q.sort);
+    const isProductCountSort = 'productCount' in sortSpec;
+    const dbSort = isProductCountSort ? { createdAt: -1 as const } : sortSpec;
 
     const result = await this.paginate({
       filter,
-      sort: parseSort(q.sort),
+      sort: dbSort,
       page: q.page,
       pageSize: q.pageSize,
     });
@@ -60,6 +66,11 @@ export class VendorsService extends BaseService<VendorDocument> {
         productCount: countMap.get(vendor._id) || 0,
       };
     });
+
+    if (isProductCountSort) {
+      const dir = sortSpec.productCount === -1 ? -1 : 1;
+      data.sort((a, b) => (a.productCount - b.productCount) * dir);
+    }
 
     return { data, meta: result.meta };
   }

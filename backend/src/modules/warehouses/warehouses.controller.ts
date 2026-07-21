@@ -1,6 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { RequirePermission } from '../../common/decorators/require-permission.decorator';
-import { CreateWarehouseDto, ListWarehousesQueryDto, UpdateWarehouseDto } from './dto/warehouse.dto';
+import {
+  CreateWarehouseDto,
+  ListWarehousesQueryDto,
+  UpdateWarehouseDto,
+} from './dto/warehouse.dto';
 import { WarehousesService } from './warehouses.service';
 
 @Controller('inventory/warehouses')
@@ -11,6 +15,12 @@ export class WarehousesController {
   @Get()
   list(@Query() query: ListWarehousesQueryDto) {
     return this.warehouses.list(query);
+  }
+
+  @RequirePermission('inventory.read')
+  @Get('stats')
+  stats() {
+    return this.warehouses.getStats();
   }
 
   @RequirePermission('inventory.read')

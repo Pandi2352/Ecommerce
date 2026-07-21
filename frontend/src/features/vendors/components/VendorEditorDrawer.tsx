@@ -21,24 +21,24 @@ export function VendorEditorDrawer({ open, onClose, vendor, onSaved }: VendorEdi
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [website, setWebsite] = useState('');
-  const [commissionRate, setCommissionRate] = useState<number>(0);
+  const [commissionRate, setCommissionRate] = useState<number | string>(0);
   const [status, setStatus] = useState<VendorStatus>(VendorStatus.ACTIVE);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (vendor) {
-      setName(vendor.name);
-      setCode(vendor.code);
+    if (vendor && open) {
+      setName(vendor.name || '');
+      setCode(vendor.code || '');
       setContactName(vendor.contactName || '');
       setEmail(vendor.email || '');
       setPhone(vendor.phone || '');
       setAddress(vendor.address || '');
       setWebsite(vendor.website || '');
-      setCommissionRate(vendor.commissionRate || 0);
-      setStatus(vendor.status);
+      setCommissionRate(vendor.commissionRate ?? 0);
+      setStatus(vendor.status || VendorStatus.ACTIVE);
       setNotes(vendor.notes || '');
-    } else {
+    } else if (!open) {
       setName('');
       setCode('');
       setContactName('');
@@ -68,18 +68,19 @@ export function VendorEditorDrawer({ open, onClose, vendor, onSaved }: VendorEdi
       const payload = {
         name: name.trim(),
         code: code.trim().toUpperCase(),
-        contactName: contactName.trim() || undefined,
-        email: email.trim() || undefined,
-        phone: phone.trim() || undefined,
-        address: address.trim() || undefined,
-        website: website.trim() || undefined,
-        commissionRate: Number(commissionRate) || 0,
+        contactName: contactName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        website: website.trim(),
+        commissionRate:
+          commissionRate === '' ? 0 : Math.max(0, Math.min(100, Number(commissionRate))),
         status,
-        notes: notes.trim() || undefined,
+        notes: notes.trim(),
       };
 
       if (vendor) {
-        await updateVendor(vendor._id, payload);
+        await updateVendor(vendor.id, payload);
         toast.success(`Vendor "${name}" updated`);
       } else {
         await createVendor(payload);
@@ -167,7 +168,7 @@ export function VendorEditorDrawer({ open, onClose, vendor, onSaved }: VendorEdi
               max={100}
               step={0.5}
               value={commissionRate}
-              onChange={(e) => setCommissionRate(parseFloat(e.target.value) || 0)}
+              onChange={(e) => setCommissionRate(e.target.value)}
               placeholder="0"
             />
           </FormField>
@@ -184,10 +185,7 @@ export function VendorEditorDrawer({ open, onClose, vendor, onSaved }: VendorEdi
           </FormField>
 
           <FormField label="Account Status">
-            <Select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as VendorStatus)}
-            >
+            <Select value={status} onChange={(e) => setStatus(e.target.value as VendorStatus)}>
               <option value={VendorStatus.ACTIVE}>Active</option>
               <option value={VendorStatus.INACTIVE}>Inactive</option>
               <option value={VendorStatus.PENDING_APPROVAL}>Pending Approval</option>

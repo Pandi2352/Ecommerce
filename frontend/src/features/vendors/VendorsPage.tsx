@@ -1,5 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Building2, Plus, Users, Clock, Layers, MoreVertical, Edit2, Trash2, Globe, Mail, Phone } from 'lucide-react';
+import {
+  Building2,
+  Plus,
+  Users,
+  Clock,
+  Layers,
+  MoreVertical,
+  Edit2,
+  Trash2,
+  Globe,
+  Mail,
+  Phone,
+} from 'lucide-react';
 import { VendorStatus } from '@ecommerce/shared';
 import {
   Badge,
@@ -78,7 +90,7 @@ export function VendorsPage() {
 
   const handleStatusChange = async (v: VendorItem, nextStatus: VendorStatus) => {
     try {
-      await updateVendor(v._id, { status: nextStatus });
+      await updateVendor(v.id, { status: nextStatus });
       toast.success(`Vendor "${v.name}" status updated to ${nextStatus}`);
       loadData();
     } catch (err) {
@@ -90,7 +102,7 @@ export function VendorsPage() {
     if (!deletingVendor) return;
     setDeleting(true);
     try {
-      const res = await deleteVendor(deletingVendor._id);
+      const res = await deleteVendor(deletingVendor.id);
       if (res.detachedProducts > 0) {
         toast.success(
           `Deleted vendor "${deletingVendor.name}" and detached ${res.detachedProducts} products`,
@@ -150,9 +162,7 @@ export function VendorsPage() {
             )}
           </div>
           {v.contactName && (
-            <span className="text-[11px] text-text-secondary">
-              Contact: {v.contactName}
-            </span>
+            <span className="text-[11px] text-text-secondary">Contact: {v.contactName}</span>
           )}
         </div>
       ),
@@ -182,13 +192,19 @@ export function VendorsPage() {
       key: 'commission',
       header: 'Commission',
       className: 'text-right',
-      cell: (v) => <span className="font-mono text-xs font-bold text-text">{v.commissionRate}%</span>,
+      cell: (v) => (
+        <span className="font-mono text-xs font-bold text-text">{v.commissionRate}%</span>
+      ),
     },
     {
       key: 'products',
       header: 'Products',
       className: 'text-right',
-      cell: (v) => <span className="font-mono text-xs font-semibold text-text-secondary">{v.productCount}</span>,
+      cell: (v) => (
+        <span className="font-mono text-xs font-semibold text-text-secondary">
+          {v.productCount}
+        </span>
+      ),
     },
     {
       key: 'status',
@@ -219,17 +235,13 @@ export function VendorsPage() {
             {
               label: (
                 <span className="flex items-center gap-2">
-                  <span>
-                    {v.status === VendorStatus.ACTIVE ? 'Mark Inactive' : 'Mark Active'}
-                  </span>
+                  <span>{v.status === VendorStatus.ACTIVE ? 'Mark Inactive' : 'Mark Active'}</span>
                 </span>
               ),
               onSelect: () =>
                 handleStatusChange(
                   v,
-                  v.status === VendorStatus.ACTIVE
-                    ? VendorStatus.INACTIVE
-                    : VendorStatus.ACTIVE,
+                  v.status === VendorStatus.ACTIVE ? VendorStatus.INACTIVE : VendorStatus.ACTIVE,
                 ),
             },
             {
@@ -271,7 +283,11 @@ export function VendorsPage() {
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard label="Total Vendors" value={stats.total} icon={<Building2 className="h-5 w-5" />} />
+          <StatCard
+            label="Total Vendors"
+            value={stats.total}
+            icon={<Building2 className="h-5 w-5" />}
+          />
           <StatCard
             label="Active Vendors"
             value={stats.active}
@@ -294,7 +310,7 @@ export function VendorsPage() {
       )}
 
       {/* Toolbar / Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-border bg-surface p-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-md border border-border bg-surface p-3">
         <div className="flex flex-1 items-center gap-3">
           <SearchInput
             value={search}
@@ -321,11 +337,7 @@ export function VendorsPage() {
           </Select>
         </div>
 
-        <Select
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          className="w-44"
-        >
+        <Select value={sort} onChange={(e) => setSort(e.target.value)} className="w-44">
           <option value="name:asc">Sort: Name (A-Z)</option>
           <option value="code:asc">Sort: Code (A-Z)</option>
           <option value="productCount:desc">Sort: Most Products</option>
@@ -337,7 +349,7 @@ export function VendorsPage() {
       <Table
         columns={columns}
         rows={vendors}
-        rowKey={(v) => v._id}
+        rowKey={(v) => v.id}
         loading={loading}
         emptyState={
           <EmptyState
@@ -359,12 +371,7 @@ export function VendorsPage() {
       />
 
       {/* Pagination */}
-      {meta && (
-        <Pagination
-          meta={meta}
-          onPageChange={(p) => setPage(p)}
-        />
-      )}
+      {meta && <Pagination meta={meta} onPageChange={(p) => setPage(p)} />}
 
       {/* Drawer Editor */}
       <VendorEditorDrawer

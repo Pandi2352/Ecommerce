@@ -1,7 +1,7 @@
 import type { PaginationQuery } from '@ecommerce/shared';
 
 export interface BrandItem {
-  _id: string;
+  id: string;
   name: string;
   slug: string;
   logo?: string;

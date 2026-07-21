@@ -4,17 +4,35 @@ import { Model } from 'mongoose';
 import type { PaginatedMeta } from '../../common/dto/pagination.dto';
 import { BaseService } from '../../common/services/base.service';
 import { buildSearchFilter, parseSort } from '../../common/utils';
-import { CreateWarehouseDto, ListWarehousesQueryDto, UpdateWarehouseDto } from './dto/warehouse.dto';
+import {
+  InventoryRecord,
+  InventoryRecordDocument,
+} from '../inventory/schemas/inventory-record.schema';
+import {
+  CreateWarehouseDto,
+  ListWarehousesQueryDto,
+  UpdateWarehouseDto,
+} from './dto/warehouse.dto';
 import { Warehouse, WarehouseDocument } from './schemas/warehouse.schema';
 
 export interface WarehouseWithItemCount extends Warehouse {
   itemCount: number;
+  totalOnHand: number;
+}
+
+export interface WarehouseStats {
+  total: number;
+  active: number;
+  inactive: number;
+  primary: string | null;
 }
 
 @Injectable()
 export class WarehousesService extends BaseService<WarehouseDocument> implements OnModuleInit {
   constructor(
     @InjectModel(Warehouse.name) model: Model<WarehouseDocument>,
+    @InjectModel(InventoryRecord.name)
+    private readonly inventoryModel: Model<InventoryRecordDocument>,
   ) {
     super(model, 'Warehouse');
   }
@@ -59,20 +77,58 @@ export class WarehousesService extends BaseService<WarehouseDocument> implements
     return this.findByIdOrThrow(id);
   }
 
-  async list(q: ListWarehousesQueryDto): Promise<{ data: Warehouse[]; meta: PaginatedMeta }> {
+  async list(
+    q: ListWarehousesQueryDto,
+  ): Promise<{ data: WarehouseWithItemCount[]; meta: PaginatedMeta }> {
     const filter: Record<string, unknown> = {
-      ...buildSearchFilter(['name', 'code', 'contactName', 'city'], q.search),
+      ...buildSearchFilter(['name', 'code', 'contactName', 'address'], q.search),
     };
 
     if (q.status === 'ACTIVE') filter.isActive = true;
     if (q.status === 'INACTIVE') filter.isActive = false;
 
-    return this.paginate({
+    const result = await this.paginate({
       filter,
-      sort: parseSort(q.sort) || { isPrimary: -1, name: 1 },
+      sort: parseSort(q.sort, { isPrimary: -1, name: 1 }),
       page: q.page,
       pageSize: q.pageSize,
     });
+
+    // Attach per-warehouse inventory counts (distinct SKUs + total units on hand).
+    const ids = result.data.map((w) => w._id);
+    const agg = await this.inventoryModel.aggregate<{
+      _id: string;
+      itemCount: number;
+      totalOnHand: number;
+    }>([
+      { $match: { warehouseId: { $in: ids } } },
+      { $group: { _id: '$warehouseId', itemCount: { $sum: 1 }, totalOnHand: { $sum: '$onHand' } } },
+    ]);
+    const byId = new Map(agg.map((a) => [a._id, a]));
+
+    const data: WarehouseWithItemCount[] = result.data.map((w) => {
+      const obj = (w.toJSON ? w.toJSON() : w) as Warehouse;
+      const stats = byId.get(w._id);
+      // toJSON exposes `id` and drops `_id`; re-add `_id` so the admin UI (which
+      // keys/edits/deletes rows by `_id`, like the /inventory payload) works.
+      return {
+        ...obj,
+        _id: w._id,
+        itemCount: stats?.itemCount ?? 0,
+        totalOnHand: stats?.totalOnHand ?? 0,
+      };
+    });
+
+    return { data, meta: result.meta };
+  }
+
+  async getStats(): Promise<WarehouseStats> {
+    const [total, active, primaryDoc] = await Promise.all([
+      this.model.countDocuments(),
+      this.model.countDocuments({ isActive: true }),
+      this.model.findOne({ isPrimary: true }).exec(),
+    ]);
+    return { total, active, inactive: total - active, primary: primaryDoc?.name ?? null };
   }
 
   async setPrimary(id: string): Promise<Warehouse> {
@@ -107,6 +163,18 @@ export class WarehousesService extends BaseService<WarehouseDocument> implements
     if (warehouse.isPrimary) {
       throw new BadRequestException('Cannot delete the primary warehouse');
     }
+    // Block deletion while the warehouse still holds stock; otherwise clean up
+    // any zeroed inventory rows so we don't orphan them.
+    const [{ onHand = 0 } = {}] = await this.inventoryModel.aggregate<{ onHand: number }>([
+      { $match: { warehouseId: id } },
+      { $group: { _id: null, onHand: { $sum: '$onHand' } } },
+    ]);
+    if (onHand > 0) {
+      throw new BadRequestException(
+        `Cannot delete warehouse "${warehouse.name}" — it still holds ${onHand} unit(s) of stock. Transfer or remove stock first.`,
+      );
+    }
+    await this.inventoryModel.deleteMany({ warehouseId: id });
     await this.model.deleteOne({ _id: warehouse._id });
     return { id };
   }

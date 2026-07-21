@@ -63,7 +63,7 @@ export const sidebarConfig: SidebarGroup[] = [
         color: 'emerald',
         children: [
           { label: 'Stock', to: '/inventory' },
-          { label: 'Low Stock', to: '/inventory/low', badge: '7' },
+          { label: 'Low Stock', to: '/inventory/low' },
           { label: 'Warehouses', to: '/inventory/warehouses' },
         ],
       },

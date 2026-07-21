@@ -8,6 +8,7 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
     "seed": "ts-node src/seed/seed.ts",
+    "seed:dressing": "ts-node src/seed/seed-dressing.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"no backend tests yet\" && exit 0"
   },

@@ -1,7 +1,7 @@
 import type { PaginationQuery, VendorStatus } from '@ecommerce/shared';
 
 export interface VendorItem {
-  _id: string;
+  id: string;
   name: string;
   code: string;
   contactName?: string;

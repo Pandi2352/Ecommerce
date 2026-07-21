@@ -1,0 +1,50 @@
+[
+  {
+    "name": "StyleHub Distributors Ltd",
+    "code": "VND-STYLEHUB",
+    "contactName": "Rajesh Sharma",
+    "email": "sales@stylehubdistributors.com",
+    "phone": "+91 98765 43210",
+    "address": "702 Trade World Tower B, Lower Parel, Mumbai, Maharashtra 400013",
+    "website": "https://stylehubdistributors.com",
+    "commissionRate": 12.5,
+    "status": "ACTIVE",
+    "notes": "Primary distributor for European fashion imports, summer dresses, and luxury activewear."
+  },
+  {
+    "name": "Vogue Textiles & Garments Co",
+    "code": "VND-VOGUE",
+    "contactName": "Priya Nair",
+    "email": "orders@voguetextiles.in",
+    "phone": "+91 98765 43211",
+    "address": "45 Heritage Handloom Enclave, Sanganer, Jaipur, Rajasthan 302029",
+    "website": "https://voguetextiles.in",
+    "commissionRate": 10,
+    "status": "ACTIVE",
+    "notes": "Specialist manufacturer of hand-block printed cotton sarees, chanderi silk kurtas, and traditional ethnic wear."
+  },
+  {
+    "name": "Urban Threads Apparel Suppliers",
+    "code": "VND-URBAN",
+    "contactName": "Vikram Mehta",
+    "email": "contact@urbanthreadsapparel.com",
+    "phone": "+91 98765 43212",
+    "address": "120 Industrial Garment Complex, Phase III, Okhla, New Delhi 110020",
+    "website": "https://urbanthreadsapparel.com",
+    "commissionRate": 8.5,
+    "status": "ACTIVE",
+    "notes": "Bulk wholesaler for mid-wash denim jackets, Oxford cotton shirts, cashmere knits, and menswear chinos."
+  },
+  {
+    "name": "Royal Footwear & Accessories",
+    "code": "VND-ROYAL",
+    "contactName": "Anand Verma",
+    "email": "info@royalfootwear.co.in",
+    "phone": "+91 98765 43213",
+    "address": "304 Leather Goods Park, Shoe Market Area, Agra, Uttar Pradesh 282003",
+    "website": "https://royalfootwear.co.in",
+    "commissionRate": 15,
+    "status": "ACTIVE",
+    "notes": "Exclusive vendor for genuine Italian leather belts, minimalist white sneakers, evening stiletto heels, and leather totes."
+  }
+]

@@ -14,3 +14,11 @@ export function money(n: number): string {
     maximumFractionDigits: 2,
   }).format(n);
 }
+
+/** High-quality default product image fallback for storefront product cards */
+export const DEFAULT_PRODUCT_IMAGE =
+  'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500';
+
+/** High-quality default banner image fallback */
+export const DEFAULT_BANNER_IMAGE =
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200';

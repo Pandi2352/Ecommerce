@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Star } from 'lucide-react';
-import { money } from '@/lib/utils';
+import { money, DEFAULT_PRODUCT_IMAGE } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import type { Product } from '@/lib/types';
 
@@ -120,7 +120,7 @@ export function CategorySectionBlock({
               className="aspect-square overflow-hidden bg-surface-2 mb-2 block"
             >
               <img
-                src={item.image}
+                src={item.image || DEFAULT_PRODUCT_IMAGE}
                 alt={item.name}
                 className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
               />

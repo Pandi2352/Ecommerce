@@ -14,8 +14,10 @@ interface Props {
 export function IdentityTab({ form, onChange, disabled }: Props) {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
+  const [uploadingProductImg, setUploadingProductImg] = useState(false);
   const logoRef = useRef<HTMLInputElement>(null);
   const faviconRef = useRef<HTMLInputElement>(null);
+  const productImgRef = useRef<HTMLInputElement>(null);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,6 +53,23 @@ export function IdentityTab({ form, onChange, disabled }: Props) {
     }
   };
 
+  const handleProductImgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (productImgRef.current) productImgRef.current.value = '';
+    if (!file) return;
+
+    setUploadingProductImg(true);
+    try {
+      const url = await uploadImage(file);
+      onChange('defaultProductImageUrl', url);
+      toast.success('Default product image uploaded!');
+    } catch {
+      toast.error('Failed to upload default product image');
+    } finally {
+      setUploadingProductImg(false);
+    }
+  };
+
   const setSocial = (network: keyof SocialLinks, val: string) => {
     onChange('socialLinks', {
       ...form.socialLinks,
@@ -63,7 +82,7 @@ export function IdentityTab({ form, onChange, disabled }: Props) {
       <Card className="p-5">
         <h3 className="text-sm font-semibold text-text">Store Identity & Branding</h3>
         <p className="mt-0.5 text-xs text-text-secondary">
-          Storefront logo, name, tagline, footer details, and social channels.
+          Storefront logo, default product image, tagline, footer details, and social channels.
         </p>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -81,7 +100,7 @@ export function IdentityTab({ form, onChange, disabled }: Props) {
               value={form.tagline ?? ''}
               onChange={(e) => onChange('tagline', e.target.value)}
               disabled={disabled}
-              placeholder="e.g. Your One-Stop Electronics & Fashion Destination"
+              placeholder="e.g. Your One-Stop Storefront Destination"
             />
           </FormField>
 
@@ -157,12 +176,62 @@ export function IdentityTab({ form, onChange, disabled }: Props) {
             </div>
           </FormField>
 
+          {/* Default Product Image Upload */}
+          <FormField label="Default Product Fallback Image" className="sm:col-span-2">
+            <p className="text-[11px] text-text-muted mb-2">
+              Displayed on product cards whenever a product is added without an image.
+            </p>
+            <div className="flex items-center gap-3">
+              {form.defaultProductImageUrl ? (
+                <img
+                  src={form.defaultProductImageUrl}
+                  alt="default product"
+                  className="h-14 w-14 object-cover rounded border border-border bg-bg"
+                />
+              ) : (
+                <span className="grid h-14 w-14 place-items-center rounded border border-border bg-bg text-text-secondary">
+                  <ImagePlus className="size-5" />
+                </span>
+              )}
+              {!disabled && (
+                <div className="flex flex-col gap-1.5">
+                  <input
+                    ref={productImgRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleProductImgUpload}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      loading={uploadingProductImg}
+                      onClick={() => productImgRef.current?.click()}
+                    >
+                      Upload Default Product Image
+                    </Button>
+                    {form.defaultProductImageUrl && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onChange('defaultProductImageUrl', '')}
+                      >
+                        Reset
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </FormField>
+
           <FormField label="Footer Copyright Text" className="sm:col-span-2">
             <Input
               value={form.footerText ?? ''}
               onChange={(e) => onChange('footerText', e.target.value)}
               disabled={disabled}
-              placeholder="© 2026 MaxShop. All rights reserved."
+              placeholder="© 2026 Storefront. All rights reserved."
             />
           </FormField>
         </div>

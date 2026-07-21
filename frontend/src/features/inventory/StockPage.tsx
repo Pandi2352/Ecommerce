@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Boxes, AlertTriangle, XCircle, RefreshCw, SlidersHorizontal, History, Building2, Package } from 'lucide-react';
+import {
+  Boxes,
+  AlertTriangle,
+  XCircle,
+  RefreshCw,
+  SlidersHorizontal,
+  History,
+  Building2,
+  Package,
+} from 'lucide-react';
 import {
   Badge,
   Button,
@@ -46,7 +55,10 @@ export function StockPage() {
           pageSize: 15,
           search: search.trim() || undefined,
           warehouseId: warehouseId || undefined,
-          stockStatus: stockStatus !== 'ALL' ? (stockStatus as any) : undefined,
+          stockStatus:
+            stockStatus !== 'ALL'
+              ? (stockStatus as 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK')
+              : undefined,
           sort,
         }),
         fetchInventoryStats(),
@@ -97,7 +109,9 @@ export function StockPage() {
           )}
           <div className="leading-tight">
             <p className="text-xs font-bold text-text">{item.productName}</p>
-            <span className="font-mono text-[11px] font-semibold text-indigo-500">{item.variantSku}</span>
+            <span className="font-mono text-[11px] font-semibold text-indigo-500">
+              {item.variantSku}
+            </span>
           </div>
         </div>
       ),
@@ -124,7 +138,11 @@ export function StockPage() {
       className: 'text-right',
       cell: (item) => (
         <span className="font-mono text-xs text-text-secondary">
-          {item.reserved > 0 ? <span className="text-amber-500 font-semibold">{item.reserved}</span> : '0'}
+          {item.reserved > 0 ? (
+            <span className="text-amber-500 font-semibold">{item.reserved}</span>
+          ) : (
+            '0'
+          )}
         </span>
       ),
     },
@@ -135,7 +153,11 @@ export function StockPage() {
       cell: (item) => (
         <span
           className={`font-mono text-xs font-bold ${
-            item.available === 0 ? 'text-danger' : item.available <= item.lowStockThreshold ? 'text-amber-500' : 'text-emerald-500'
+            item.available === 0
+              ? 'text-danger'
+              : item.available <= item.lowStockThreshold
+                ? 'text-amber-500'
+                : 'text-emerald-500'
           }`}
         >
           {item.available}
@@ -186,7 +208,8 @@ export function StockPage() {
             <span>Stock & Inventory Records</span>
           </h1>
           <p className="text-xs text-text-secondary">
-            Real-time physical on-hand inventory, reserved order allocations, and stock audit ledgers.
+            Real-time physical on-hand inventory, reserved order allocations, and stock audit
+            ledgers.
           </p>
         </div>
       </div>
@@ -194,7 +217,11 @@ export function StockPage() {
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard label="Total Stock On-Hand" value={stats.totalOnHand} icon={<Boxes className="h-5 w-5" />} />
+          <StatCard
+            label="Total Stock On-Hand"
+            value={stats.totalOnHand}
+            icon={<Boxes className="h-5 w-5" />}
+          />
           <StatCard
             label="Total Reserved"
             value={stats.totalReserved}
@@ -255,8 +282,8 @@ export function StockPage() {
           >
             <option value="ALL">All Statuses</option>
             <option value="IN_STOCK">In Stock</option>
-            <option value="LOW_STOCK">Low Stock ⚠️</option>
-            <option value="OUT_OF_STOCK">Out of Stock 🚨</option>
+            <option value="LOW_STOCK">Low Stock</option>
+            <option value="OUT_OF_STOCK">Out of Stock</option>
           </Select>
         </div>
 

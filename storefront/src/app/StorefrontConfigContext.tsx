@@ -43,6 +43,7 @@ export interface StorefrontConfig {
   tagline?: string;
   logoUrl?: string;
   faviconUrl?: string;
+  defaultProductImageUrl?: string;
   footerText?: string;
   supportEmail?: string;
   supportPhone?: string;
@@ -102,8 +103,15 @@ function applyTheme(theme?: ThemeConfig) {
   const root = document.documentElement;
 
   if (theme.primaryColor) {
+    const hover = adjustColorBrightness(theme.primaryColor, -15);
     root.style.setProperty('--accent', theme.primaryColor);
-    root.style.setProperty('--accent-hover', adjustColorBrightness(theme.primaryColor, -15));
+    root.style.setProperty('--accent-hover', hover);
+    // The MaxShop chrome (ribbons, nav tabs, prices, buttons) is driven by the
+    // red tokens, not --accent. Recolor them too so the admin "Theme & Colors"
+    // primary color actually changes the storefront's dominant color.
+    root.style.setProperty('--danger', theme.primaryColor);
+    root.style.setProperty('--maxshop-red', theme.primaryColor);
+    root.style.setProperty('--maxshop-red-hover', hover);
   }
   if (theme.accentColor) {
     root.style.setProperty('--pink', theme.accentColor);
@@ -136,12 +144,12 @@ function applyFavicon(faviconUrl?: string) {
 }
 
 function adjustColorBrightness(hex: string, percent: number): string {
-  let num = parseInt(hex.replace('#', ''), 16);
+  const num = parseInt(hex.replace('#', ''), 16);
   if (isNaN(num)) return hex;
-  let amt = Math.round(2.55 * percent);
-  let R = (num >> 16) + amt;
-  let G = ((num >> 8) & 0x00ff) + amt;
-  let B = (num & 0x0000ff) + amt;
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = ((num >> 8) & 0x00ff) + amt;
+  const B = (num & 0x0000ff) + amt;
   return `#${(
     0x1000000 +
     (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +

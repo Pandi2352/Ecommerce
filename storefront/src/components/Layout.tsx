@@ -1,38 +1,25 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import {
-  ShoppingBag,
-  Search,
-  Phone,
-  User,
-  Lock,
-  Globe,
-  DollarSign,
-  ChevronDown,
-} from 'lucide-react';
+import { ShoppingBag, Search, Phone, Lock, Globe, IndianRupee, ChevronDown } from 'lucide-react';
 import { useCart } from '@/cart/CartContext';
 import { useStorefrontConfig } from '@/app/StorefrontConfigContext';
+import { useCategories } from '@/app/CategoryContext';
 import { useState } from 'react';
-
-const NAV_ITEMS = [
-  { label: 'HOME', to: '/' },
-  { label: 'SHOP', to: '/' },
-  { label: 'MOBILES', to: '/' },
-  { label: 'ELECTRONICS', to: '/' },
-  { label: 'BLOG', to: '/' },
-  { label: 'PAGES', to: '/' },
-  { label: 'ABOUT US', to: '/' },
-  { label: 'CONTACT US', to: '/' },
-];
 
 export function Layout() {
   const { count } = useCart();
   const { config } = useStorefrontConfig();
+  const { categories, selectedCategory, setSelectedCategory } = useCategories();
   const location = useLocation();
-  const [searchCategory, setSearchCategory] = useState('All Categories');
   const [searchTerm, setSearchTerm] = useState('');
 
   const storeName = config?.storeName || 'MAXSHOP';
   const logoUrl = config?.logoUrl;
+
+  const navItems = [
+    { label: 'HOME', id: null },
+    { label: 'ALL PRODUCTS', id: null },
+    ...categories.slice(0, 6).map((c) => ({ label: c.name.toUpperCase(), id: c.id })),
+  ];
 
   return (
     <div className="flex min-h-full flex-col bg-bg text-text">
@@ -44,16 +31,15 @@ export function Layout() {
             <span className="bg-amber-500 text-white font-bold px-1.5 py-0.5 text-[10px] uppercase rounded-xs">
               This Week
             </span>
-            <span className="truncate">Maecenas faucibus mollis interdum et malesuada fames.</span>
+            <span className="truncate">
+              Special deals and new arrivals across all store categories.
+            </span>
           </div>
 
-          {/* Quick Account & Settings Links */}
+          {/* Quick Links */}
           <div className="flex items-center gap-4 text-[11px] font-medium">
-            <Link to="/auth/login" className="flex items-center gap-1 hover:text-danger">
-              <User className="h-3 w-3" /> Login
-            </Link>
-            <Link to="/account" className="flex items-center gap-1 hover:text-danger">
-              <User className="h-3 w-3" /> My Account <ChevronDown className="h-3 w-3" />
+            <Link to="/cart" className="flex items-center gap-1 hover:text-danger">
+              <ShoppingBag className="h-3 w-3" /> Cart
             </Link>
             <Link to="/checkout" className="flex items-center gap-1 hover:text-danger">
               <Lock className="h-3 w-3" /> Checkout
@@ -63,7 +49,7 @@ export function Layout() {
               <Globe className="h-3 w-3" /> English <ChevronDown className="h-3 w-3" />
             </div>
             <div className="flex items-center gap-1 hover:text-danger cursor-pointer">
-              <DollarSign className="h-3 w-3" /> USD <ChevronDown className="h-3 w-3" />
+              <IndianRupee className="h-3 w-3" /> INR <ChevronDown className="h-3 w-3" />
             </div>
           </div>
         </div>
@@ -72,18 +58,19 @@ export function Layout() {
       {/* ── 2. MAIN HEADER ───────────────────────────────────────────────── */}
       <header className="bg-surface py-5 border-b border-border">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-2 sm:px-4 gap-6">
-          {/* Left: Search with Category Select */}
+          {/* Left: Search with Dynamic DB Category Select */}
           <div className="flex flex-1 max-w-md items-center border-2 border-border rounded-sm overflow-hidden focus-within:border-danger transition-colors">
             <select
-              value={searchCategory}
-              onChange={(e) => setSearchCategory(e.target.value)}
-              className="bg-surface-2 px-3 py-2 text-xs font-semibold border-r border-border outline-none text-text-secondary cursor-pointer"
+              value={selectedCategory || ''}
+              onChange={(e) => setSelectedCategory(e.target.value || null)}
+              className="bg-surface-2 px-3 py-2 text-xs font-semibold border-r border-border outline-none text-text-secondary cursor-pointer max-w-[140px] truncate"
             >
-              <option>All Categories</option>
-              <option>Electronics</option>
-              <option>Mobiles</option>
-              <option>Fashion</option>
-              <option>Computers</option>
+              <option value="">All Categories</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
             </select>
             <input
               type="text"
@@ -107,8 +94,8 @@ export function Layout() {
                   className="text-3xl font-black tracking-tight uppercase"
                   style={{ fontFamily: 'var(--font-display)' }}
                 >
-                  <span className="text-text">MAX</span>
-                  <span className="text-danger">SHOP</span>
+                  <span className="text-text">{storeName.slice(0, 3)}</span>
+                  <span className="text-danger">{storeName.slice(3) || 'SHOP'}</span>
                 </span>
               </div>
             )}
@@ -123,7 +110,9 @@ export function Layout() {
               <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
                 HOTLINE:
               </p>
-              <p className="text-xs font-black text-danger tracking-wide">(801) 2345 - 6789</p>
+              <p className="text-xs font-black text-danger tracking-wide">
+                {config?.supportPhone || '(801) 2345 - 6789'}
+              </p>
             </div>
           </div>
         </div>
@@ -132,18 +121,23 @@ export function Layout() {
       {/* ── 3. PRIMARY NAVIGATION BAR (Dark bar with Red angled tabs) ────── */}
       <nav className="bg-maxshop-dark border-b-2 border-danger text-white">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-2 sm:px-4">
-          {/* Links */}
-          <div className="flex items-center">
-            {NAV_ITEMS.map((item, idx) => {
-              const isActive = location.pathname === item.to && idx === 0;
+          {/* Dynamic Nav Links */}
+          <div className="flex items-center overflow-x-auto no-scrollbar">
+            {navItems.map((item, idx) => {
+              const isActive =
+                (item.id === null &&
+                  selectedCategory === null &&
+                  location.pathname === '/' &&
+                  idx === 0) ||
+                (item.id !== null && selectedCategory === item.id);
               return (
-                <Link
+                <button
                   key={item.label}
-                  to={item.to}
-                  className={`maxshop-nav-tab ${isActive ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(item.id)}
+                  className={`maxshop-nav-tab whitespace-nowrap ${isActive ? 'active' : ''}`}
                 >
                   {item.label}
-                </Link>
+                </button>
               );
             })}
           </div>
@@ -151,7 +145,7 @@ export function Layout() {
           {/* Cart Button Ribbon */}
           <Link
             to="/cart"
-            className="maxshop-ribbon bg-danger hover:bg-danger/90 text-white flex items-center gap-2 py-2 px-5 cursor-pointer"
+            className="maxshop-ribbon bg-danger hover:bg-danger/90 text-white flex items-center gap-2 py-2 px-5 cursor-pointer shrink-0"
           >
             <ShoppingBag className="h-4 w-4" />
             <span className="font-extrabold text-xs">MY CART</span>
@@ -169,8 +163,8 @@ export function Layout() {
 
       {/* ── 5. FOOTER ────────────────────────────────────────────────────── */}
       <footer className="border-t border-border bg-surface text-xs text-text-secondary mt-12 py-8">
-        <div className="mx-auto max-w-[1400px] px-2 sm:px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026 {storeName}. All rights reserved. Premium Marketplace Storefront.</p>
+        <div className="mx-auto max-w-[1440px] px-2 sm:px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>© 2026 {storeName}. All rights reserved. Powered by Generic Store Engine.</p>
           <div className="flex items-center gap-4">
             <Link to="/" className="hover:text-danger">
               Privacy Policy
