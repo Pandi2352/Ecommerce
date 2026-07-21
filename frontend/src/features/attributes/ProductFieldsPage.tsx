@@ -32,7 +32,11 @@ import {
 } from './api';
 
 const slug = (s: string) =>
-  s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
 
 interface FieldForm {
   label: string;
@@ -115,7 +119,10 @@ export function ProductFieldsPage() {
     label: form.label,
     type: form.type,
     options: needsOptions
-      ? form.optionsText.split(',').map((o) => o.trim()).filter(Boolean)
+      ? form.optionsText
+          .split(',')
+          .map((o) => o.trim())
+          .filter(Boolean)
       : [],
     unit: form.unit || undefined,
     group: form.group || undefined,
@@ -129,10 +136,14 @@ export function ProductFieldsPage() {
   const onSave = () => {
     if (form.label.trim().length < 1) return toast.error('Label is required');
     if (!editing && !form.key) return toast.error('Key is required');
-    if (needsOptions && !buildPayload().options?.length) return toast.error('Add at least one option');
+    if (needsOptions && !buildPayload().options?.length)
+      return toast.error('Add at least one option');
     const payload = buildPayload();
     void save.run(
-      () => (editing ? updateAttribute(editing.id, payload) : createAttribute({ ...payload, key: form.key })),
+      () =>
+        editing
+          ? updateAttribute(editing.id, payload)
+          : createAttribute({ ...payload, key: form.key }),
       {
         success: editing ? 'Field updated' : 'Field created',
         error: 'Save failed',
@@ -161,7 +172,11 @@ export function ProductFieldsPage() {
     void preset.run(() => applyPreset(presetId), {
       error: 'Failed to apply preset',
       onSuccess: (res) => {
-        toast.success(res.added > 0 ? `Added ${res.added} field${res.added === 1 ? '' : 's'}` : 'All preset fields already exist');
+        toast.success(
+          res.added > 0
+            ? `Added ${res.added} field${res.added === 1 ? '' : 's'}`
+            : 'All preset fields already exist',
+        );
         setPresetOpen(false);
         setPresetId('');
         void reload();
@@ -214,10 +229,22 @@ export function ProductFieldsPage() {
       cell: (a) =>
         canWrite && (
           <div className="flex justify-end gap-1">
-            <Button variant="ghost" size="sm" iconOnly aria-label="Edit" onClick={() => openEdit(a)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              iconOnly
+              aria-label="Edit"
+              onClick={() => openEdit(a)}
+            >
               <Pencil className="size-4" />
             </Button>
-            <Button variant="ghost" size="sm" iconOnly aria-label="Delete" onClick={() => setToDelete(a)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              iconOnly
+              aria-label="Delete"
+              onClick={() => setToDelete(a)}
+            >
               <Trash2 className="size-4 text-danger" />
             </Button>
           </div>
@@ -233,7 +260,11 @@ export function ProductFieldsPage() {
         action={
           canWrite && (
             <div className="flex gap-2">
-              <Button variant="secondary" leftIcon={<Wand2 className="size-4" />} onClick={() => setPresetOpen(true)}>
+              <Button
+                variant="secondary"
+                leftIcon={<Wand2 className="size-4" />}
+                onClick={() => setPresetOpen(true)}
+              >
                 Apply preset
               </Button>
               <Button leftIcon={<Plus className="size-4" />} onClick={openCreate}>
@@ -278,7 +309,11 @@ export function ProductFieldsPage() {
       >
         <div className="grid grid-cols-2 gap-3">
           <FormField label="Label" required>
-            <Input value={form.label} onChange={(e) => onLabel(e.target.value)} placeholder="e.g. Material" />
+            <Input
+              value={form.label}
+              onChange={(e) => onLabel(e.target.value)}
+              placeholder="e.g. Material"
+            />
           </FormField>
           <FormField label="Key" hint={editing ? 'Fixed after creation' : 'Auto from label'}>
             <Input
@@ -292,7 +327,10 @@ export function ProductFieldsPage() {
             />
           </FormField>
           <FormField label="Type">
-            <Select value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as AttributeType }))}>
+            <Select
+              value={form.type}
+              onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as AttributeType }))}
+            >
               {ATTRIBUTE_TYPES.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -301,7 +339,10 @@ export function ProductFieldsPage() {
             </Select>
           </FormField>
           <FormField label="Unit" hint="optional, e.g. cm, g">
-            <Input value={form.unit} onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))} />
+            <Input
+              value={form.unit}
+              onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
+            />
           </FormField>
           {needsOptions && (
             <FormField label="Options" required className="col-span-2" hint="comma-separated">
@@ -313,22 +354,40 @@ export function ProductFieldsPage() {
             </FormField>
           )}
           <FormField label="Group" hint="form section">
-            <Input value={form.group} onChange={(e) => setForm((f) => ({ ...f, group: e.target.value }))} placeholder="Specs" />
+            <Input
+              value={form.group}
+              onChange={(e) => setForm((f) => ({ ...f, group: e.target.value }))}
+              placeholder="Specs"
+            />
           </FormField>
           <FormField label="Sort order">
-            <Input type="number" value={form.sortOrder} onChange={(e) => setForm((f) => ({ ...f, sortOrder: e.target.value }))} />
+            <Input
+              type="number"
+              value={form.sortOrder}
+              onChange={(e) => setForm((f) => ({ ...f, sortOrder: e.target.value }))}
+            />
           </FormField>
           <FormField label="Applies to" className="col-span-2">
-            <Select value={form.scope} onChange={(e) => setForm((f) => ({ ...f, scope: e.target.value as 'all' | 'categories' }))}>
+            <Select
+              value={form.scope}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, scope: e.target.value as 'all' | 'categories' }))
+              }
+            >
               <option value="all">All products</option>
               <option value="categories">Specific categories</option>
             </Select>
           </FormField>
           {form.scope === 'categories' && (
             <div className="col-span-2 max-h-40 space-y-1 overflow-y-auto rounded-md border border-border p-2 scrollbar-thin">
-              {categories.length === 0 && <p className="text-xs text-text-secondary">No categories yet.</p>}
+              {categories.length === 0 && (
+                <p className="text-xs text-text-secondary">No categories yet.</p>
+              )}
               {categories.map((c) => (
-                <label key={c.id} className="flex cursor-pointer items-center gap-2 text-sm text-text">
+                <label
+                  key={c.id}
+                  className="flex cursor-pointer items-center gap-2 text-sm text-text"
+                >
                   <Checkbox
                     checked={form.categoryIds.includes(c.id)}
                     onChange={() =>
@@ -346,13 +405,25 @@ export function ProductFieldsPage() {
             </div>
           )}
           <label className="flex items-center gap-2 text-sm text-text">
-            <Checkbox checked={form.required} onChange={(e) => setForm((f) => ({ ...f, required: e.target.checked }))} />
+            <Checkbox
+              checked={form.required}
+              onChange={(e) => setForm((f) => ({ ...f, required: e.target.checked }))}
+            />
             Required
           </label>
           <label className="flex items-center gap-2 text-sm text-text">
-            <Checkbox checked={form.filterable} onChange={(e) => setForm((f) => ({ ...f, filterable: e.target.checked }))} />
+            <Checkbox
+              checked={form.filterable}
+              onChange={(e) => setForm((f) => ({ ...f, filterable: e.target.checked }))}
+            />
             Filterable
           </label>
+          <p className="col-span-2 -mt-1 text-xs text-text-secondary">
+            <span className="font-medium text-text">Filterable</span> fields appear as shopper
+            filters on the storefront's All Products page (e.g. Material, Fit, Gender). Works best
+            with <span className="font-medium">select</span> /{' '}
+            <span className="font-medium">boolean</span> types.
+          </p>
         </div>
       </Modal>
 
@@ -363,7 +434,11 @@ export function ProductFieldsPage() {
         title="Apply a shop preset"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setPresetOpen(false)} disabled={preset.saving}>
+            <Button
+              variant="secondary"
+              onClick={() => setPresetOpen(false)}
+              disabled={preset.saving}
+            >
               Cancel
             </Button>
             <Button onClick={doApplyPreset} loading={preset.saving} disabled={!presetId}>
@@ -391,11 +466,16 @@ export function ProductFieldsPage() {
                 />
                 <div>
                   <p className="text-sm font-medium text-text">
-                    {p.label} <span className="text-xs font-normal text-text-secondary">· {p.fieldCount} fields</span>
+                    {p.label}{' '}
+                    <span className="text-xs font-normal text-text-secondary">
+                      · {p.fieldCount} fields
+                    </span>
                   </p>
                   <p className="text-xs text-text-secondary">{p.description}</p>
                   {p.variantOptions.length > 0 && (
-                    <p className="mt-1 text-[11px] text-text-secondary">Variant options: {p.variantOptions.join(', ')}</p>
+                    <p className="mt-1 text-[11px] text-text-secondary">
+                      Variant options: {p.variantOptions.join(', ')}
+                    </p>
                   )}
                 </div>
               </label>
@@ -414,8 +494,8 @@ export function ProductFieldsPage() {
         onClose={() => setToDelete(null)}
         message={
           <>
-            Delete the <span className="font-medium text-text">{toDelete?.label}</span> field? Existing product
-            values for it will be ignored.
+            Delete the <span className="font-medium text-text">{toDelete?.label}</span> field?
+            Existing product values for it will be ignored.
           </>
         }
       />

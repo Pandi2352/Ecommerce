@@ -2,6 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from '@/cart/CartContext';
 import { AuthProvider } from '@/auth/AuthContext';
+import { BootGate } from '@/components/BootGate';
 import { StorefrontConfigProvider } from './StorefrontConfigContext';
 import { CategoryProvider } from './CategoryContext';
 import { AppRoutes } from './routes';
@@ -13,7 +14,9 @@ export function App() {
         <StorefrontConfigProvider>
           <CategoryProvider>
             <CartProvider>
-              <AppRoutes />
+              <BootGate>
+                <AppRoutes />
+              </BootGate>
               <Toaster
                 position="bottom-right"
                 toastOptions={{

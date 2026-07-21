@@ -341,18 +341,6 @@ export function ProductsPage() {
           onValueChange={(v) => setFilters((f) => ({ ...f, search: v, page: 1 }))}
         />
         <Select
-          className="w-44"
-          value={filters.category}
-          onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value, page: 1 }))}
-        >
-          <option value="">All categories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </Select>
-        <Select
           className="w-40"
           value={filters.brandId}
           onChange={(e) => setFilters((f) => ({ ...f, brandId: e.target.value, page: 1 }))}

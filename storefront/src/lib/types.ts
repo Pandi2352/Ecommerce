@@ -10,6 +10,13 @@ export interface Paginated<T> {
   meta: Meta;
 }
 
+/** Catalog filter facets from `/storefront/facets` — fully admin-driven. */
+export interface Facets {
+  priceRange: { min: number; max: number };
+  brands: { id: string; name: string; count: number }[];
+  attributes: { key: string; label: string; type: string; unit?: string; values: string[] }[];
+}
+
 /** Product as exposed by the public storefront API (`/storefront/products`). */
 export interface Product {
   id: string;

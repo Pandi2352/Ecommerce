@@ -22,11 +22,6 @@ export function SectionsTab({ sections, onChange, disabled }: Props) {
       desc: 'Display the full-width image slider at the top of the homepage.',
     },
     {
-      key: 'showCategories',
-      label: 'Categories Filter Bar',
-      desc: 'Display category filter chips / pills above the product list.',
-    },
-    {
       key: 'showFeatured',
       label: 'Featured Products Grid',
       desc: 'Display highlighted product catalog grid.',

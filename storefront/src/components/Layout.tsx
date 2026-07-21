@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   ShoppingBag,
   Search,
@@ -19,17 +19,19 @@ export function Layout() {
   const { count } = useCart();
   const { user } = useAuth();
   const { config } = useStorefrontConfig();
-  const { categories, selectedCategory, setSelectedCategory } = useCategories();
+  const { setSelectedCategory } = useCategories();
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
   const storeName = config?.storeName || 'MAXSHOP';
   const logoUrl = config?.logoUrl;
 
   const navItems = [
-    { label: 'HOME', id: null },
-    { label: 'ALL PRODUCTS', id: null },
-    ...categories.slice(0, 6).map((c) => ({ label: c.name.toUpperCase(), id: c.id })),
+    { label: 'HOME', to: '/', resetCategory: true },
+    { label: 'ALL PRODUCTS', to: '/products', resetCategory: true },
+    { label: 'ABOUT US', to: '/about', resetCategory: false },
+    { label: 'CONTACT', to: '/contact', resetCategory: false },
   ];
 
   return (
@@ -75,28 +77,27 @@ export function Layout() {
       {/* ── 2. MAIN HEADER ───────────────────────────────────────────────── */}
       <header className="bg-surface py-5 border-b border-border">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-2 sm:px-4 gap-6">
-          {/* Left: Search with Dynamic DB Category Select */}
+          {/* Left: Product search */}
           <div className="flex flex-1 max-w-md items-center border-2 border-border rounded-sm overflow-hidden focus-within:border-danger transition-colors">
-            <select
-              value={selectedCategory || ''}
-              onChange={(e) => setSelectedCategory(e.target.value || null)}
-              className="bg-surface-2 px-3 py-2 text-xs font-semibold border-r border-border outline-none text-text-secondary cursor-pointer max-w-[140px] truncate"
-            >
-              <option value="">All Categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchTerm.trim())
+                  navigate(`/products?q=${encodeURIComponent(searchTerm.trim())}`);
+              }}
               placeholder="Search for products..."
               className="w-full bg-surface px-3 py-2 text-xs outline-none"
             />
-            <button className="bg-text text-white p-2.5 hover:bg-danger transition-colors">
+            <button
+              onClick={() =>
+                searchTerm.trim() &&
+                navigate(`/products?q=${encodeURIComponent(searchTerm.trim())}`)
+              }
+              className="bg-text text-white p-2.5 hover:bg-danger transition-colors"
+              aria-label="Search"
+            >
               <Search className="h-4 w-4" />
             </button>
           </div>
@@ -140,21 +141,20 @@ export function Layout() {
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-2 sm:px-4">
           {/* Dynamic Nav Links */}
           <div className="flex items-center overflow-x-auto no-scrollbar">
-            {navItems.map((item, idx) => {
+            {navItems.map((item) => {
               const isActive =
-                (item.id === null &&
-                  selectedCategory === null &&
-                  location.pathname === '/' &&
-                  idx === 0) ||
-                (item.id !== null && selectedCategory === item.id);
+                item.to === '/' ? location.pathname === '/' : location.pathname.startsWith(item.to);
               return (
-                <button
-                  key={item.label}
-                  onClick={() => setSelectedCategory(item.id)}
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => {
+                    if (item.resetCategory) setSelectedCategory(null);
+                  }}
                   className={`maxshop-nav-tab whitespace-nowrap ${isActive ? 'active' : ''}`}
                 >
                   {item.label}
-                </button>
+                </Link>
               );
             })}
           </div>

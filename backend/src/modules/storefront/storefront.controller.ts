@@ -10,20 +10,30 @@ export class StorefrontController {
   constructor(private readonly storefront: StorefrontService) {}
 
   @Get('products')
-  listProducts(
-    @Query('page') page?: string,
-    @Query('pageSize') pageSize?: string,
-    @Query('search') search?: string,
-    @Query('category') category?: string,
-    @Query('sort') sort?: string,
-  ) {
+  listProducts(@Query() q: Record<string, string>) {
+    // Dynamic attribute facets arrive as `attr_<key>=v1,v2`.
+    const attrs: Record<string, string[]> = {};
+    for (const [k, v] of Object.entries(q)) {
+      if (k.startsWith('attr_') && v) attrs[k.slice(5)] = v.split(',').filter(Boolean);
+    }
     return this.storefront.listProducts({
-      page: page ? Number(page) : undefined,
-      pageSize: pageSize ? Number(pageSize) : undefined,
-      search,
-      category,
-      sort,
+      page: q.page ? Number(q.page) : undefined,
+      pageSize: q.pageSize ? Number(q.pageSize) : undefined,
+      search: q.search,
+      category: q.category,
+      sort: q.sort,
+      minPrice: q.minPrice ? Number(q.minPrice) : undefined,
+      maxPrice: q.maxPrice ? Number(q.maxPrice) : undefined,
+      brand: q.brand,
+      onSale: q.onSale === 'true',
+      inStock: q.inStock === 'true',
+      attrs,
     });
+  }
+
+  @Get('facets')
+  facets(@Query('category') category?: string) {
+    return this.storefront.getFacets(category);
   }
 
   @Get('products/:slug')

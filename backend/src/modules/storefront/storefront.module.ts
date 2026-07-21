@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
+import { Brand, BrandSchema } from '../brands/schemas/brand.schema';
+import { Attribute, AttributeSchema } from '../attributes/schemas/attribute.schema';
 import { OrdersModule } from '../orders/orders.module';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
@@ -11,7 +13,11 @@ import { StorefrontAccountController } from './storefront-account.controller';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+    MongooseModule.forFeature([
+      { name: Product.name, schema: ProductSchema },
+      { name: Brand.name, schema: BrandSchema },
+      { name: Attribute.name, schema: AttributeSchema },
+    ]),
     OrdersModule,
     AuthModule,
     UsersModule,

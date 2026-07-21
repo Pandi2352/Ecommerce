@@ -50,3 +50,6 @@ Thumbs.db
 .cache/
 .temp/
 tmp/
+
+# local (non-docker) MongoDB data
+.local-mongo/
