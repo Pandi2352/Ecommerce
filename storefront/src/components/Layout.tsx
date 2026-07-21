@@ -1,41 +1,187 @@
-import { Link, Outlet } from 'react-router-dom';
-import { ShoppingBag } from 'lucide-react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import {
+  ShoppingBag,
+  Search,
+  Phone,
+  User,
+  Lock,
+  Globe,
+  DollarSign,
+  ChevronDown,
+} from 'lucide-react';
 import { useCart } from '@/cart/CartContext';
+import { useStorefrontConfig } from '@/app/StorefrontConfigContext';
+import { useState } from 'react';
+
+const NAV_ITEMS = [
+  { label: 'HOME', to: '/' },
+  { label: 'SHOP', to: '/' },
+  { label: 'MOBILES', to: '/' },
+  { label: 'ELECTRONICS', to: '/' },
+  { label: 'BLOG', to: '/' },
+  { label: 'PAGES', to: '/' },
+  { label: 'ABOUT US', to: '/' },
+  { label: 'CONTACT US', to: '/' },
+];
 
 export function Layout() {
   const { count } = useCart();
+  const { config } = useStorefrontConfig();
+  const location = useLocation();
+  const [searchCategory, setSearchCategory] = useState('All Categories');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const storeName = config?.storeName || 'MAXSHOP';
+  const logoUrl = config?.logoUrl;
+
   return (
-    <div className="flex min-h-full flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-surface">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link to="/" className="flex items-center gap-2 text-base font-semibold text-text">
-            <span className="grid h-7 w-7 place-items-center rounded-md bg-accent text-accent-fg">
-              N
+    <div className="flex min-h-full flex-col bg-bg text-text">
+      {/* ── 1. TOP UTILITY BAR ────────────────────────────────────────────── */}
+      <div className="border-b border-border bg-surface text-xs text-text-secondary">
+        <div className="mx-auto flex h-9 max-w-[1440px] items-center justify-between px-2 sm:px-4">
+          {/* Ticker Notice */}
+          <div className="flex items-center gap-2">
+            <span className="bg-amber-500 text-white font-bold px-1.5 py-0.5 text-[10px] uppercase rounded-xs">
+              This Week
             </span>
-            NovaShop
-          </Link>
-          <Link
-            to="/cart"
-            className="relative flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-text hover:bg-bg"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            Cart
-            {count > 0 && (
-              <span className="grid h-5 min-w-5 place-items-center rounded-md bg-accent px-1 text-xs font-medium text-accent-fg">
-                {count}
-              </span>
+            <span className="truncate">Maecenas faucibus mollis interdum et malesuada fames.</span>
+          </div>
+
+          {/* Quick Account & Settings Links */}
+          <div className="flex items-center gap-4 text-[11px] font-medium">
+            <Link to="/auth/login" className="flex items-center gap-1 hover:text-danger">
+              <User className="h-3 w-3" /> Login
+            </Link>
+            <Link to="/account" className="flex items-center gap-1 hover:text-danger">
+              <User className="h-3 w-3" /> My Account <ChevronDown className="h-3 w-3" />
+            </Link>
+            <Link to="/checkout" className="flex items-center gap-1 hover:text-danger">
+              <Lock className="h-3 w-3" /> Checkout
+            </Link>
+            <span className="h-3 w-px bg-border" />
+            <div className="flex items-center gap-1 hover:text-danger cursor-pointer">
+              <Globe className="h-3 w-3" /> English <ChevronDown className="h-3 w-3" />
+            </div>
+            <div className="flex items-center gap-1 hover:text-danger cursor-pointer">
+              <DollarSign className="h-3 w-3" /> USD <ChevronDown className="h-3 w-3" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 2. MAIN HEADER ───────────────────────────────────────────────── */}
+      <header className="bg-surface py-5 border-b border-border">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-2 sm:px-4 gap-6">
+          {/* Left: Search with Category Select */}
+          <div className="flex flex-1 max-w-md items-center border-2 border-border rounded-sm overflow-hidden focus-within:border-danger transition-colors">
+            <select
+              value={searchCategory}
+              onChange={(e) => setSearchCategory(e.target.value)}
+              className="bg-surface-2 px-3 py-2 text-xs font-semibold border-r border-border outline-none text-text-secondary cursor-pointer"
+            >
+              <option>All Categories</option>
+              <option>Electronics</option>
+              <option>Mobiles</option>
+              <option>Fashion</option>
+              <option>Computers</option>
+            </select>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search for products..."
+              className="w-full bg-surface px-3 py-2 text-xs outline-none"
+            />
+            <button className="bg-text text-white p-2.5 hover:bg-danger transition-colors">
+              <Search className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Center: Store Brand Logo */}
+          <Link to="/" className="flex items-center justify-center shrink-0">
+            {logoUrl ? (
+              <img src={logoUrl} alt={storeName} className="h-10 max-w-44 object-contain" />
+            ) : (
+              <div className="text-center">
+                <span
+                  className="text-3xl font-black tracking-tight uppercase"
+                  style={{ fontFamily: 'var(--font-display)' }}
+                >
+                  <span className="text-text">MAX</span>
+                  <span className="text-danger">SHOP</span>
+                </span>
+              </div>
             )}
           </Link>
+
+          {/* Right: Phone / Hotline Widget */}
+          <div className="flex items-center gap-3 text-right hidden md:flex shrink-0">
+            <div className="h-10 w-10 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+              <Phone className="h-5 w-5 fill-danger text-danger" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+                HOTLINE:
+              </p>
+              <p className="text-xs font-black text-danger tracking-wide">(801) 2345 - 6789</p>
+            </div>
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+      {/* ── 3. PRIMARY NAVIGATION BAR (Dark bar with Red angled tabs) ────── */}
+      <nav className="bg-maxshop-dark border-b-2 border-danger text-white">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-2 sm:px-4">
+          {/* Links */}
+          <div className="flex items-center">
+            {NAV_ITEMS.map((item, idx) => {
+              const isActive = location.pathname === item.to && idx === 0;
+              return (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  className={`maxshop-nav-tab ${isActive ? 'active' : ''}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Cart Button Ribbon */}
+          <Link
+            to="/cart"
+            className="maxshop-ribbon bg-danger hover:bg-danger/90 text-white flex items-center gap-2 py-2 px-5 cursor-pointer"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            <span className="font-extrabold text-xs">MY CART</span>
+            <span className="bg-white text-danger font-bold rounded-xs px-1.5 py-0.2 text-xs ml-1">
+              {count}
+            </span>
+          </Link>
+        </div>
+      </nav>
+
+      {/* ── 4. MAIN BODY CONTAINER ───────────────────────────────────────── */}
+      <main className="mx-auto w-full max-w-[1440px] flex-1 px-2 sm:px-4 py-6">
         <Outlet />
       </main>
 
-      <footer className="border-t border-border bg-surface">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-text-secondary">
-          © NovaShop — a demo storefront.
+      {/* ── 5. FOOTER ────────────────────────────────────────────────────── */}
+      <footer className="border-t border-border bg-surface text-xs text-text-secondary mt-12 py-8">
+        <div className="mx-auto max-w-[1400px] px-2 sm:px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>© 2026 {storeName}. All rights reserved. Premium Marketplace Storefront.</p>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="hover:text-danger">
+              Privacy Policy
+            </Link>
+            <Link to="/" className="hover:text-danger">
+              Terms of Service
+            </Link>
+            <Link to="/" className="hover:text-danger">
+              Contact Support
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

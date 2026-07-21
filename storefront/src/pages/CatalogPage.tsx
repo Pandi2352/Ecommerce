@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Star, Grid3x3, LayoutList } from 'lucide-react';
 import { getList } from '@/lib/api';
 import { money } from '@/lib/utils';
 import type { Meta, Product } from '@/lib/types';
+import { useStorefrontConfig } from '@/app/StorefrontConfigContext';
+import { BannerCarousel } from '@/components/BannerCarousel';
+import { LeftSidebar } from '@/components/LeftSidebar';
+import { HotDealsSection } from '@/components/HotDealsSection';
+import { CategorySectionBlock } from '@/components/CategorySectionBlock';
 
 export function CatalogPage() {
+  const { config } = useStorefrontConfig();
   const [products, setProducts] = useState<Product[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [search, setSearch] = useState('');
   const [term, setTerm] = useState('');
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Debounce the search box.
   useEffect(() => {
     const t = setTimeout(() => {
       setTerm(search);
@@ -26,7 +31,6 @@ export function CatalogPage() {
   useEffect(() => {
     let active = true;
     setLoading(true);
-    setError(null);
     getList<Product>('/storefront/products', {
       params: { page, pageSize: 12, search: term || undefined },
     })
@@ -35,7 +39,7 @@ export function CatalogPage() {
         setProducts(res.data);
         setMeta(res.meta);
       })
-      .catch((e) => active && setError(e?.message ?? 'Failed to load products'))
+      .catch(() => {})
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
@@ -43,108 +47,217 @@ export function CatalogPage() {
   }, [page, term]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-text">Shop</h1>
-          <p className="text-sm text-text-secondary">Browse the latest from NovaShop.</p>
-        </div>
-        <div className="relative w-full sm:w-72">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products…"
-            className="w-full rounded-md border border-border bg-surface py-2 pl-9 pr-3 text-sm outline-none focus:border-info"
-          />
-        </div>
-      </div>
+    <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-4 sm:gap-5 items-start">
+      {/* ── LEFT COLUMN: SIDEBAR ───────────────────────────────────────────── */}
+      <LeftSidebar />
 
-      {error && (
-        <div className="rounded-md border border-danger/40 bg-danger/5 p-4 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {/* ── RIGHT COLUMN: MAIN CONTENT & PRODUCTS ─────────────────────────── */}
+      <div className="space-y-8 min-w-0">
+        {/* 1. Main Hero Banner Slider */}
+        <BannerCarousel banners={config?.banners} />
 
-      {loading ? (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="overflow-hidden rounded-md border border-border bg-surface">
-              <div className="aspect-square animate-pulse bg-bg" />
-              <div className="space-y-2 p-3">
-                <div className="h-4 w-3/4 animate-pulse rounded bg-bg" />
-                <div className="h-4 w-1/3 animate-pulse rounded bg-bg" />
+        {/* 2. Hot Deals Section with Live Timers */}
+        <HotDealsSection products={products} />
+
+        {/* 3. Electronics Category Block */}
+        <CategorySectionBlock
+          title="ELECTRONICS"
+          subTabs={['Accessories', 'Book & Magazine', 'Gift', 'Screen-Protectors', 'Sony']}
+          bannerText="NEW ARRIVALS"
+          bannerSubtext="Curabitur luctus ipsum eget convallis"
+          bannerDiscount="50% OFF"
+          bannerImage="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300"
+          bannerBg="linear-gradient(135deg, #f97316 0%, #e62e04 100%)"
+          products={products}
+        />
+
+        {/* 4. Mobiles Category Block */}
+        <CategorySectionBlock
+          title="MOBILES"
+          subTabs={['Accessories', 'Cables & Connectors', 'Croma', 'Mobile Brands']}
+          bannerText="END OF SEASON SAVE 50% OFF"
+          bannerSubtext="NEW WATCHES Up to 25% OFF on all items"
+          bannerDiscount="50% OFF"
+          bannerImage="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300"
+          bannerBg="linear-gradient(135deg, #2563eb 0%, #1e40af 100%)"
+          products={products}
+        />
+
+        {/* 5. Main Catalog Product Grid */}
+        <div className="space-y-4 pt-4 border-t border-border">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+            <div className="maxshop-ribbon text-xs font-black tracking-wider uppercase">
+              FEATURED CATALOG
+              {meta && <span className="ml-2 font-normal">({meta.total} items)</span>}
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Search */}
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Filter catalog…"
+                  className="nova-input w-40 pl-8 text-xs py-1.5"
+                />
+              </div>
+              {/* View mode toggle */}
+              <div className="flex border border-border rounded-xs overflow-hidden">
+                {(
+                  [
+                    ['grid', Grid3x3],
+                    ['list', LayoutList],
+                  ] as const
+                ).map(([mode, Icon]) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className="h-7 w-7 flex items-center justify-center transition-colors"
+                    style={
+                      viewMode === mode
+                        ? { background: '#e62e04', color: 'white' }
+                        : { color: '#666666' }
+                    }
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </button>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
-      ) : products.length === 0 ? (
-        <div className="rounded-md border border-border bg-surface p-12 text-center text-sm text-text-secondary">
-          No products found.
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      )}
+          </div>
 
-      {meta && meta.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3 pt-2">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage((n) => n - 1)}
-            className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm disabled:opacity-40"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-text-secondary">
-            Page {meta.page} of {meta.totalPages}
-          </span>
-          <button
-            disabled={page >= meta.totalPages}
-            onClick={() => setPage((n) => n + 1)}
-            className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm disabled:opacity-40"
-          >
-            Next
-          </button>
+          {/* Grid View */}
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="aspect-[3/4] skeleton rounded-sm" />
+              ))}
+            </div>
+          ) : products.length === 0 ? (
+            <div className="p-8 text-center text-xs text-text-secondary border border-border rounded-sm">
+              No products found matching your criteria.
+            </div>
+          ) : (
+            <div
+              className={
+                viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-4 gap-4' : 'space-y-3'
+              }
+            >
+              {products.map((p) => (
+                <ProductCard key={p.id} product={p} viewMode={viewMode} />
+              ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {meta && meta.totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-6">
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage((n) => n - 1)}
+                className="px-3 py-1 text-xs border border-border rounded-xs bg-surface disabled:opacity-30 hover:border-danger"
+              >
+                Previous
+              </button>
+              <span className="text-xs font-semibold">
+                Page {page} of {meta.totalPages}
+              </span>
+              <button
+                disabled={page >= meta.totalPages}
+                onClick={() => setPage((n) => n + 1)}
+                className="px-3 py-1 text-xs border border-border rounded-xs bg-surface disabled:opacity-30 hover:border-danger"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, viewMode }: { product: Product; viewMode: 'grid' | 'list' }) {
   const img = product.images?.[0];
   const onSale = product.compareAtPrice && product.compareAtPrice > product.price;
-  return (
-    <Link
-      to={`/products/${product.slug}`}
-      className="group overflow-hidden rounded-md border border-border bg-surface transition-colors hover:border-info"
-    >
-      <div className="aspect-square overflow-hidden bg-bg">
-        {img ? (
-          <img
-            src={img}
-            alt={product.name}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-          />
-        ) : (
-          <div className="grid h-full place-items-center text-text-secondary">No image</div>
-        )}
-      </div>
-      <div className="space-y-1 p-3">
-        <h3 className="line-clamp-1 text-sm font-medium text-text">{product.name}</h3>
-        <div className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-text">{money(product.price)}</span>
+
+  if (viewMode === 'list') {
+    return (
+      <Link
+        to={`/products/${product.slug}`}
+        className="product-card flex gap-4 p-3 rounded-sm items-center hover:border-danger transition-colors"
+      >
+        <div className="h-20 w-20 shrink-0 bg-surface-2 overflow-hidden border border-border">
+          {img ? (
+            <img src={img} alt={product.name} className="h-full w-full object-cover" />
+          ) : (
+            <div className="grid h-full place-items-center text-xs">📦</div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-xs font-semibold text-text truncate hover:text-danger">
+            {product.name}
+          </h4>
+          <div className="flex items-center text-amber-400 mt-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} className="h-2.5 w-2.5 fill-amber-400" />
+            ))}
+          </div>
+        </div>
+        <div className="text-right">
+          <span className="text-sm font-bold text-danger">{money(product.price)}</span>
           {onSale && (
-            <span className="text-xs text-text-secondary line-through">
+            <span className="block text-[11px] text-text-muted line-through">
               {money(product.compareAtPrice!)}
             </span>
           )}
         </div>
+      </Link>
+    );
+  }
+
+  return (
+    <div className="product-card group relative flex flex-col justify-between rounded-sm p-3">
+      {onSale && (
+        <span className="absolute top-2 left-2 z-10 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wider rounded-xs">
+          SALE
+        </span>
+      )}
+      <Link
+        to={`/products/${product.slug}`}
+        className="aspect-square overflow-hidden bg-surface-2 mb-2 block"
+      >
+        {img ? (
+          <img
+            src={img}
+            alt={product.name}
+            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="grid h-full place-items-center text-2xl">📦</div>
+        )}
+      </Link>
+      <div className="text-center space-y-1">
+        <div className="flex justify-center text-amber-400">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} className="h-3 w-3 fill-amber-400" />
+          ))}
+        </div>
+        <Link
+          to={`/products/${product.slug}`}
+          className="text-xs font-semibold text-text line-clamp-1 hover:text-danger"
+        >
+          {product.name}
+        </Link>
+        <div className="flex items-center justify-center gap-1.5 text-xs">
+          {onSale && (
+            <span className="text-text-muted line-through text-[11px]">
+              {money(product.compareAtPrice!)}
+            </span>
+          )}
+          <span className="font-bold text-danger">{money(product.price)}</span>
+        </div>
       </div>
-    </Link>
+    </div>
   );
 }

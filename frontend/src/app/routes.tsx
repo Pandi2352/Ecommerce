@@ -20,6 +20,7 @@ import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage';
 import { BusinessSettingsPage } from '@/features/settings/BusinessSettingsPage';
+import { StorefrontSettingsPage } from '@/features/settings/StorefrontSettingsPage';
 import { ProfilePage } from '@/features/profile';
 import { UsersPage } from '@/features/users';
 import { RolesPage, PermissionsPage } from '@/features/roles';
@@ -49,61 +50,65 @@ export const router = createBrowserRouter([
         element: <MainLayout />,
         errorElement: <RouteErrorBoundary />,
         children: [
-      { index: true, element: <Dashboard /> },
-      { path: 'kitchen-sink', element: <KitchenSink /> },
-      
-      // Main
-      { path: 'analytics', element: g('reports.read', <Placeholder title="Analytics" />) },
-      { path: 'orders', element: g('orders.read', <OrdersPage />) },
-      { path: 'products', element: g('products.read', <ProductsPage />) },
-      { path: 'products/new', element: g('products.write', <ProductEditorPage />) },
-      { path: 'products/:id/edit', element: g('products.write', <ProductEditorPage />) },
-      { path: 'collections', element: g('products.read', <Placeholder title="Collections" />) },
-      { path: 'categories', element: g('categories.read', <CategoriesPage />) },
-      { path: 'brands', element: g('brands.read', <BrandsPage />) },
-      { path: 'vendors', element: g('vendors.read', <VendorsPage />) },
-      { path: 'product-fields', element: g('attributes.read', <ProductFieldsPage />) },
-      { path: 'inventory', element: g('inventory.read', <StockPage />) },
-      { path: 'inventory/low', element: g('inventory.read', <LowStockPage />) },
-      { path: 'inventory/warehouses', element: g('inventory.read', <WarehousesPage />) },
-      { path: 'orders/returns', element: g('orders.read', <Placeholder title="Returns" />) },
-      { path: 'orders/abandoned', element: g('orders.read', <Placeholder title="Abandoned Carts" />) },
-      { path: 'pages', element: <Placeholder title="Pages" /> },
-      { path: 'customers', element: g('customers.read', <Placeholder title="Customers" />) },
-      { path: 'marketing', element: g('marketing.read', <Placeholder title="Marketing" />) },
-      { path: 'discounts', element: g('discounts.read', <DiscountsPage />) },
-      { path: 'cart', element: <CartPage /> },
-      
-      // Sales Channels
-      { path: 'online-store', element: <Placeholder title="Online Store" /> },
-      { path: 'mobile-app', element: <Placeholder title="Mobile App" /> },
-      { path: 'pos-terminal', element: <Placeholder title="POS Terminal" /> },
-      
-      // Apps & Tools
-      { path: 'reviews', element: g('reviews.read', <Placeholder title="Reviews" />) },
-      { path: 'reports', element: g('reports.read', <Placeholder title="Reports" />) },
-      { path: 'ai-studio', element: <Placeholder title="AI Studio" /> },
-      { path: 'automation', element: <Placeholder title="Automation" /> },
+          { index: true, element: <Dashboard /> },
+          { path: 'kitchen-sink', element: <KitchenSink /> },
 
-      // Account & settings — everything self-service lives on the profile page
-      { path: 'profile', element: <ProfilePage /> },
-      { path: 'profile/:id', element: g('users.read', <ProfilePage />) },
-      { path: 'settings', element: <Navigate to="/profile" replace /> },
-      { path: 'settings/business', element: g('settings.read', <BusinessSettingsPage />) },
-      { path: 'users-roles', element: g('users.read', <UsersPage />) },
-      { path: 'roles', element: g('roles.read', <RolesPage />) },
-      { path: 'permissions', element: g('roles.read', <PermissionsPage />) },
-      { path: 'audit', element: g('audit.read', <AuditLogPage />) },
-      { path: 'integrations', element: <Placeholder title="Integrations" /> },
-      { path: 'billing', element: <Placeholder title="Billing" /> },
+          // Main
+          { path: 'analytics', element: g('reports.read', <Placeholder title="Analytics" />) },
+          { path: 'orders', element: g('orders.read', <OrdersPage />) },
+          { path: 'products', element: g('products.read', <ProductsPage />) },
+          { path: 'products/new', element: g('products.write', <ProductEditorPage />) },
+          { path: 'products/:id/edit', element: g('products.write', <ProductEditorPage />) },
+          { path: 'collections', element: g('products.read', <Placeholder title="Collections" />) },
+          { path: 'categories', element: g('categories.read', <CategoriesPage />) },
+          { path: 'brands', element: g('brands.read', <BrandsPage />) },
+          { path: 'vendors', element: g('vendors.read', <VendorsPage />) },
+          { path: 'product-fields', element: g('attributes.read', <ProductFieldsPage />) },
+          { path: 'inventory', element: g('inventory.read', <StockPage />) },
+          { path: 'inventory/low', element: g('inventory.read', <LowStockPage />) },
+          { path: 'inventory/warehouses', element: g('inventory.read', <WarehousesPage />) },
+          { path: 'orders/returns', element: g('orders.read', <Placeholder title="Returns" />) },
+          {
+            path: 'orders/abandoned',
+            element: g('orders.read', <Placeholder title="Abandoned Carts" />),
+          },
+          { path: 'pages', element: <Placeholder title="Pages" /> },
+          { path: 'customers', element: g('customers.read', <Placeholder title="Customers" />) },
+          { path: 'marketing', element: g('marketing.read', <Placeholder title="Marketing" />) },
+          { path: 'discounts', element: g('discounts.read', <DiscountsPage />) },
+          { path: 'cart', element: <CartPage /> },
 
-      // Error page previews (for QA/design)
-      { path: 'errors/403', element: <Forbidden /> },
-      { path: 'errors/400', element: <BadRequest /> },
-      { path: 'errors/500', element: <ServerError /> },
+          // Sales Channels
+          { path: 'online-store', element: <Placeholder title="Online Store" /> },
+          { path: 'mobile-app', element: <Placeholder title="Mobile App" /> },
+          { path: 'pos-terminal', element: <Placeholder title="POS Terminal" /> },
 
-      // Catch-all 404 (rendered inside the admin shell)
-      { path: '*', element: <NotFound /> },
+          // Apps & Tools
+          { path: 'reviews', element: g('reviews.read', <Placeholder title="Reviews" />) },
+          { path: 'reports', element: g('reports.read', <Placeholder title="Reports" />) },
+          { path: 'ai-studio', element: <Placeholder title="AI Studio" /> },
+          { path: 'automation', element: <Placeholder title="Automation" /> },
+
+          // Account & settings — everything self-service lives on the profile page
+          { path: 'profile', element: <ProfilePage /> },
+          { path: 'profile/:id', element: g('users.read', <ProfilePage />) },
+          { path: 'settings', element: <Navigate to="/profile" replace /> },
+          { path: 'settings/business', element: g('settings.read', <BusinessSettingsPage />) },
+          { path: 'settings/storefront', element: g('settings.read', <StorefrontSettingsPage />) },
+          { path: 'users-roles', element: g('users.read', <UsersPage />) },
+          { path: 'roles', element: g('roles.read', <RolesPage />) },
+          { path: 'permissions', element: g('roles.read', <PermissionsPage />) },
+          { path: 'audit', element: g('audit.read', <AuditLogPage />) },
+          { path: 'integrations', element: <Placeholder title="Integrations" /> },
+          { path: 'billing', element: <Placeholder title="Billing" /> },
+
+          // Error page previews (for QA/design)
+          { path: 'errors/403', element: <Forbidden /> },
+          { path: 'errors/400', element: <BadRequest /> },
+          { path: 'errors/500', element: <ServerError /> },
+
+          // Catch-all 404 (rendered inside the admin shell)
+          { path: '*', element: <NotFound /> },
         ],
       },
     ],
