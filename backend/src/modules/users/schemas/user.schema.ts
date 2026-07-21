@@ -82,6 +82,24 @@ export class User {
 
   @Prop({ type: Object })
   links?: { website?: string; twitter?: string; linkedin?: string; github?: string };
+
+  /** Saved shipping addresses (storefront customers). */
+  @Prop({ type: [Object], default: [] })
+  addresses!: CustomerAddress[];
+}
+
+export interface CustomerAddress {
+  id: string;
+  label?: string;
+  fullName: string;
+  phone?: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state?: string;
+  postalCode: string;
+  country?: string;
+  isDefault?: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

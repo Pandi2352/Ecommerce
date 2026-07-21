@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'node:crypto';
-import { UserStatus } from '@ecommerce/shared';
+import { CUSTOMER_ROLE, UserStatus } from '@ecommerce/shared';
 import { addDays, addMinutes, now } from '../../common/utils';
 import { buildMeta } from '../../common/dto/pagination.dto';
 import { UsersService } from '../users/users.service';
@@ -55,7 +55,9 @@ export class AuthService {
     }
     // Temporary lock after too many failed attempts.
     if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
-      throw new UnauthorizedException('Account temporarily locked after failed logins. Try again later.');
+      throw new UnauthorizedException(
+        'Account temporarily locked after failed logins. Try again later.',
+      );
     }
     if (!(await bcrypt.compare(dto.password, user.password))) {
       await this.users.registerFailedLogin(String(user._id));
@@ -133,7 +135,8 @@ export class AuthService {
     const payload = await this.verifyMailToken(token, 'invite');
     const user = await this.users.findById(payload.sub);
     if (!user) throw new BadRequestException('Invitation is no longer valid');
-    if (user.status !== UserStatus.INVITED) throw new BadRequestException('Invitation already used');
+    if (user.status !== UserStatus.INVITED)
+      throw new BadRequestException('Invitation already used');
     await this.users.setPassword(payload.sub, await bcrypt.hash(password, 10));
     await this.users.adminUpdate(payload.sub, { status: UserStatus.ACTIVE });
     await this.users.setEmailVerified(payload.sub);
@@ -232,9 +235,7 @@ export class AuthService {
   }
 
   async revokeSession(userId: string, sessionId: string): Promise<void> {
-    await this.sessions
-      .deleteOne({ _id: sessionId, user: userId })
-      .exec();
+    await this.sessions.deleteOne({ _id: sessionId, user: userId }).exec();
   }
 
   async revokeAllSessions(userId: string): Promise<void> {
@@ -246,6 +247,23 @@ export class AuthService {
   // ── OAuth issue (Google) ─────────────────────────────────────────────────
 
   async issueForUser(user: UserDocument, userAgent?: string): Promise<AuthResult> {
+    return this.issue(user, userAgent);
+  }
+
+  /** Public self-registration for storefront customers (role = Customer). */
+  async registerCustomer(
+    data: { name: string; email: string; password: string; phone?: string },
+    userAgent?: string,
+  ): Promise<AuthResult> {
+    const user = await this.users.create({
+      name: data.name,
+      email: data.email,
+      password: await bcrypt.hash(data.password, 10),
+      role: CUSTOMER_ROLE,
+      status: UserStatus.ACTIVE,
+    });
+    if (data.phone) await this.users.updateProfile(String(user._id), { phone: data.phone });
+    await this.users.setEmailVerified(String(user._id));
     return this.issue(user, userAgent);
   }
 
@@ -297,10 +315,17 @@ export class AuthService {
       });
   }
 
-  private mailToken(sub: string, purpose: MailToken['purpose'], expiresIn: string): Promise<string> {
+  private mailToken(
+    sub: string,
+    purpose: MailToken['purpose'],
+    expiresIn: string,
+  ): Promise<string> {
     return this.jwt.signAsync(
       { sub, purpose },
-      { secret: this.config.getOrThrow('JWT_MAIL_SECRET'), expiresIn: expiresIn as unknown as number },
+      {
+        secret: this.config.getOrThrow('JWT_MAIL_SECRET'),
+        expiresIn: expiresIn as unknown as number,
+      },
     );
   }
 

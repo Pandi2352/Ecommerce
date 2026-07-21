@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { OrderStatus, PaymentStatus } from '@ecommerce/shared';
@@ -6,7 +6,12 @@ import type { PaginatedMeta } from '../../common/dto/pagination.dto';
 import { BaseService } from '../../common/services/base.service';
 import { buildSearchFilter, now, parseSort } from '../../common/utils';
 import { Order, OrderDocument } from './schemas/order.schema';
-import { CreateOrderDto, ListOrdersQueryDto, UpdateOrderDto, UpdateOrderStatusDto } from './dto/order.dto';
+import {
+  CreateOrderDto,
+  ListOrdersQueryDto,
+  UpdateOrderDto,
+  UpdateOrderStatusDto,
+} from './dto/order.dto';
 
 const VOID_STATUSES = [OrderStatus.CANCELLED, OrderStatus.RETURNED, OrderStatus.REFUNDED];
 const money = (n: number) => Math.round(n * 100) / 100;
@@ -49,11 +54,45 @@ export class OrdersService extends BaseService<OrderDocument> {
     };
     if (q.status) filter.status = q.status;
     if (q.paymentStatus) filter.paymentStatus = q.paymentStatus;
-    return this.paginate({ filter, sort: parseSort(q.sort, { createdAt: -1 }), page: q.page, pageSize: q.pageSize });
+    return this.paginate({
+      filter,
+      sort: parseSort(q.sort, { createdAt: -1 }),
+      page: q.page,
+      pageSize: q.pageSize,
+    });
   }
 
   findOne(id: string): Promise<OrderDocument> {
     return this.findByIdOrThrow(id);
+  }
+
+  /** A logged-in customer's own orders (matched by account id OR email snapshot). */
+  listForCustomer(
+    customerId: string,
+    email: string,
+    page = 1,
+    pageSize = 10,
+  ): Promise<{ data: OrderDocument[]; meta: PaginatedMeta }> {
+    const filter = {
+      $or: [{ 'customer.id': customerId }, { 'customer.email': email.toLowerCase() }],
+    };
+    return this.paginate({ filter, sort: { createdAt: -1 }, page, pageSize });
+  }
+
+  /** Look up one of the customer's own orders by its order number (ownership-checked). */
+  async findCustomerOrder(
+    orderNumber: string,
+    customerId: string,
+    email: string,
+  ): Promise<OrderDocument> {
+    const order = await this.model
+      .findOne({
+        orderNumber,
+        $or: [{ 'customer.id': customerId }, { 'customer.email': email.toLowerCase() }],
+      })
+      .exec();
+    if (!order) throw new NotFoundException('Order not found');
+    return order;
   }
 
   /** Change status and append a timeline entry (atomic). */
@@ -62,7 +101,10 @@ export class OrdersService extends BaseService<OrderDocument> {
     return (await this.model
       .findByIdAndUpdate(
         id,
-        { status: dto.status, $push: { timeline: { status: dto.status, note: dto.note ?? '', at: now() } } },
+        {
+          status: dto.status,
+          $push: { timeline: { status: dto.status, note: dto.note ?? '', at: now() } },
+        },
         { new: true },
       )
       .exec())!;

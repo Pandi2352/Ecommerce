@@ -1,12 +1,23 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ShoppingBag, Search, Phone, Lock, Globe, IndianRupee, ChevronDown } from 'lucide-react';
+import {
+  ShoppingBag,
+  Search,
+  Phone,
+  User,
+  Lock,
+  Globe,
+  IndianRupee,
+  ChevronDown,
+} from 'lucide-react';
 import { useCart } from '@/cart/CartContext';
+import { useAuth } from '@/auth/AuthContext';
 import { useStorefrontConfig } from '@/app/StorefrontConfigContext';
 import { useCategories } from '@/app/CategoryContext';
 import { useState } from 'react';
 
 export function Layout() {
   const { count } = useCart();
+  const { user } = useAuth();
   const { config } = useStorefrontConfig();
   const { categories, selectedCategory, setSelectedCategory } = useCategories();
   const location = useLocation();
@@ -38,9 +49,15 @@ export function Layout() {
 
           {/* Quick Links */}
           <div className="flex items-center gap-4 text-[11px] font-medium">
-            <Link to="/cart" className="flex items-center gap-1 hover:text-danger">
-              <ShoppingBag className="h-3 w-3" /> Cart
-            </Link>
+            {user ? (
+              <Link to="/account" className="flex items-center gap-1 hover:text-danger">
+                <User className="h-3 w-3" /> {user.name.split(' ')[0]}
+              </Link>
+            ) : (
+              <Link to="/auth/login" className="flex items-center gap-1 hover:text-danger">
+                <User className="h-3 w-3" /> Sign in
+              </Link>
+            )}
             <Link to="/checkout" className="flex items-center gap-1 hover:text-danger">
               <Lock className="h-3 w-3" /> Checkout
             </Link>

@@ -10,12 +10,12 @@ import { Model } from 'mongoose';
 import { CUSTOMER_ROLE, SUPER_ADMIN_ROLE, UserStatus } from '@ecommerce/shared';
 import type { PaginatedMeta } from '../../common/dto/pagination.dto';
 import { BaseService } from '../../common/services/base.service';
-import { addMinutes, buildSearchFilter, now, parseSort } from '../../common/utils';
+import { addMinutes, buildSearchFilter, generateId, now, parseSort } from '../../common/utils';
 
 /** Failed logins allowed before a temporary lock, and how long the lock lasts. */
 export const MAX_FAILED_LOGINS = 5;
 export const LOCK_MINUTES = 15;
-import { User, UserDocument } from './schemas/user.schema';
+import { User, UserDocument, type CustomerAddress } from './schemas/user.schema';
 
 export interface UserListQuery {
   page: number;
@@ -95,7 +95,9 @@ export class UsersService extends BaseService<UserDocument> {
       .findByIdAndUpdate(id, { $inc: { failedLoginCount: 1 } }, { new: true })
       .exec();
     if (user && user.failedLoginCount >= MAX_FAILED_LOGINS) {
-      await this.model.findByIdAndUpdate(id, { lockedUntil: addMinutes(now(), LOCK_MINUTES) }).exec();
+      await this.model
+        .findByIdAndUpdate(id, { lockedUntil: addMinutes(now(), LOCK_MINUTES) })
+        .exec();
     }
   }
 
@@ -129,7 +131,17 @@ export class UsersService extends BaseService<UserDocument> {
       if (clash) throw new ConflictException('Email already in use');
     }
     const patch: Record<string, unknown> = {};
-    const fields = ['name', 'avatarUrl', 'phone', 'jobTitle', 'department', 'bio', 'location', 'timezone', 'links'] as const;
+    const fields = [
+      'name',
+      'avatarUrl',
+      'phone',
+      'jobTitle',
+      'department',
+      'bio',
+      'location',
+      'timezone',
+      'links',
+    ] as const;
     for (const key of fields) if (data[key] !== undefined) patch[key] = data[key];
     if (data.email) {
       patch.email = data.email.toLowerCase();
@@ -146,6 +158,56 @@ export class UsersService extends BaseService<UserDocument> {
     await this.model.findByIdAndUpdate(id, { emailVerified: true }).exec();
   }
 
+  // ── Customer saved addresses (storefront) ─────────────────────────────────
+
+  async getAddresses(userId: string): Promise<CustomerAddress[]> {
+    const user = await this.findByIdOrThrow(userId);
+    return user.addresses ?? [];
+  }
+
+  async addAddress(userId: string, dto: Omit<CustomerAddress, 'id'>): Promise<CustomerAddress[]> {
+    const user = await this.findByIdOrThrow(userId);
+    const list = user.addresses ?? [];
+    const address: CustomerAddress = { ...dto, id: generateId() };
+    // First address is always default; an explicit default demotes the others.
+    if (address.isDefault || list.length === 0) {
+      list.forEach((a) => (a.isDefault = false));
+      address.isDefault = true;
+    }
+    user.addresses = [...list, address];
+    user.markModified('addresses');
+    await user.save();
+    return user.addresses;
+  }
+
+  async updateAddress(
+    userId: string,
+    addressId: string,
+    dto: Partial<Omit<CustomerAddress, 'id'>>,
+  ): Promise<CustomerAddress[]> {
+    const user = await this.findByIdOrThrow(userId);
+    const list = user.addresses ?? [];
+    const target = list.find((a) => a.id === addressId);
+    if (!target) throw new NotFoundException('Address not found');
+    Object.assign(target, dto, { id: target.id });
+    if (dto.isDefault) list.forEach((a) => (a.isDefault = a.id === addressId));
+    user.addresses = list;
+    user.markModified('addresses');
+    await user.save();
+    return user.addresses;
+  }
+
+  async removeAddress(userId: string, addressId: string): Promise<CustomerAddress[]> {
+    const user = await this.findByIdOrThrow(userId);
+    const list = (user.addresses ?? []).filter((a) => a.id !== addressId);
+    // Keep exactly one default when possible.
+    if (list.length > 0 && !list.some((a) => a.isDefault)) list[0].isDefault = true;
+    user.addresses = list;
+    user.markModified('addresses');
+    await user.save();
+    return user.addresses;
+  }
+
   // ── Admin management ──────────────────────────────────────────────────────
 
   list(q: UserListQuery): Promise<{ data: UserDocument[]; meta: PaginatedMeta }> {
@@ -155,7 +217,8 @@ export class UsersService extends BaseService<UserDocument> {
     // Admin user management is staff-only — customers live in the Customers module.
     filter.role = q.role && q.role !== CUSTOMER_ROLE ? q.role : { $ne: CUSTOMER_ROLE };
     if (q.status) filter.status = q.status;
-    if (q.verified === 'true' || q.verified === 'false') filter.emailVerified = q.verified === 'true';
+    if (q.verified === 'true' || q.verified === 'false')
+      filter.emailVerified = q.verified === 'true';
     return this.paginate({
       filter,
       sort: parseSort(q.sort),

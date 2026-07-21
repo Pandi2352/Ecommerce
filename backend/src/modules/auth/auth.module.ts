@@ -35,5 +35,6 @@ import { GoogleStrategy } from './strategies/google.strategy';
       inject: [ConfigService, UsersService],
     },
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

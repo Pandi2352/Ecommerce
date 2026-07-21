@@ -23,7 +23,7 @@ Sprint 1,Design System,Design-system audit,No shadows + rounded-md across dashbo
 Sprint 1,Design System,Reusable SearchInput,"Search field: left icon + clearable X button + Escape-to-clear + Enter submit + loading spinner; controlled value/onValueChange",Done,Verified (build+lint),Medium,Done,"components/ui/SearchInput; adopted in Users toolbar with loading state; hides native search cancel button"
 Sprint 1,Design System,Table zebra + grey canvas,"Zebra striped rows (--row-stripe), clearer hover (--row-hover), white table card on grey app canvas (--bg)",Done,Verified (build+lint),Medium,Done,"New --row-stripe token (light+dark); --bg now light grey so surfaces pop; Table container bg-surface; Users page spacing tightened space-y-6->4"
 Sprint 2,Auth,Admin seed + invite,No public signup; seed one admin then admin invites users by email,Done,Verified (curl + build),Critical,Done,"npm run seed creates ADMIN; POST /auth/invite + /auth/accept-invite; signup removed (404); INVITED->ACTIVE; invite token TTL now 15 min (was 3d); invitedAt/inviteExpiresAt/invitedBy tracked"
-Sprint 3,User Management,Invited list + reinvite/revoke,Invited tab with 15-min expiry, reinvite (refresh window), revoke (hard-delete pending),Done,Verified (curl + build + lint),High,Done,"Tabs (All/Invited w/ count badge); POST /auth/reinvite/:id + DELETE /auth/invite/:id; expiry badge via formatRelative; reinvite/revoke ACTIVE users -> 400; reusable Tabs component + formatRelative util"
+Sprint 3,User Management,Invited list + reinvite/revoke,"Invited tab with 15-min expiry, reinvite (refresh window), revoke (hard-delete pending)",Done,Verified (curl + build + lint),High,Done,"Tabs (All/Invited w/ count badge); POST /auth/reinvite/:id + DELETE /auth/invite/:id; expiry badge via formatRelative; reinvite/revoke ACTIVE users -> 400; reusable Tabs component + formatRelative util"
 Sprint 3,User Management,Users page — count cards + advanced,"Colorful API count cards (/users/stats); click-to-sort columns; verified filter; bulk ban/restore/delete/setRole; admin resend-verification; copy invite link; user detail drawer",Done,Verified (curl + build + lint),High,Done,"GET /users/stats + POST /users/bulk (excludes self) + POST /auth/resend-verification/:id + verified/sort query; reusable StatCard + Drawer + Table sort; cards click to filter"
 Sprint 3,User Management,Row actions menu + Super Admin protection,"Per-row kebab menu (options were clipping in table); role change via modal not inline select; Super Admin rows protected FE+BE (no ban/delete/role-change)",Done,Verified (curl + build + lint),High,Done,"Dropdown now portaled (no overflow clip); inline role Select -> Badge + Change-role modal; assertMutable 403 on Super Admin single actions, bulk excludes them; StatCards single scrollable row; role cards merged into grid"
 Sprint 2,Auth,Login,Credential login returning JWT,Done,Verified (curl + build),Critical,Done,"Redesigned split AuthLayout (SVG) + branded loader; login enforces ACTIVE status; refresh-on-401. Wrong pw -> 401"
@@ -49,13 +49,13 @@ Sprint 2,Auth,Security hardening finishers,"helmet + strict CSP; tokenVersion gl
 Sprint 3,User Management,Roles UX upgrade,"Configurable default invite role; assign-role-to-many-users; role export/import (JSON); role card actions menu",Done,Verified (curl + build + lint),High,Done,"isDefault on Role + PATCH /roles/:id/default (exactly one, seed self-heals); invite defaults to it; Assign-to-users modal -> /users/bulk; client-side JSON export + import; per-card kebab (Set default/Assign/Export/Edit/Delete); docs/17 rows marked done"
 Sprint 3,User Management,Ban / Restore,Suspend/ban and restore users,Done,Verified (curl),Medium,Done,"ban/restore endpoints + UI; admin can't ban/delete self (400)"
 Sprint 3,User Management,User activity,Activity log per user,Not Started,Not Started,Low,Not Started,Deferred (ActivityLog schema — Phase 27)
-Sprint 3,User Management,Addresses,Multiple addresses per user,Not Started,Not Started,Medium,Not Started,Storefront/customers feature — later sprint
+Sprint 3,User Management,Addresses,Multiple addresses per user,Done,Verified (curl + build + lint),Medium,Done,"User.addresses[] embedded + /storefront/account/addresses CRUD (default-address handling); managed in the storefront Account page"
 Sprint 3,User Management,Wishlist,User wishlist,Not Started,Not Started,Medium,Not Started,Storefront feature — later sprint
 Sprint 3,User Management,Recently viewed,Track recently viewed products,Not Started,Not Started,Low,Not Started,Storefront feature — later sprint
 Sprint 3,Dashboard,KPI cards,"Revenue, Orders, Customers, Conversion + sparkline",In Progress,Not Started,High,In Progress,UI built (mock); real analytics wiring needs orders/products (Sprint 4-6)
 Sprint 3,Dashboard,Sales chart,Custom dual-line SVG chart,In Progress,Not Started,High,In Progress,"UI built (mock, animated, 2px no-gradient); data pending"
 Sprint 3,Dashboard,Order status chart,Radial status breakdown,In Progress,Not Started,Medium,In Progress,UI built (mock); data pending orders
-Sprint 3,Dashboard,Category distribution,Donut chart,In Progress,Not Started,Medium,In Progress,UI built (mock, animated); data pending
+Sprint 3,Dashboard,Category distribution,Donut chart,In Progress,Not Started,Medium,In Progress,"UI built (mock, animated); data pending"
 Sprint 3,Dashboard,Recent orders,Recent orders table,In Progress,Not Started,High,In Progress,UI built (mock); data pending orders
 Sprint 3,Dashboard,Live orders,Realtime order feed,Not Started,Not Started,Medium,Not Started,socket.io; needs realtime gateway + orders
 Sprint 3,Dashboard,Top customers,Top customers list,In Progress,Not Started,Low,In Progress,UI built (Top Products mock); data pending
@@ -111,7 +111,7 @@ Sprint 7,Orders,Refund,Full/partial refund,Not Started,Not Started,Medium,Not St
 Sprint 7,Orders,Invoice,Generate invoice PDF,Not Started,Not Started,Medium,Not Started,
 Sprint 7,Orders,Tracking,Shipment tracking link,Not Started,Not Started,Medium,Not Started,
 Sprint 7,Orders,Order detail panel,Right context panel: customer/timeline/payment/shipment/notes,Done,Verified (build + lint),High,Done,"Slide-over Drawer: customer, items, totals breakdown, shipping address, timeline, inline status-update control"
-Sprint 7,Orders,Customer order history,GET /me/orders,Not Started,Not Started,High,Not Started,
+Sprint 7,Orders,Customer order history,GET /me/orders,In Progress,Verified (curl + build + lint),High,In Progress,"Delivered as GET /storefront/account/orders + /:orderNumber (auth'd, ownership by customer.id OR email); My Orders tab in the storefront Account page. Invoice PDF still pending (see row 135 / Sprint 7 Invoice)"
 Sprint 8,Payments,Stripe,Card payments via payment intent,Not Started,Not Started,High,Not Started,
 Sprint 8,Payments,Razorpay,Razorpay gateway integration,Not Started,Not Started,Medium,Not Started,
 Sprint 8,Payments,Cash on delivery,COD flow,Not Started,Not Started,Medium,Not Started,
@@ -131,8 +131,8 @@ Sprint 9,Storefront,Search + filters,"Search, filter, sort",In Progress,Verified
 Sprint 9,Storefront,Product detail page,"PDP: gallery, variants, reviews, add-to-cart",Done,Verified (curl + build + lint),Critical,Done,"ProductDetailPage: image gallery + thumbnails, Size/Color option selectors resolving the matching variant (price/stock/image), stock hint, Add to cart + Buy now; reviews still pending"
 Sprint 9,Storefront,Cart page,Storefront cart view,Done,Verified (build + lint),High,Done,"CartProvider (Context + localStorage, line key = product+variant); CartPage: qty steppers, remove, per-line + subtotal totals, header cart badge"
 Sprint 9,Storefront,Checkout flow,Storefront checkout UI,Done,Verified (curl + build + lint),Critical,Done,"CheckoutPage: contact + shipping address + payment method form, order summary, POST /storefront/checkout then clears cart -> OrderConfirmationPage (NOVA-#### + totals). Server recomputes all prices"
-Sprint 9,Storefront,Account,Profile + addresses,Not Started,Not Started,High,Not Started,
-Sprint 9,Storefront,Order history & invoices,Customer orders + invoices,Not Started,Not Started,High,Not Started,
+Sprint 9,Storefront,Account,Profile + addresses,Done,Verified (curl + build + lint),High,Done,"Public customer auth (role=Customer): POST /storefront/auth/register+login+refresh+logout+me (separate sf_refresh cookie so admin/customer sessions don't clash on localhost); reuses AuthService.issue/login/refresh + JWT. AccountPage tabs Profile + Addresses (User.addresses[] CRUD, default handling) + Orders. Storefront AuthContext + ProtectedRoute + login/register pages + header account menu; checkout prefills from the signed-in customer"
+Sprint 9,Storefront,Order history & invoices,Customer orders + invoices,In Progress,Verified (curl + build + lint),High,In Progress,"GET /storefront/account/orders + /:orderNumber (ownership by customer.id OR email); My Orders tab lists status/total/items. Invoice PDF still pending (see Sprint 7 Invoice)"
 Sprint 9,Storefront,Wishlist page,Wishlist UI,Not Started,Not Started,Medium,Not Started,
 Sprint 9,Storefront,Notifications,In-app customer notifications,Not Started,Not Started,Low,Not Started,
 Sprint 9,Storefront,Responsive & SEO,"SSR-friendly, meta tags, performance",Not Started,Not Started,High,Not Started,
@@ -155,7 +155,7 @@ Sprint 11,Reports,Sales & revenue reports,Time-series sales/revenue,Not Started,
 Sprint 11,Reports,Inventory & product reports,Stock + product performance,Not Started,Not Started,Medium,Not Started,
 Sprint 11,Reports,Customer/coupon/tax/profit,Additional report types,Not Started,Not Started,Low,Not Started,
 Sprint 11,Reports,Exports,CSV/Excel/PDF export,Not Started,Not Started,Medium,Not Started,
-Sprint 11,Settings,Store settings,Store profile,Not Started,Not Started,Medium,Not Started,
+Sprint 11,Settings,Store settings,Store profile,Done,Verified (curl + build + lint),Medium,Done,"Delivered via Business Settings (row 44) + Storefront Customization (Identity tab): store name/legal name/tagline/logo/favicon/footer/contact/address"
 Sprint 11,Settings,Currency/tax/shipping,Commerce config,Not Started,Not Started,Medium,Not Started,
 Sprint 11,Settings,Email/SMS,Provider configuration,Not Started,Not Started,Low,Not Started,
 Sprint 11,Settings,Theme,Light/dark + branding,Done,Verified (build + lint),Low,Done,"Admin Storefront Customization: Theme (color presets incl. MaxShop Red, primary/accent, button style/radius, font), Identity (store name/logo/favicon/footer/social), Sections (homepage visibility toggles). Storefront applies theme + identity live via /settings/public"
@@ -167,10 +167,10 @@ Sprint 11,Notifications,Push,Web push,Not Started,Not Started,Low,Not Started,
 Sprint 11,Search,Full-text search,MongoDB Atlas Search,Not Started,Not Started,High,Not Started,
 Sprint 11,Search,Autocomplete,Search suggestions,Not Started,Not Started,Medium,Not Started,
 Sprint 11,Search,Recent/popular,Recent + popular searches,Not Started,Not Started,Low,Not Started,
-Sprint 12,Security,Helmet,Secure HTTP headers,Not Started,Not Started,High,Not Started,
+Sprint 12,Security,Helmet,Secure HTTP headers,Done,Verified (curl + build),High,Done,"Delivered early (Sprint 2 hardening, see row 48): helmet with strict CSP (default-src none), HSTS, nosniff"
 Sprint 12,Security,Rate limiting,@nestjs/throttler (in-memory),Done,Verified (curl + build),High,Done,"Delivered early — global ThrottlerGuard 120/min + login/forgot 5/min (429 on 6th); Redis-backed store later"
-Sprint 12,Security,Validation,DTO/Zod on all writes,Not Started,Not Started,Critical,Not Started,
-Sprint 12,Security,XSS/CSRF/CORS,Injection + cross-origin protection,Not Started,Not Started,High,Not Started,
+Sprint 12,Security,Validation,DTO/Zod on all writes,Done,Verified (curl + build + lint),Critical,Done,"Global ValidationPipe (whitelist + transform) in main.ts; every write endpoint has a class-validator DTO; @ecommerce/shared Zod schemas + PASSWORD_REGEX shared FE/BE"
+Sprint 12,Security,XSS/CSRF/CORS,Injection + cross-origin protection,In Progress,Verified (curl + build),High,In Progress,"CORS multi-origin allow-list (CLIENT_ORIGIN, credentials enabled for admin+storefront cookies); helmet CSP (default-src none) covers XSS headers; ValidationPipe whitelist strips unknown fields; Mongoose parameterizes queries; refresh cookies httpOnly + sameSite lax + Bearer API (low CSRF surface). Dedicated input-sanitization sweep still pending"
 Sprint 12,Security,Audit logs,Sensitive mutation audit trail,Done,Verified (curl + build),Medium,Done,"Global AuditInterceptor records successes AND failures: actor(id/name/email/role), resource+id, status, success, errorMessage, durationMs, real client IP (trust-proxy + XFF, ::ffff/::1 tidied), scrubbed input+result; GET /audit + page gated by audit.read; hash-chain pending"
 Sprint 12,Security,Activity logs,User activity logging,Not Started,Not Started,Low,Not Started,
 Sprint 12,File Management,Upload,Multer to Cloudinary/S3,In Progress,Verified (curl),High,In Progress,"Local disk upload shipped early — POST /uploads/image (Multer diskStorage, 5MB, image-only) served at /uploads; driver (local/s3) chosen in Business Settings; S3 upload -> 501 until wired"
@@ -184,7 +184,7 @@ Sprint 12,Analytics,Visitors/conversion,Traffic + conversion,Not Started,Not Sta
 Sprint 12,Analytics,Retention/cohorts,Cohort + retention analysis,Not Started,Not Started,Low,Not Started,
 Sprint 12,Logging,API logs,Winston request logging,Not Started,Not Started,Medium,Not Started,
 Sprint 12,Logging,Login/audit/system logs,Structured logs,Not Started,Not Started,Medium,Not Started,
-Sprint 13,Performance,Pagination,Offset pagination on all lists,Not Started,Not Started,High,Not Started,
+Sprint 13,Performance,Pagination,Offset pagination on all lists,Done,Verified (curl + build + lint),High,Done,"Delivered early (see rows 10/12): BaseService.paginate + PaginationQueryDto (page/pageSize/search/sort); server-driven across users/products/categories/brands/vendors/orders/inventory/warehouses + shared <Pagination>"
 Sprint 13,Performance,Lazy load / infinite scroll,Storefront list performance,Not Started,Not Started,Medium,Not Started,
 Sprint 13,Performance,Caching (Redis),Introduce Redis cache,Not Started,Not Started,Medium,Not Started,Redis enabled here
 Sprint 13,Performance,Queues (BullMQ),Move jobs to BullMQ,Not Started,Not Started,Medium,Not Started,BullMQ enabled here

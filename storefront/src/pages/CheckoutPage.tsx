@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { api } from '@/lib/api';
 import { money } from '@/lib/utils';
 import { useCart } from '@/cart/CartContext';
+import { useAuth } from '@/auth/AuthContext';
 import { User, Mail, Phone, MapPin, CreditCard, Lock, CheckCircle2 } from 'lucide-react';
 
 interface FormState {
@@ -33,7 +34,11 @@ const STEPS = ['Contact', 'Shipping', 'Payment', 'Review'];
 export function CheckoutPage() {
   const navigate = useNavigate();
   const { items, subtotal, clear } = useCart();
-  const [form, setForm] = useState<FormState>(EMPTY);
+  const { user } = useAuth();
+  // Prefill contact details for a signed-in customer so the order links to their account.
+  const [form, setForm] = useState<FormState>(
+    user ? { ...EMPTY, name: user.name, email: user.email, phone: user.phone ?? '' } : EMPTY,
+  );
   const [submitting, setSubmitting] = useState(false);
 
   if (items.length === 0) {
