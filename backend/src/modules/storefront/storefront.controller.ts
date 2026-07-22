@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { StorefrontService } from './storefront.service';
 import { CollectionsService } from '../collections/collections.service';
+import { PagesService } from '../pages/pages.service';
 import { CheckoutDto } from './dto/checkout.dto';
 import { Public } from '../../common/decorators/public.decorator';
 
@@ -11,6 +12,7 @@ export class StorefrontController {
   constructor(
     private readonly storefront: StorefrontService,
     private readonly collections: CollectionsService,
+    private readonly pages: PagesService,
   ) {}
 
   @Get('collections')
@@ -26,6 +28,16 @@ export class StorefrontController {
   @Get('collections/:slug')
   collectionBySlug(@Param('slug') slug: string) {
     return this.collections.getPublicBySlug(slug);
+  }
+
+  @Get('pages')
+  listPages() {
+    return this.pages.listPublic();
+  }
+
+  @Get('pages/:slug')
+  pageBySlug(@Param('slug') slug: string) {
+    return this.pages.getPublicBySlug(slug);
   }
 
   @Get('products')

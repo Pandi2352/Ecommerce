@@ -256,6 +256,57 @@ body {
   background: var(--maxshop-red-hover);
 }
 
+/* ─── CMS content (rendered HTML from admin Pages) ──────────── */
+.cms-content > *:first-child {
+  margin-top: 0;
+}
+.cms-content h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 1.75rem 0 0.75rem;
+}
+.cms-content h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 1.25rem 0 0.5rem;
+}
+.cms-content p {
+  margin: 0 0 1rem;
+  color: var(--text-secondary);
+}
+.cms-content ul,
+.cms-content ol {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+  color: var(--text-secondary);
+}
+.cms-content ul {
+  list-style: disc;
+}
+.cms-content ol {
+  list-style: decimal;
+}
+.cms-content li {
+  margin: 0.25rem 0;
+}
+.cms-content a {
+  color: var(--maxshop-red);
+  text-decoration: underline;
+}
+.cms-content blockquote {
+  border-left: 3px solid var(--maxshop-red);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.cms-content strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
 /* ─── Skeleton ──────────────────────────────────────────────── */
 .skeleton {
   background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);

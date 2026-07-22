@@ -7,6 +7,7 @@ import { OrdersModule } from '../orders/orders.module';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { CollectionsModule } from '../collections/collections.module';
+import { PagesModule } from '../pages/pages.module';
 import { StorefrontService } from './storefront.service';
 import { StorefrontController } from './storefront.controller';
 import { StorefrontAuthController } from './storefront-auth.controller';
@@ -23,6 +24,7 @@ import { StorefrontAccountController } from './storefront-account.controller';
     AuthModule,
     UsersModule,
     CollectionsModule,
+    PagesModule,
   ],
   controllers: [StorefrontController, StorefrontAuthController, StorefrontAccountController],
   providers: [StorefrontService],

@@ -99,7 +99,13 @@ export const sidebarConfig: SidebarGroup[] = [
       { label: 'Marketing', icon: Rocket, color: 'orange', to: '/marketing' },
       { label: 'Reviews', icon: Star, color: 'yellow', to: '/reviews' },
       { label: 'Online Store', icon: Store, color: 'teal', to: '/online-store', isExternal: true },
-      { label: 'Pages', icon: LayoutTemplate, color: 'blue', to: '/pages' },
+      {
+        label: 'Pages',
+        icon: LayoutTemplate,
+        color: 'blue',
+        to: '/pages',
+        permission: 'content.read',
+      },
     ],
   },
   {

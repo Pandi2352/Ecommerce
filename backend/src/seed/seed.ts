@@ -22,6 +22,7 @@ import { ProductsService } from '../modules/products/products.service';
 import { Cart } from '../modules/cart/schemas/cart.schema';
 import { Product } from '../modules/products/schemas/product.schema';
 import { CollectionsService } from '../modules/collections/collections.service';
+import { PagesService } from '../modules/pages/pages.service';
 
 /** Shortest valid transition path between two order statuses (state machine). */
 function statusPath(from: OrderStatus, target: OrderStatus): OrderStatus[] {
@@ -400,6 +401,43 @@ async function seed() {
     console.log('✓ Seeded 3 collections (1 manual, 2 automatic)');
   } else {
     console.log('✓ Collections already present — skipped');
+  }
+
+  // Sample CMS pages (idempotent) — footer policy/info pages.
+  const pages = app.get(PagesService);
+  if ((await pages.list({ page: 1, pageSize: 1 })).meta.total === 0) {
+    const SAMPLE_PAGES = [
+      {
+        title: 'Shipping & Returns',
+        excerpt: 'How we ship your order and how to return it.',
+        sortOrder: 1,
+        body: `<h2>Shipping</h2><p>We dispatch orders within <strong>1–2 business days</strong> from our regional fulfilment hubs. Standard delivery takes 3–7 business days depending on your location. Orders over ₹100 ship free.</p><h2>Returns</h2><p>Not quite right? You can return most items within <strong>30 days</strong> of delivery for a full refund, provided they are unworn and in their original packaging.</p><ul><li>Start a return from your account's Orders tab</li><li>Pack the item securely with the original invoice</li><li>Refunds are issued to your original payment method within 5–7 days</li></ul>`,
+      },
+      {
+        title: 'Privacy Policy',
+        excerpt: 'How we collect, use and protect your data.',
+        sortOrder: 2,
+        body: `<h2>Your privacy matters</h2><p>We collect only the information needed to process your orders and improve your shopping experience — your name, contact details, addresses and order history.</p><h3>How we use it</h3><ul><li>To fulfil and deliver your orders</li><li>To provide customer support</li><li>To send order updates you've asked for</li></ul><h3>Your rights</h3><p>You can request access to, correction of, or deletion of your personal data at any time by contacting our support team.</p>`,
+      },
+      {
+        title: 'Terms of Service',
+        excerpt: 'The terms that govern use of this store.',
+        sortOrder: 3,
+        body: `<h2>Using this store</h2><p>By placing an order you agree to these terms. Prices and availability are subject to change without notice. We reserve the right to refuse or cancel any order.</p><h3>Payment</h3><p>All payments are processed securely. Orders are confirmed only once payment is authorised (or, for cash on delivery, once the order is placed).</p><h3>Liability</h3><p>Our liability for any order is limited to the value of the goods purchased.</p>`,
+      },
+      {
+        title: 'FAQ',
+        excerpt: 'Answers to the questions we hear most.',
+        sortOrder: 4,
+        body: `<h2>Frequently asked questions</h2><h3>How do I track my order?</h3><p>Sign in and open the <strong>Orders</strong> tab in your account to see live status for every order.</p><h3>What payment methods do you accept?</h3><p>We accept major cards and cash on delivery in supported areas.</p><h3>Can I change my order after placing it?</h3><p>Contact support as soon as possible — we can usually amend orders that haven't shipped yet.</p>`,
+      },
+    ];
+    for (const p of SAMPLE_PAGES) {
+      await pages.create({ ...p, status: 'published', showInFooter: true });
+    }
+    console.log(`✓ Seeded ${SAMPLE_PAGES.length} CMS pages`);
+  } else {
+    console.log('✓ Pages already present — skipped');
   }
 
   await app.close();

@@ -14,6 +14,7 @@ import { AboutPage } from '@/pages/AboutPage';
 import { ContactPage } from '@/pages/ContactPage';
 import { CollectionsPage } from '@/pages/CollectionsPage';
 import { CollectionPage } from '@/pages/CollectionPage';
+import { CmsPage } from '@/pages/CmsPage';
 
 export function AppRoutes() {
   return (
@@ -27,6 +28,7 @@ export function AppRoutes() {
         <Route path="/order/:orderNumber" element={<OrderConfirmationPage />} />
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/collections/:slug" element={<CollectionPage />} />
+        <Route path="/p/:slug" element={<CmsPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/auth/login" element={<LoginPage />} />

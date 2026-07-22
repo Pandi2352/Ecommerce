@@ -9,6 +9,7 @@ import { BrandsPage } from '@/features/brands';
 import { VendorsPage } from '@/features/vendors';
 import { ProductsPage, ProductEditorPage } from '@/features/products';
 import { CollectionsPage } from '@/features/collections';
+import { PagesPage } from '@/features/pages';
 import { ProductFieldsPage } from '@/features/attributes';
 import { StockPage, LowStockPage, WarehousesPage } from '@/features/inventory';
 import { DiscountsPage } from '@/features/discounts';
@@ -71,7 +72,7 @@ export const router = createBrowserRouter([
           { path: 'inventory/warehouses', element: g('inventory.read', <WarehousesPage />) },
           { path: 'orders/returns', element: g('orders.read', <ReturnsPage />) },
           { path: 'orders/abandoned', element: g('orders.read', <AbandonedCartsPage />) },
-          { path: 'pages', element: <Placeholder title="Pages" /> },
+          { path: 'pages', element: g('content.read', <PagesPage />) },
           { path: 'customers', element: g('customers.read', <CustomersPage />) },
           { path: 'marketing', element: g('marketing.read', <Placeholder title="Marketing" />) },
           { path: 'discounts', element: g('discounts.read', <DiscountsPage />) },

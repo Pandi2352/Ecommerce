@@ -1,0 +1,84 @@
+{
+  "storeName": "Vogue Vesture",
+  "legalName": "Vogue Vesture Retail Private Limited",
+  "tagline": "Premium Fashion & Latest Trends",
+  "logoUrl": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&h=80&fit=crop",
+  "faviconUrl": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=32&h=32&fit=crop",
+  "defaultProductImageUrl": "https://images.unsplash.com/photo-1524282745852-a463fa495977?w=600&h=600&fit=crop",
+  "footerText": "© 2026 Vogue Vesture. Crafted with passion for modern fashion.",
+  "supportEmail": "support@voguevesture.com",
+  "supportPhone": "+91 99000 88000",
+  "address": {
+    "line1": "702 Trade World Tower B",
+    "line2": "Lower Parel",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "postalCode": "400013",
+    "country": "India"
+  },
+  "currency": "INR",
+  "locale": "en-IN",
+  "timezone": "Asia/Kolkata",
+  "theme": {
+    "primaryColor": "#e62e04",
+    "accentColor": "#10b981",
+    "buttonRadius": "4px",
+    "fontFamily": "Outfit",
+    "buttonStyle": "solid",
+    "darkMode": false
+  },
+  "banners": [
+    {
+      "id": "slide-1",
+      "imageUrl": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=450&fit=crop",
+      "title": "ELEGANT SUMMER DRESSES",
+      "subtitle": "FLATTERING LINEN WRAPS & MAXI DRESSES",
+      "badgeText": "NEW IN",
+      "ctaText": "SHOP NOW",
+      "ctaLink": "/products",
+      "isActive": true,
+      "order": 1
+    },
+    {
+      "id": "slide-2",
+      "imageUrl": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=450&fit=crop",
+      "title": "PREMIUM CASUALS",
+      "subtitle": "CLASSIC OXFORD SHIRTS & DENIMS",
+      "badgeText": "VINTAGE",
+      "ctaText": "EXPLORE",
+      "ctaLink": "/products",
+      "isActive": true,
+      "order": 2
+    },
+    {
+      "id": "slide-3",
+      "imageUrl": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=1200&h=450&fit=crop",
+      "title": "ETHNIC HERITAGE",
+      "subtitle": "HAND-BLOCK PRINTS & EMBROIDERED SILK KURTAS",
+      "badgeText": "FESTIVE",
+      "ctaText": "VIEW COLLECTION",
+      "ctaLink": "/products",
+      "isActive": true,
+      "order": 3
+    }
+  ],
+  "homepageSections": {
+    "showBanners": true,
+    "showFeatured": true,
+    "showBestSellers": true,
+    "showCategories": true,
+    "showDeals": true
+  },
+  "socialLinks": {
+    "facebook": "https://facebook.com/voguevesture",
+    "instagram": "https://instagram.com/voguevesture",
+    "twitter": "https://twitter.com/voguevesture",
+    "youtube": "https://youtube.com/voguevesture",
+    "linkedin": "https://linkedin.com/company/voguevesture"
+  },
+  "uploadDriver": "local",
+  "s3Bucket": "vogue-vesture-assets",
+  "s3Region": "ap-south-1",
+  "s3AccessKeyId": "AKIAIOSFODNN7EXAMPLE",
+  "s3SecretAccessKey": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+}

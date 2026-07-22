@@ -8,6 +8,7 @@ import { BrandsService } from '../modules/brands/brands.service';
 import { VendorsService } from '../modules/vendors/vendors.service';
 import { AttributesService } from '../modules/attributes/attributes.service';
 import { WarehousesService } from '../modules/warehouses/warehouses.service';
+import { SettingsService } from '../modules/settings/settings.service';
 import { ProductStatus, StockAdjustmentType } from '@ecommerce/shared';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -302,6 +303,17 @@ export async function seedInventory(
   );
 }
 
+export async function seedStorefrontSettings(appContext: any) {
+  const settingsService = appContext.get(SettingsService);
+  const jsonPath = path.join(__dirname, '../../../seeds/storefront.seed.json');
+  const rawData = fs.readFileSync(jsonPath, 'utf-8');
+  const settingsData = JSON.parse(rawData);
+
+  console.log('\n⚙️ [Seed Call 7/7] Seeding Storefront Customization Settings...');
+  await settingsService.update(settingsData);
+  console.log('  ✓ Storefront customization seeded successfully!');
+}
+
 async function runAllSeeds() {
   console.log('🚀 Initializing Full Dressing Shop Seed Process...');
   const app = await NestFactory.createApplicationContext(AppModule, { logger: ['error', 'warn'] });
@@ -315,6 +327,7 @@ async function runAllSeeds() {
     const warehouses = await seedWarehouses(app);
     const products = await seedProducts(app, categoryMap, brandMap, vendorMap);
     await seedInventory(app, products, warehouses);
+    await seedStorefrontSettings(app);
   } catch (error) {
     console.error('❌ Seeding failed:', error);
   } finally {

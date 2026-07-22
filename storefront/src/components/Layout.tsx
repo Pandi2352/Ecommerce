@@ -13,7 +13,15 @@ import { useCart } from '@/cart/CartContext';
 import { useAuth } from '@/auth/AuthContext';
 import { useStorefrontConfig } from '@/app/StorefrontConfigContext';
 import { useCategories } from '@/app/CategoryContext';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
+
+interface FooterPage {
+  id: string;
+  title: string;
+  slug: string;
+  showInFooter: boolean;
+}
 
 export function Layout() {
   const { count } = useCart();
@@ -23,9 +31,17 @@ export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [footerPages, setFooterPages] = useState<FooterPage[]>([]);
+
+  // Footer links are driven by published CMS pages flagged "show in footer".
+  useEffect(() => {
+    api
+      .get<FooterPage[]>('/storefront/pages')
+      .then((res) => setFooterPages(res.data.filter((p) => p.showInFooter)))
+      .catch(() => setFooterPages([]));
+  }, []);
 
   const storeName = config?.storeName || 'MAXSHOP';
-  const logoUrl = config?.logoUrl;
 
   const navItems = [
     { label: 'HOME', to: '/', resetCategory: true },
@@ -96,19 +112,17 @@ export function Layout() {
 
           {/* Center: Store Brand Logo */}
           <Link to="/" className="flex items-center justify-center shrink-0">
-            {logoUrl ? (
-              <img src={logoUrl} alt={storeName} className="h-10 max-w-44 object-contain" />
-            ) : (
-              <div className="text-center">
-                <span
-                  className="text-3xl font-black tracking-tight uppercase"
-                  style={{ fontFamily: 'var(--font-display)' }}
-                >
-                  <span className="text-text">{storeName.slice(0, 3)}</span>
-                  <span className="text-danger">{storeName.slice(3) || 'SHOP'}</span>
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-2 border-y-2 border-text px-4 py-1.5 hover:border-danger transition-colors duration-200">
+              <span
+                className="text-lg sm:text-2xl font-black tracking-[0.25em] text-text uppercase"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                {storeName.split(' ')[0]}
+                {storeName.split(' ')[1] && (
+                  <span className="text-danger ml-2">{storeName.split(' ')[1]}</span>
+                )}
+              </span>
+            </div>
           </Link>
 
           {/* Right: Phone / Hotline Widget */}
@@ -196,14 +210,13 @@ export function Layout() {
       <footer className="border-t border-border bg-surface text-xs text-text-secondary mt-12 py-8">
         <div className="mx-auto max-w-[1440px] px-2 sm:px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© 2026 {storeName}. All rights reserved. Powered by Generic Store Engine.</p>
-          <div className="flex items-center gap-4">
-            <Link to="/" className="hover:text-danger">
-              Privacy Policy
-            </Link>
-            <Link to="/" className="hover:text-danger">
-              Terms of Service
-            </Link>
-            <Link to="/" className="hover:text-danger">
+          <div className="flex flex-wrap items-center gap-4">
+            {footerPages.map((p) => (
+              <Link key={p.id} to={`/p/${p.slug}`} className="hover:text-danger">
+                {p.title}
+              </Link>
+            ))}
+            <Link to="/contact" className="hover:text-danger">
               Contact Support
             </Link>
           </div>
