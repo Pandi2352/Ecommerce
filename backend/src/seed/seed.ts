@@ -21,6 +21,7 @@ import { OrdersService } from '../modules/orders/orders.service';
 import { ProductsService } from '../modules/products/products.service';
 import { Cart } from '../modules/cart/schemas/cart.schema';
 import { Product } from '../modules/products/schemas/product.schema';
+import { CollectionsService } from '../modules/collections/collections.service';
 
 /** Shortest valid transition path between two order statuses (state machine). */
 function statusPath(from: OrderStatus, target: OrderStatus): OrderStatus[] {
@@ -361,6 +362,44 @@ async function seed() {
     console.log(`✓ Seeded ${carts} abandoned carts`);
   } else {
     console.log('✓ Carts already present — skipped');
+  }
+
+  // Sample collections (idempotent) — one manual + two automatic (rule-based).
+  const collections = app.get(CollectionsService);
+  if ((await collections.list({ page: 1, pageSize: 1 })).meta.total === 0) {
+    const featured = await productModel.find({ status: ProductStatus.ACTIVE }).limit(4).exec();
+    await collections.create({
+      name: "Editor's Picks",
+      description: 'A hand-picked edit of our current favourites.',
+      type: 'manual',
+      productIds: featured.map((p) => String(p._id)),
+      isActive: true,
+      isFeatured: true,
+      sortOrder: 1,
+    });
+    await collections.create({
+      name: 'On Sale',
+      description: 'Everything currently discounted.',
+      type: 'auto',
+      match: 'all',
+      conditions: [{ field: 'onSale', operator: 'is', value: 'true' }],
+      isActive: true,
+      isFeatured: true,
+      sortOrder: 2,
+    });
+    await collections.create({
+      name: 'Premium Edit',
+      description: 'Our finest pieces over ₹3,000.',
+      type: 'auto',
+      match: 'all',
+      conditions: [{ field: 'price', operator: 'gt', value: '3000' }],
+      isActive: true,
+      isFeatured: false,
+      sortOrder: 3,
+    });
+    console.log('✓ Seeded 3 collections (1 manual, 2 automatic)');
+  } else {
+    console.log('✓ Collections already present — skipped');
   }
 
   await app.close();

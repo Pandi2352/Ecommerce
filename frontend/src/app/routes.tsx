@@ -8,6 +8,7 @@ import { CategoriesPage } from '@/features/categories';
 import { BrandsPage } from '@/features/brands';
 import { VendorsPage } from '@/features/vendors';
 import { ProductsPage, ProductEditorPage } from '@/features/products';
+import { CollectionsPage } from '@/features/collections';
 import { ProductFieldsPage } from '@/features/attributes';
 import { StockPage, LowStockPage, WarehousesPage } from '@/features/inventory';
 import { DiscountsPage } from '@/features/discounts';
@@ -60,7 +61,7 @@ export const router = createBrowserRouter([
           { path: 'products', element: g('products.read', <ProductsPage />) },
           { path: 'products/new', element: g('products.write', <ProductEditorPage />) },
           { path: 'products/:id/edit', element: g('products.write', <ProductEditorPage />) },
-          { path: 'collections', element: g('products.read', <Placeholder title="Collections" />) },
+          { path: 'collections', element: g('products.read', <CollectionsPage />) },
           { path: 'categories', element: g('categories.read', <CategoriesPage />) },
           { path: 'brands', element: g('brands.read', <BrandsPage />) },
           { path: 'vendors', element: g('vendors.read', <VendorsPage />) },

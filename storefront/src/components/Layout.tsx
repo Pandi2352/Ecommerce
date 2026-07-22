@@ -30,6 +30,7 @@ export function Layout() {
   const navItems = [
     { label: 'HOME', to: '/', resetCategory: true },
     { label: 'ALL PRODUCTS', to: '/products', resetCategory: true },
+    { label: 'COLLECTIONS', to: '/collections', resetCategory: false },
     { label: 'ABOUT US', to: '/about', resetCategory: false },
     { label: 'CONTACT', to: '/contact', resetCategory: false },
   ];

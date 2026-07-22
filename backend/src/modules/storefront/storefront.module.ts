@@ -6,6 +6,7 @@ import { Attribute, AttributeSchema } from '../attributes/schemas/attribute.sche
 import { OrdersModule } from '../orders/orders.module';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
+import { CollectionsModule } from '../collections/collections.module';
 import { StorefrontService } from './storefront.service';
 import { StorefrontController } from './storefront.controller';
 import { StorefrontAuthController } from './storefront-auth.controller';
@@ -21,6 +22,7 @@ import { StorefrontAccountController } from './storefront-account.controller';
     OrdersModule,
     AuthModule,
     UsersModule,
+    CollectionsModule,
   ],
   controllers: [StorefrontController, StorefrontAuthController, StorefrontAccountController],
   providers: [StorefrontService],

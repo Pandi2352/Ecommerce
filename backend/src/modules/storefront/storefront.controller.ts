@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { StorefrontService } from './storefront.service';
+import { CollectionsService } from '../collections/collections.service';
 import { CheckoutDto } from './dto/checkout.dto';
 import { Public } from '../../common/decorators/public.decorator';
 
@@ -7,7 +8,25 @@ import { Public } from '../../common/decorators/public.decorator';
 @Public()
 @Controller('storefront')
 export class StorefrontController {
-  constructor(private readonly storefront: StorefrontService) {}
+  constructor(
+    private readonly storefront: StorefrontService,
+    private readonly collections: CollectionsService,
+  ) {}
+
+  @Get('collections')
+  listCollections() {
+    return this.collections.listPublic();
+  }
+
+  @Get('collections/featured')
+  featuredCollections() {
+    return this.collections.listFeatured();
+  }
+
+  @Get('collections/:slug')
+  collectionBySlug(@Param('slug') slug: string) {
+    return this.collections.getPublicBySlug(slug);
+  }
 
   @Get('products')
   listProducts(@Query() q: Record<string, string>) {
