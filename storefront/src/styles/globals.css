@@ -306,6 +306,26 @@ body {
   color: var(--text);
   font-weight: 700;
 }
+.cms-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+}
+.cms-content th,
+.cms-content td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.cms-content th {
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 700;
+}
+.cms-content td {
+  color: var(--text-secondary);
+}
 
 /* ─── Skeleton ──────────────────────────────────────────────── */
 .skeleton {

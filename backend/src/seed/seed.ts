@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -403,9 +404,9 @@ async function seed() {
     console.log('✓ Collections already present — skipped');
   }
 
-  // Sample CMS pages (idempotent) — footer policy/info pages.
+  // Sample CMS pages (idempotent per-slug) — footer policy/info pages.
   const pages = app.get(PagesService);
-  if ((await pages.list({ page: 1, pageSize: 1 })).meta.total === 0) {
+  {
     const SAMPLE_PAGES = [
       {
         title: 'Shipping & Returns',
@@ -431,13 +432,29 @@ async function seed() {
         sortOrder: 4,
         body: `<h2>Frequently asked questions</h2><h3>How do I track my order?</h3><p>Sign in and open the <strong>Orders</strong> tab in your account to see live status for every order.</p><h3>What payment methods do you accept?</h3><p>We accept major cards and cash on delivery in supported areas.</p><h3>Can I change my order after placing it?</h3><p>Contact support as soon as possible — we can usually amend orders that haven't shipped yet.</p>`,
       },
+      {
+        title: 'Size Guide',
+        excerpt: 'Find your perfect fit before you order.',
+        sortOrder: 5,
+        body: `<h2>How to measure</h2><p>For the most accurate fit, measure over your underwear with a soft tape and keep it snug but not tight. If you're between sizes, we recommend sizing up.</p><ul><li><strong>Bust</strong> — around the fullest part of your chest</li><li><strong>Waist</strong> — around the narrowest part of your torso</li><li><strong>Hips</strong> — around the fullest part of your hips</li></ul><h2>Women's size chart</h2><table><thead><tr><th>Size</th><th>Bust (in)</th><th>Waist (in)</th><th>Hips (in)</th></tr></thead><tbody><tr><td>XS</td><td>31–32</td><td>24–25</td><td>34–35</td></tr><tr><td>S</td><td>33–34</td><td>26–27</td><td>36–37</td></tr><tr><td>M</td><td>35–36</td><td>28–29</td><td>38–39</td></tr><tr><td>L</td><td>37–39</td><td>30–32</td><td>40–42</td></tr><tr><td>XL</td><td>40–42</td><td>33–35</td><td>43–45</td></tr></tbody></table><p>Still unsure? <a href="/contact">Contact our team</a> and we'll help you pick the right size.</p>`,
+      },
     ];
+    // Create only the pages whose slug isn't taken yet, so re-seeding adds
+    // newly-introduced sample pages without duplicating existing ones.
+    let createdPages = 0;
     for (const p of SAMPLE_PAGES) {
-      await pages.create({ ...p, status: 'published', showInFooter: true });
+      try {
+        await pages.create({ ...p, status: 'published', showInFooter: true });
+        createdPages++;
+      } catch (err) {
+        if (!(err instanceof ConflictException)) throw err;
+      }
     }
-    console.log(`✓ Seeded ${SAMPLE_PAGES.length} CMS pages`);
-  } else {
-    console.log('✓ Pages already present — skipped');
+    console.log(
+      createdPages
+        ? `✓ Seeded ${createdPages} new CMS page(s)`
+        : '✓ CMS pages already present — skipped',
+    );
   }
 
   await app.close();
