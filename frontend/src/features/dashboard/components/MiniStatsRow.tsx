@@ -1,11 +1,12 @@
-import { ArrowUpRight, ArrowDownRight, ChevronRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import type { DashboardData } from '../api';
 
 interface MiniCardProps {
   label: string;
   value: string;
-  delta: string;
-  isPositive: boolean;
+  delta?: number;
+  positiveWhenUp?: boolean;
   sparklineData: number[];
   color: string;
   isBarChart?: boolean;
@@ -15,22 +16,23 @@ function MiniCard({
   label,
   value,
   delta,
-  isPositive,
+  positiveWhenUp = true,
   sparklineData,
   color,
   isBarChart = false,
 }: MiniCardProps) {
   const width = 80;
   const height = 18;
-  const max = Math.max(...sparklineData);
-  const min = Math.min(...sparklineData);
+  const max = Math.max(...sparklineData, 1);
+  const min = Math.min(...sparklineData, 0);
   const range = max - min || 1;
+  const points = sparklineData.map((val, index) => ({
+    x: (index / Math.max(sparklineData.length - 1, 1)) * width,
+    y: height - ((val - min) / range) * height,
+  }));
 
-  const points = sparklineData.map((val, index) => {
-    const x = (index / (sparklineData.length - 1)) * width;
-    const y = height - ((val - min) / range) * height;
-    return { x, y };
-  });
+  const up = (delta ?? 0) >= 0;
+  const good = positiveWhenUp ? up : !up;
 
   return (
     <div className="flex flex-col justify-between rounded-md border border-border bg-surface p-3 transition-all hover:border-slate-350 dark:hover:border-slate-700">
@@ -40,35 +42,38 @@ function MiniCard({
         </p>
         <div className="mt-1 flex items-baseline gap-1.5">
           <span className="text-base font-bold text-text font-mono leading-none">{value}</span>
-          <span
-            className={cn(
-              "inline-flex items-center text-[9px] font-bold leading-none",
-              isPositive ? "text-emerald-500" : "text-rose-500"
-            )}
-          >
-            {isPositive ? <ArrowUpRight className="h-2 w-2" /> : <ArrowDownRight className="h-2 w-2" />}
-            {delta}
-          </span>
+          {delta !== undefined && (
+            <span
+              className={cn(
+                'inline-flex items-center text-[9px] font-bold leading-none',
+                good ? 'text-emerald-500' : 'text-rose-500',
+              )}
+            >
+              {up ? <ArrowUpRight className="h-2 w-2" /> : <ArrowDownRight className="h-2 w-2" />}
+              {Math.abs(delta)}%
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Mini Trend Line or Bar Chart */}
       <div className="mt-3.5 h-4.5 w-full overflow-hidden">
         {isBarChart ? (
           <div className="flex items-end justify-between h-full gap-0.5 px-1">
-            {sparklineData.map((val, idx) => {
-              const h = ((val - min) / range) * 100 || 10;
-              return (
-                <div
-                  key={idx}
-                  className="w-1.5 rounded-t-md bg-indigo-500 opacity-80 hover:opacity-100 transition-opacity"
-                  style={{ height: `${Math.max(h, 20)}%` }}
-                />
-              );
-            })}
+            {sparklineData.map((val, idx) => (
+              <div
+                key={idx}
+                className="w-1.5 rounded-t-md bg-indigo-500 opacity-80"
+                style={{ height: `${Math.max(((val - min) / range) * 100, 20)}%` }}
+              />
+            ))}
           </div>
         ) : (
-          <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+          <svg
+            width="100%"
+            height="100%"
+            viewBox={`0 0 ${width} ${height}`}
+            preserveAspectRatio="none"
+          >
             <path
               d={points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')}
               fill="none"
@@ -84,86 +89,82 @@ function MiniCard({
   );
 }
 
-export function MiniStatsRow() {
-  const profitData = [10, 15, 8, 20, 22, 18, 30];
-  const soldData = [5, 12, 10, 15, 13, 20, 24];
-  const custData = [12, 10, 15, 18, 14, 22, 25];
-  const cartData = [25, 22, 28, 19, 15, 12, 8];
-  const subsData = [8, 10, 11, 14, 15, 13, 18];
+/** Round up to a "nice" ceiling for the revenue goal. */
+function niceCeil(v: number): number {
+  if (v <= 0) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v / p;
+  const m = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+  return m * p;
+}
+const compact = (n: number) => {
+  if (n >= 1e7) return `₹${(n / 1e7).toFixed(2).replace(/\.00$/, '')}Cr`;
+  if (n >= 1e5) return `₹${(n / 1e5).toFixed(2).replace(/\.00$/, '')}L`;
+  if (n >= 1e3) return `₹${(n / 1e3).toFixed(1).replace(/\.0$/, '')}K`;
+  return `₹${n}`;
+};
 
-  // Radial progress calculations for Revenue Goal
-  const goalPercentage = 74;
+export function MiniStatsRow({ data }: { data: DashboardData }) {
+  const { counts, kpis, salesSeries } = data;
+  const spark = salesSeries.slice(-7).map((s) => s.revenue);
+  const bars = salesSeries.slice(-7).map((s) => s.orders);
+
+  // Soft monthly revenue goal derived from current run-rate.
+  const goal = niceCeil(Math.max(kpis.revenue * 1.4, 1));
+  const goalPct = Math.min(100, Math.round((kpis.revenue / goal) * 100));
   const radius = 24;
   const strokeWidth = 5;
-  const circumference = 2 * Math.PI * radius; // ~150.8
-  const offset = circumference - (goalPercentage / 100) * circumference;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (goalPct / 100) * circumference;
 
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-      {/* Total Profit */}
       <MiniCard
-        label="Total Profit"
-        value="₹8,45,210"
-        delta="14.2%"
-        isPositive={true}
-        sparklineData={profitData}
-        color="var(--color-success)"
+        label="Total Orders"
+        value={String(counts.totalOrders)}
+        delta={kpis.ordersDelta}
+        sparklineData={spark}
+        color="var(--color-info)"
       />
-
-      {/* Products Sold */}
       <MiniCard
         label="Products Sold"
-        value="12,842"
-        delta="13.1%"
-        isPositive={true}
-        sparklineData={soldData}
+        value={String(bars.reduce((a, b) => a + b, 0))}
+        sparklineData={bars}
         color="var(--color-info)"
-        isBarChart={true}
+        isBarChart
       />
-
-      {/* Returning Customers */}
       <MiniCard
-        label="Returning Customers"
-        value="2,543"
-        delta="9.3%"
-        isPositive={true}
-        sparklineData={custData}
+        label="New Customers (30d)"
+        value={String(counts.newCustomers30d)}
+        delta={kpis.customersDelta}
+        sparklineData={spark}
         color="var(--color-success)"
       />
-
-      {/* Abandoned Carts */}
       <MiniCard
-        label="Abandoned Carts"
-        value="1,246"
-        delta="8.4%"
-        isPositive={false}
-        sparklineData={cartData}
+        label="Active Products"
+        value={String(counts.activeProducts)}
+        sparklineData={spark}
+        color="var(--color-success)"
+      />
+      <MiniCard
+        label="Low Stock"
+        value={String(counts.lowStock)}
+        positiveWhenUp={false}
+        sparklineData={spark}
         color="var(--color-danger)"
       />
 
-      {/* Active Subscriptions */}
-      <MiniCard
-        label="Active Subscriptions"
-        value="568"
-        delta="6.2%"
-        isPositive={true}
-        sparklineData={subsData}
-        color="var(--color-info)"
-      />
-
-      {/* Revenue Goal Card */}
+      {/* Revenue Goal */}
       <div className="flex items-center justify-between rounded-md bg-indigo-600 p-3.5 text-white">
         <div className="flex items-center gap-3">
-          {/* Circular progress */}
           <div className="relative h-14 w-14 shrink-0">
             <svg viewBox="0 0 60 60" className="-rotate-90 h-full w-full">
-              {/* Outer ring path */}
               <circle
                 cx="30"
                 cy="30"
                 r={radius}
                 fill="transparent"
-                stroke="rgba(255, 255, 255, 0.15)"
+                stroke="rgba(255,255,255,0.15)"
                 strokeWidth={strokeWidth}
               />
               <circle
@@ -180,26 +181,20 @@ export function MiniStatsRow() {
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center font-mono text-[10px] font-bold text-white">
-              {goalPercentage}%
+              {goalPct}%
             </div>
           </div>
-
           <div className="flex flex-col justify-center leading-none">
             <span className="text-[10px] font-bold tracking-wider text-indigo-100 uppercase">
               Revenue Goal
             </span>
             <span className="mt-1 text-sm font-bold tracking-tight font-mono text-white">
-              ₹24.58M <span className="text-[10px] text-indigo-200 font-normal">/ ₹33M</span>
+              {compact(kpis.revenue)}{' '}
+              <span className="text-[10px] text-indigo-200 font-normal">/ {compact(goal)}</span>
             </span>
-            <span className="mt-1 text-[9px] font-semibold text-indigo-200">
-              Monthly Goal
-            </span>
+            <span className="mt-1 text-[9px] font-semibold text-indigo-200">Last 30 days</span>
           </div>
         </div>
-
-        <button className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer" aria-label="Goal details">
-          <ChevronRight className="h-4 w-4" />
-        </button>
       </div>
     </div>
   );

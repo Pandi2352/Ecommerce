@@ -1,0 +1,93 @@
+[
+  {
+    "name": "Aisha Khan",
+    "email": "aisha@example.com",
+    "phone": "+91 90000 11111",
+    "addresses": [
+      {
+        "label": "Home",
+        "fullName": "Aisha Khan",
+        "phone": "+91 90000 11111",
+        "line1": "12 MG Road",
+        "line2": "Near Trinity Metro",
+        "city": "Bengaluru",
+        "state": "KA",
+        "postalCode": "560001",
+        "country": "India",
+        "isDefault": true
+      },
+      {
+        "label": "Office",
+        "fullName": "Aisha Khan",
+        "line1": "Tower B, Prestige Tech Park",
+        "city": "Bengaluru",
+        "state": "KA",
+        "postalCode": "560103",
+        "country": "India"
+      }
+    ]
+  },
+  {
+    "name": "Ravi Menon",
+    "email": "ravi@example.com",
+    "phone": "+91 90000 22222",
+    "addresses": [
+      {
+        "label": "Home",
+        "fullName": "Ravi Menon",
+        "phone": "+91 90000 22222",
+        "line1": "45 Marine Drive",
+        "city": "Mumbai",
+        "state": "MH",
+        "postalCode": "400002",
+        "country": "India",
+        "isDefault": true
+      },
+      {
+        "label": "Parents",
+        "fullName": "Ravi Menon",
+        "line1": "9 Fort Kochi Lane",
+        "city": "Kochi",
+        "state": "KL",
+        "postalCode": "682001",
+        "country": "India"
+      }
+    ]
+  },
+  {
+    "name": "Priya Sharma",
+    "email": "priya@example.com",
+    "phone": "+91 90000 33333",
+    "addresses": [
+      {
+        "label": "Home",
+        "fullName": "Priya Sharma",
+        "phone": "+91 90000 33333",
+        "line1": "7 Civil Lines",
+        "city": "Delhi",
+        "state": "DL",
+        "postalCode": "110054",
+        "country": "India",
+        "isDefault": true
+      },
+      {
+        "label": "Work",
+        "fullName": "Priya Sharma",
+        "line1": "Cyber Hub, DLF Phase 2",
+        "city": "Gurugram",
+        "state": "HR",
+        "postalCode": "122002",
+        "country": "India"
+      },
+      {
+        "label": "Hostel",
+        "fullName": "Priya Sharma",
+        "line1": "Room 210, Green Residency",
+        "city": "Noida",
+        "state": "UP",
+        "postalCode": "201301",
+        "country": "India"
+      }
+    ]
+  }
+]

@@ -26,6 +26,12 @@ export interface MyOrderItem {
   subtotal: number;
 }
 
+export interface OrderTimelineEntry {
+  status: string;
+  note?: string;
+  at: string;
+}
+
 export interface MyOrder {
   id: string;
   orderNumber: string;
@@ -39,6 +45,9 @@ export interface MyOrder {
   tax: number;
   total: number;
   createdAt: string;
+  customer?: { name: string; email: string; phone?: string };
+  shippingAddress?: Record<string, string>;
+  timeline?: OrderTimelineEntry[];
 }
 
 // ── Profile ──

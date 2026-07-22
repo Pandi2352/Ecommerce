@@ -37,6 +37,25 @@ export const OrderStatus = {
 } as const;
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
+/**
+ * Allowed order status transitions (state machine). Shared by the admin UI (to
+ * show only valid next statuses) and the backend (to enforce them). Empty = terminal.
+ */
+export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  CREATED: ['PACKED', 'CANCELLED'],
+  PAID: ['PACKED', 'CANCELLED'],
+  PACKED: ['SHIPPED', 'CANCELLED'],
+  SHIPPED: ['DELIVERED', 'RETURNED'],
+  DELIVERED: ['RETURNED', 'REFUNDED'],
+  RETURNED: ['REFUNDED'],
+  CANCELLED: [],
+  REFUNDED: [],
+};
+
+/** Valid next statuses from the given one. */
+export const nextOrderStatuses = (s: OrderStatus): OrderStatus[] =>
+  ORDER_STATUS_TRANSITIONS[s] ?? [];
+
 export const PaymentStatus = {
   PENDING: 'PENDING',
   PAID: 'PAID',
@@ -78,6 +97,3 @@ export const DiscountStatus = {
   DISABLED: 'DISABLED',
 } as const;
 export type DiscountStatus = (typeof DiscountStatus)[keyof typeof DiscountStatus];
-
-
-

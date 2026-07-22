@@ -1,94 +1,124 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Banknote, CreditCard, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '@/lib/api';
 import { money } from '@/lib/utils';
-import { useCart } from '@/cart/CartContext';
+import { Field, TextInput } from '@/components/form';
+import { lineKey, useCart } from '@/cart/CartContext';
 import { useAuth } from '@/auth/AuthContext';
-import { User, Mail, Phone, MapPin, CreditCard, Lock, CheckCircle2 } from 'lucide-react';
+import { AddressPicker } from '@/account/components/AddressPicker';
+import type { Address } from '@/account/account.api';
 
-interface FormState {
-  name: string;
-  email: string;
+interface GuestAddress {
+  fullName: string;
   phone: string;
   line1: string;
+  line2: string;
   city: string;
   state: string;
   postalCode: string;
-  paymentMethod: string;
 }
-
-const EMPTY: FormState = {
-  name: '',
-  email: '',
+const EMPTY_GUEST: GuestAddress = {
+  fullName: '',
   phone: '',
   line1: '',
+  line2: '',
   city: '',
   state: '',
   postalCode: '',
-  paymentMethod: 'COD',
 };
-
-const STEPS = ['Contact', 'Shipping', 'Payment', 'Review'];
 
 export function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, subtotal, clear } = useCart();
+  const { items, subtotal, clear, remove } = useCart();
   const { user } = useAuth();
-  // Prefill contact details for a signed-in customer so the order links to their account.
-  const [form, setForm] = useState<FormState>(
-    user ? { ...EMPTY, name: user.name, email: user.email, phone: user.phone ?? '' } : EMPTY,
-  );
+
+  const [name, setName] = useState(user?.name ?? '');
+  const [email, setEmail] = useState(user?.email ?? '');
+  const [phone, setPhone] = useState(user?.phone ?? '');
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [guest, setGuest] = useState<GuestAddress>(EMPTY_GUEST);
   const [submitting, setSubmitting] = useState(false);
+
+  const onSelectAddress = useCallback((a: Address | null) => setSelectedAddress(a), []);
+  const setG = (k: keyof GuestAddress) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setGuest((g) => ({ ...g, [k]: e.target.value }));
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center animate-fadeIn">
-        <div className="text-6xl mb-6 animate-float">🛒</div>
-        <h1
-          style={{ fontFamily: 'var(--font-display)', fontWeight: 800 }}
-          className="text-3xl text-text mb-2"
-        >
-          No Items to Checkout
-        </h1>
-        <p className="text-text-secondary mb-6">Add some items to your cart first.</p>
-        <Link to="/" className="btn-primary rounded-xl px-6 py-2.5 text-sm font-bold">
-          Browse Products
-        </Link>
+      <div className="mx-auto max-w-lg py-10 text-center">
+        <h1 className="text-xl font-bold text-text">Checkout</h1>
+        <div className="mt-4 rounded-md border border-border bg-surface p-10 text-sm text-text-secondary">
+          Your cart is empty.
+          <div>
+            <Link
+              to="/products"
+              className="mt-3 inline-block font-semibold text-danger hover:underline"
+            >
+              Browse products
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const set =
-    (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-      setForm((f) => ({ ...f, [k]: e.target.value }));
+  async function placeOrder() {
+    // Resolve the shipping address (saved selection for members, typed for guests).
+    const addr = user
+      ? selectedAddress && {
+          fullName: selectedAddress.fullName,
+          phone: selectedAddress.phone ?? '',
+          line1: selectedAddress.line1,
+          line2: selectedAddress.line2 ?? '',
+          city: selectedAddress.city,
+          state: selectedAddress.state ?? '',
+          postalCode: selectedAddress.postalCode,
+          country: selectedAddress.country ?? 'India',
+        }
+      : guest;
 
-  const shipping = subtotal >= 50 ? 0 : 5.99;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+    if (!name.trim() || !email.trim()) return toast.error('Name and email are required');
+    if (!addr || !addr.line1?.trim() || !addr.city?.trim() || !addr.postalCode?.trim()) {
+      return toast.error('Please provide a complete shipping address');
+    }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
     setSubmitting(true);
     try {
+      // Re-resolve each cart line by its slug so stale product ids (e.g. after a
+      // catalog reseed) are healed, and anything genuinely gone is dropped.
+      const resolved: { productId: string; variant?: Record<string, string>; quantity: number }[] =
+        [];
+      const gone: typeof items = [];
+      for (const i of items) {
+        try {
+          const p = await api.get<{ id: string }>(`/storefront/products/${i.slug}`);
+          resolved.push({ productId: p.data.id, variant: i.variant, quantity: i.quantity });
+        } catch {
+          gone.push(i);
+        }
+      }
+      if (gone.length) {
+        gone.forEach((g) => remove(lineKey(g)));
+        toast.error(
+          `${gone.length} item(s) are no longer available and were removed from your cart.`,
+        );
+        if (resolved.length === 0) {
+          setSubmitting(false);
+          return;
+        }
+      }
+
       const res = await api.post('/storefront/checkout', {
-        customer: { name: form.name, email: form.email, phone: form.phone || undefined },
-        items: items.map((i) => ({
-          productId: i.productId,
-          variant: i.variant,
-          quantity: i.quantity,
-        })),
-        shippingAddress: {
-          line1: form.line1,
-          city: form.city,
-          state: form.state,
-          postalCode: form.postalCode,
-        },
-        paymentMethod: form.paymentMethod,
+        customer: { name: name.trim(), email: email.trim(), phone: phone.trim() || undefined },
+        items: resolved,
+        shippingAddress: addr,
+        paymentMethod: 'COD',
       });
       const order = res.data as { orderNumber: string };
       clear();
-      toast.success('Order placed! 🎉');
+      toast.success('Order placed!');
       navigate(`/order/${order.orderNumber}`, { state: { order: res.data } });
     } catch (err) {
       toast.error((err as { message?: string })?.message ?? 'Checkout failed');
@@ -98,303 +128,210 @@ export function CheckoutPage() {
   }
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Header */}
-      <div className="text-center">
-        <h1
-          style={{ fontFamily: 'var(--font-display)', fontWeight: 800 }}
-          className="text-3xl text-text mb-2"
-        >
-          Secure Checkout
-        </h1>
-        <p className="text-sm text-text-secondary flex items-center justify-center gap-1.5">
-          <Lock className="h-3.5 w-3.5 text-emerald" /> SSL encrypted · Your information is safe
+    <div className="mx-auto max-w-5xl space-y-6 py-6">
+      <div>
+        <h1 className="text-xl font-bold text-text">Checkout</h1>
+        <p className="text-xs text-text-secondary">
+          Complete your details below — you're just a step away from your order.
         </p>
       </div>
 
-      {/* Step Progress */}
-      <div className="flex items-center gap-0 rounded-2xl overflow-hidden border border-border bg-surface">
-        {STEPS.map((step, i) => (
-          <div
-            key={step}
-            className="flex-1 flex items-center justify-center gap-2 py-3 px-2 text-xs font-semibold transition-all"
-            style={
-              i === 0
-                ? { background: 'var(--gradient-brand)', color: 'white' }
-                : { color: 'var(--text-muted)' }
-            }
-          >
-            <span
-              className="flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold shrink-0"
-              style={
-                i === 0 ? { background: 'rgba(255,255,255,0.25)' } : { background: 'var(--border)' }
-              }
-            >
-              {i + 1}
-            </span>
-            <span className="hidden sm:inline">{step}</span>
-          </div>
-        ))}
-      </div>
-
-      <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-5">
           {/* Contact */}
-          <Section
-            icon={<User className="h-4.5 w-4.5" />}
-            title="Contact Details"
-            gradient="var(--gradient-brand)"
-          >
-            <Field
-              icon={<User className="h-4 w-4" />}
-              label="Full Name"
-              required
-              value={form.name}
-              onChange={set('name')}
-            />
+          <Section title="Contact details" step={1}>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                icon={<Mail className="h-4 w-4" />}
-                label="Email"
-                type="email"
-                required
-                value={form.email}
-                onChange={set('email')}
-              />
-              <Field
-                icon={<Phone className="h-4 w-4" />}
-                label="Phone"
-                value={form.phone}
-                onChange={set('phone')}
-              />
+              <Field label="Full name" required>
+                <TextInput
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Priya Sharma"
+                  autoComplete="name"
+                />
+              </Field>
+              <Field label="Email" required>
+                <TextInput
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                />
+              </Field>
+              <Field label="Phone">
+                <TextInput
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 90000 00000"
+                  autoComplete="tel"
+                />
+              </Field>
             </div>
+            {!user && (
+              <p className="mt-3 text-xs text-text-secondary">
+                Have an account?{' '}
+                <Link
+                  to="/auth/login"
+                  state={{ from: '/checkout' }}
+                  className="font-semibold text-danger hover:underline"
+                >
+                  Sign in
+                </Link>{' '}
+                to use your saved addresses.
+              </p>
+            )}
           </Section>
 
-          {/* Shipping */}
-          <Section
-            icon={<MapPin className="h-4.5 w-4.5" />}
-            title="Shipping Address"
-            gradient="var(--gradient-cool)"
-          >
-            <Field
-              icon={<MapPin className="h-4 w-4" />}
-              label="Street Address"
-              required
-              value={form.line1}
-              onChange={set('line1')}
-            />
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="City" required value={form.city} onChange={set('city')} />
-              <Field label="State" value={form.state} onChange={set('state')} />
-              <Field
-                label="Postal Code"
-                required
-                value={form.postalCode}
-                onChange={set('postalCode')}
-              />
-            </div>
+          {/* Shipping address */}
+          <Section title="Shipping address" step={2}>
+            {user ? (
+              <AddressPicker onSelect={onSelectAddress} />
+            ) : (
+              <div className="space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Field label="Full name" required>
+                    <TextInput
+                      value={guest.fullName}
+                      onChange={setG('fullName')}
+                      placeholder="Recipient's full name"
+                      autoComplete="name"
+                    />
+                  </Field>
+                  <Field label="Phone">
+                    <TextInput
+                      value={guest.phone}
+                      onChange={setG('phone')}
+                      placeholder="+91 90000 00000"
+                      autoComplete="tel"
+                    />
+                  </Field>
+                </div>
+                <Field label="Address line 1" required>
+                  <TextInput
+                    value={guest.line1}
+                    onChange={setG('line1')}
+                    placeholder="House / flat no, street"
+                    autoComplete="address-line1"
+                  />
+                </Field>
+                <Field label="Address line 2">
+                  <TextInput
+                    value={guest.line2}
+                    onChange={setG('line2')}
+                    placeholder="Area, landmark (optional)"
+                    autoComplete="address-line2"
+                  />
+                </Field>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <Field label="City" required>
+                    <TextInput value={guest.city} onChange={setG('city')} placeholder="Bengaluru" />
+                  </Field>
+                  <Field label="State">
+                    <TextInput
+                      value={guest.state}
+                      onChange={setG('state')}
+                      placeholder="Karnataka"
+                    />
+                  </Field>
+                  <Field label="Postal code" required>
+                    <TextInput
+                      value={guest.postalCode}
+                      onChange={setG('postalCode')}
+                      placeholder="560001"
+                      autoComplete="postal-code"
+                    />
+                  </Field>
+                </div>
+              </div>
+            )}
           </Section>
 
           {/* Payment */}
-          <Section
-            icon={<CreditCard className="h-4.5 w-4.5" />}
-            title="Payment Method"
-            gradient="var(--gradient-warm)"
-          >
-            <div className="grid sm:grid-cols-2 gap-3">
-              {[
-                {
-                  value: 'COD',
-                  label: 'Cash on Delivery',
-                  emoji: '💵',
-                  desc: 'Pay when your order arrives',
-                },
-                {
-                  value: 'CARD',
-                  label: 'Card on Delivery',
-                  emoji: '💳',
-                  desc: 'Swipe card at your door',
-                },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, paymentMethod: opt.value }))}
-                  className="flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all duration-200"
-                  style={
-                    form.paymentMethod === opt.value
-                      ? { borderColor: 'var(--accent)', background: 'rgba(99,102,241,0.06)' }
-                      : { borderColor: 'var(--border)', background: 'var(--surface)' }
-                  }
-                >
-                  <span className="text-2xl mt-0.5">{opt.emoji}</span>
-                  <div>
-                    <p className="text-sm font-semibold text-text">{opt.label}</p>
-                    <p className="text-xs text-text-muted mt-0.5">{opt.desc}</p>
-                  </div>
-                  {form.paymentMethod === opt.value && (
-                    <div className="ml-auto">
-                      <CheckCircle2 className="h-5 w-5 text-accent" />
-                    </div>
-                  )}
-                </button>
-              ))}
+          <Section title="Payment method" step={3}>
+            <div className="space-y-2">
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-danger bg-danger/5 p-3">
+                <span className="grid h-4 w-4 place-items-center rounded-full border border-danger bg-danger">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                </span>
+                <Banknote className="h-4 w-4 text-danger" />
+                <span className="text-sm font-semibold text-text">Cash on Delivery</span>
+                <span className="ml-auto text-[11px] text-text-secondary">Pay when it arrives</span>
+              </label>
+              <div className="flex cursor-not-allowed items-center gap-3 rounded-md border border-border p-3 opacity-60">
+                <span className="h-4 w-4 rounded-full border border-border" />
+                <CreditCard className="h-4 w-4 text-text-secondary" />
+                <span className="text-sm font-medium text-text-secondary">Card / UPI</span>
+                <span className="ml-auto text-[11px] text-text-secondary">Coming soon</span>
+              </div>
             </div>
           </Section>
         </div>
 
-        {/* Order Summary */}
-        <div className="h-fit rounded-3xl border border-border bg-surface overflow-hidden shadow-lg">
-          <div className="p-5 border-b border-border" style={{ background: 'var(--surface-2)' }}>
-            <h2
-              style={{ fontFamily: 'var(--font-display)', fontWeight: 700 }}
-              className="text-lg text-text"
-            >
-              Your Order ({items.length})
-            </h2>
-          </div>
-          <div className="p-5 space-y-4">
-            {/* Items list */}
-            <div className="space-y-3 max-h-56 overflow-y-auto">
-              {items.map((i, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-surface-2 flex items-center justify-center overflow-hidden shrink-0 border border-border">
-                    {i.image ? (
-                      <img src={i.image} alt={i.name} className="h-full w-full object-cover" />
-                    ) : (
-                      <span>📦</span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-text line-clamp-1">{i.name}</p>
-                    <p className="text-xs text-text-muted">× {i.quantity}</p>
-                  </div>
-                  <span className="text-sm font-bold text-text shrink-0">
-                    {money(i.price * i.quantity)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Totals */}
-            <div className="space-y-2 border-t border-border pt-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Subtotal</span>
-                <span className="font-medium text-text">{money(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Shipping</span>
-                <span className="font-medium text-emerald">
-                  {shipping === 0 ? 'Free 🎉' : money(shipping)}
+        {/* Summary */}
+        <div className="h-fit space-y-4 rounded-md border border-border bg-surface p-5 lg:sticky lg:top-4">
+          <h2 className="text-sm font-bold text-text">Order summary</h2>
+          <div className="space-y-2">
+            {items.map((i, idx) => (
+              <div key={idx} className="flex justify-between gap-2 text-sm">
+                <span className="text-text-secondary line-clamp-1">
+                  {i.name} × {i.quantity}
                 </span>
+                <span className="shrink-0 text-text">{money(i.price * i.quantity)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Tax (8%)</span>
-                <span className="font-medium text-text">{money(tax)}</span>
-              </div>
-              <div className="flex justify-between border-t border-border pt-3">
-                <span className="font-bold text-text">Total</span>
-                <span
-                  style={{ fontFamily: 'var(--font-display)', fontWeight: 800 }}
-                  className="text-2xl gradient-text"
-                >
-                  {money(total)}
-                </span>
-              </div>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn-primary w-full rounded-2xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {submitting ? (
-                <>
-                  <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />{' '}
-                  Placing Order…
-                </>
-              ) : (
-                <>
-                  <Lock className="h-4 w-4" /> Place Order · {money(total)}
-                </>
-              )}
-            </button>
-            <p className="text-xs text-center text-text-muted">
-              By placing your order you agree to our Terms & Privacy Policy
-            </p>
+            ))}
           </div>
+          <div className="space-y-1.5 border-t border-border pt-3 text-sm">
+            <Row label="Subtotal" value={money(subtotal)} />
+            <Row label="Shipping" value="Free" />
+            <div className="flex justify-between border-t border-border pt-2 text-base font-bold text-text">
+              <span>Total</span>
+              <span>{money(subtotal)}</span>
+            </div>
+          </div>
+          <button
+            onClick={placeOrder}
+            disabled={submitting}
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-danger px-4 py-2.5 text-sm font-bold text-white hover:bg-danger/90 disabled:opacity-50"
+          >
+            <Lock className="h-4 w-4" />
+            {submitting ? 'Placing order…' : 'Place Order (COD)'}
+          </button>
+          <p className="text-center text-[11px] text-text-secondary">
+            By placing your order you agree to our terms. Totals are confirmed by the store.
+          </p>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
 
 function Section({
   title,
-  icon,
-  gradient,
+  step,
   children,
 }: {
   title: string;
-  icon: React.ReactNode;
-  gradient: string;
+  step: number;
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface overflow-hidden">
-      <div
-        className="flex items-center gap-3 px-5 py-3.5 border-b border-border"
-        style={{ background: 'var(--surface-2)' }}
-      >
-        <div
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-white"
-          style={{ background: gradient }}
-        >
-          {icon}
-        </div>
-        <h3 className="text-sm font-bold text-text">{title}</h3>
-      </div>
-      <div className="p-5 space-y-4">{children}</div>
-    </div>
+    <section className="rounded-md border border-border bg-surface p-5">
+      <h2 className="mb-4 flex items-center gap-2 text-sm font-bold text-text">
+        <span className="grid h-5 w-5 place-items-center rounded-full bg-danger text-[11px] font-bold text-white">
+          {step}
+        </span>
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }
 
-function Field({
-  label,
-  required,
-  type = 'text',
-  value,
-  onChange,
-  icon,
-}: {
-  label: string;
-  required?: boolean;
-  type?: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  icon?: React.ReactNode;
-}) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <label className="block space-y-1.5">
-      <span className="text-sm font-semibold text-text">
-        {label} {required && <span className="text-danger">*</span>}
-      </span>
-      <div className="relative">
-        {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">
-            {icon}
-          </span>
-        )}
-        <input
-          type={type}
-          required={required}
-          value={value}
-          onChange={onChange}
-          className="nova-input"
-          style={{ paddingLeft: icon ? '2.5rem' : '0.875rem' }}
-        />
-      </div>
-    </label>
+    <div className="flex justify-between text-text-secondary">
+      <span>{label}</span>
+      <span className="text-text">{value}</span>
+    </div>
   );
 }

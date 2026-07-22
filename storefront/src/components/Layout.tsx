@@ -51,15 +51,6 @@ export function Layout() {
 
           {/* Quick Links */}
           <div className="flex items-center gap-4 text-[11px] font-medium">
-            {user ? (
-              <Link to="/account" className="flex items-center gap-1 hover:text-danger">
-                <User className="h-3 w-3" /> {user.name.split(' ')[0]}
-              </Link>
-            ) : (
-              <Link to="/auth/login" className="flex items-center gap-1 hover:text-danger">
-                <User className="h-3 w-3" /> Sign in
-              </Link>
-            )}
             <Link to="/checkout" className="flex items-center gap-1 hover:text-danger">
               <Lock className="h-3 w-3" /> Checkout
             </Link>
@@ -159,17 +150,39 @@ export function Layout() {
             })}
           </div>
 
-          {/* Cart Button Ribbon */}
-          <Link
-            to="/cart"
-            className="maxshop-ribbon bg-danger hover:bg-danger/90 text-white flex items-center gap-2 py-2 px-5 cursor-pointer shrink-0"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            <span className="font-extrabold text-xs">MY CART</span>
-            <span className="bg-white text-danger font-bold rounded-xs px-1.5 py-0.2 text-xs ml-1">
-              {count}
-            </span>
-          </Link>
+          {/* Account + Cart (kept together on the right) */}
+          <div className="flex items-center gap-1 shrink-0">
+            {user ? (
+              <Link
+                to="/account"
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white hover:text-white/80"
+                title="My Account"
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">My Account</span>
+                <span className="sm:hidden">{user.name.split(' ')[0]}</span>
+              </Link>
+            ) : (
+              <Link
+                to="/auth/login"
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white hover:text-white/80"
+              >
+                <User className="h-4 w-4" />
+                <span>Sign in</span>
+              </Link>
+            )}
+            <span className="h-5 w-px bg-white/20" />
+            <Link
+              to="/cart"
+              className="maxshop-ribbon bg-danger hover:bg-danger/90 text-white flex items-center gap-2 py-2 px-5 cursor-pointer"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              <span className="font-extrabold text-xs">MY CART</span>
+              <span className="bg-white text-danger font-bold rounded-xs px-1.5 py-0.2 text-xs ml-1">
+                {count}
+              </span>
+            </Link>
+          </div>
         </div>
       </nav>
 

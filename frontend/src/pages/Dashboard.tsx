@@ -1,4 +1,6 @@
-import { DollarSign, ShoppingBag, Users, TrendingUp, CreditCard } from 'lucide-react';
+import { DollarSign, ShoppingBag, Users, CreditCard } from 'lucide-react';
+import { Alert, Skeleton } from '@/components/ui';
+import { useDashboard } from '@/features/dashboard/api';
 import { StatsCard } from '@/features/dashboard/components/StatsCard';
 import { SalesChart } from '@/features/dashboard/components/SalesChart';
 import { CategoryDistribution } from '@/features/dashboard/components/CategoryDistribution';
@@ -8,98 +10,116 @@ import { RecentOrders } from '@/features/dashboard/components/RecentOrders';
 import { TopProducts } from '@/features/dashboard/components/TopProducts';
 import { SalesHeatmap } from '@/features/dashboard/components/SalesHeatmap';
 
+const inr = (n: number) => `₹${n.toLocaleString('en-IN')}`;
+const pctStr = (n: number) => `${Math.abs(n)}%`;
+
 export function Dashboard() {
+  const { data, loading, error } = useDashboard();
+
+  if (loading && !data) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 w-full rounded-md" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+          <Skeleton className="h-72 rounded-md lg:col-span-6" />
+          <Skeleton className="h-72 rounded-md lg:col-span-3" />
+          <Skeleton className="h-72 rounded-md lg:col-span-3" />
+        </div>
+        <Skeleton className="h-24 w-full rounded-md" />
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return <Alert>{error || 'Failed to load dashboard.'}</Alert>;
+  }
+
+  const { kpis, salesSeries } = data;
+  const revSeries = salesSeries.map((s) => s.revenue);
+  const ordSeries = salesSeries.map((s) => s.orders);
+
   return (
     <div className="space-y-6">
-      
-      {/* 1. Top KPI Row */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {/* 1. KPI row (real data) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          label="Total Revenue"
-          value="₹24,58,980"
-          delta="18.2%"
-          isPositive={true}
+          label="Revenue (30d)"
+          value={inr(kpis.revenue)}
+          delta={pctStr(kpis.revenueDelta)}
+          isPositive={kpis.revenueDelta >= 0}
           icon={DollarSign}
           iconBgColor="bg-violet-500/10 dark:bg-violet-500/20"
           iconColor="text-violet-500 dark:text-violet-400"
-          sparklineData={[10, 14, 18, 12, 20, 24, 28, 22, 26, 32]}
+          sparklineData={revSeries}
           sparklineColor="#7c3aed"
         />
         <StatsCard
-          label="Orders"
-          value="8,643"
-          delta="12.4%"
-          isPositive={true}
+          label="Orders (30d)"
+          value={kpis.orders.toLocaleString('en-IN')}
+          delta={pctStr(kpis.ordersDelta)}
+          isPositive={kpis.ordersDelta >= 0}
           icon={ShoppingBag}
           iconBgColor="bg-sky-500/10 dark:bg-sky-500/20"
           iconColor="text-sky-500 dark:text-sky-400"
-          sparklineData={[5, 12, 10, 15, 18, 14, 22, 20, 26, 28]}
+          sparklineData={ordSeries}
           sparklineColor="#0ea5e9"
         />
         <StatsCard
           label="Customers"
-          value="6,324"
-          delta="8.7%"
-          isPositive={true}
+          value={kpis.customers.toLocaleString('en-IN')}
+          delta={pctStr(kpis.customersDelta)}
+          isPositive={kpis.customersDelta >= 0}
           icon={Users}
           iconBgColor="bg-emerald-500/10 dark:bg-emerald-500/20"
           iconColor="text-emerald-500 dark:text-emerald-400"
-          sparklineData={[8, 10, 15, 12, 16, 20, 18, 22, 24, 25]}
+          sparklineData={revSeries}
           sparklineColor="#10b981"
         />
         <StatsCard
-          label="Conversion Rate"
-          value="3.24%"
-          delta="2.1%"
-          isPositive={true}
-          icon={TrendingUp}
-          iconBgColor="bg-orange-500/10 dark:bg-orange-500/20"
-          iconColor="text-orange-500 dark:text-orange-400"
-          sparklineData={[15, 12, 18, 16, 20, 14, 18, 22, 19, 21]}
-          sparklineColor="#f97316"
-        />
-        <StatsCard
           label="Avg. Order Value"
-          value="₹2,847"
-          delta="6.8%"
-          isPositive={true}
+          value={inr(kpis.avgOrderValue)}
+          delta={pctStr(kpis.aovDelta)}
+          isPositive={kpis.aovDelta >= 0}
           icon={CreditCard}
           iconBgColor="bg-teal-500/10 dark:bg-teal-500/20"
           iconColor="text-teal-500 dark:text-teal-400"
-          sparklineData={[22, 20, 24, 21, 26, 28, 25, 27, 29, 30]}
+          sparklineData={revSeries}
           sparklineColor="#14b8a6"
         />
       </div>
 
-      {/* 2. Middle Row (Sales Chart, Channel Donut, Live Activity Feed) */}
+      {/* 2. Sales chart + category donut + live activity */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <div className="lg:col-span-6 xl:col-span-6 flex flex-col h-full">
-          <SalesChart />
+        <div className="lg:col-span-6 flex flex-col h-full">
+          <SalesChart data={salesSeries} />
         </div>
-        <div className="lg:col-span-3 xl:col-span-3 flex flex-col h-full">
-          <CategoryDistribution />
+        <div className="lg:col-span-3 flex flex-col h-full">
+          <CategoryDistribution data={data.categoryDistribution} />
         </div>
-        <div className="lg:col-span-3 xl:col-span-3 flex flex-col h-full">
-          <LiveActivity />
+        <div className="lg:col-span-3 flex flex-col h-full">
+          <LiveActivity orders={data.recentOrders} />
         </div>
       </div>
 
-      {/* 3. Bottom Row 1 (Mini Stats Cards + Revenue Goal Card) */}
-      <MiniStatsRow />
+      {/* 3. Mini stats */}
+      <MiniStatsRow data={data} />
 
-      {/* 4. Bottom Row 2 (Recent Orders Table, Top Selling Products, Sales Heatmap) */}
+      {/* 4. Recent orders + top products + activity heatmap */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <div className="lg:col-span-6 xl:col-span-6 flex flex-col h-full">
-          <RecentOrders />
+        <div className="lg:col-span-6 flex flex-col h-full">
+          <RecentOrders orders={data.recentOrders} />
         </div>
-        <div className="lg:col-span-3 xl:col-span-3 flex flex-col h-full">
-          <TopProducts />
+        <div className="lg:col-span-3 flex flex-col h-full">
+          <TopProducts products={data.topProducts} />
         </div>
-        <div className="lg:col-span-3 xl:col-span-3 flex flex-col h-full">
-          <SalesHeatmap />
+        <div className="lg:col-span-3 flex flex-col h-full">
+          <SalesHeatmap series={salesSeries} />
         </div>
       </div>
-
     </div>
   );
 }

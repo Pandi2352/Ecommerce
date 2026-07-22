@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { OrderStatus, PaymentStatus } from '@ecommerce/shared';
+import { OrderStatus, PaymentStatus, nextOrderStatuses } from '@ecommerce/shared';
 import type { PaginatedMeta } from '../../common/dto/pagination.dto';
 import { BaseService } from '../../common/services/base.service';
 import { buildSearchFilter, now, parseSort } from '../../common/utils';
@@ -97,12 +97,31 @@ export class OrdersService extends BaseService<OrderDocument> {
 
   /** Change status and append a timeline entry (atomic). */
   async updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<Order> {
-    await this.findByIdOrThrow(id);
+    const order = await this.findByIdOrThrow(id);
+
+    // Enforce the shared state machine (same status = allowed note-only update).
+    if (dto.status !== order.status) {
+      const allowed = nextOrderStatuses(order.status);
+      if (!allowed.includes(dto.status)) {
+        throw new BadRequestException(
+          `Cannot change order from ${order.status} to ${dto.status}. Allowed: ${allowed.join(', ') || 'none (terminal)'}`,
+        );
+      }
+    }
+
+    // Keep payment status in sync with fulfilment outcome (COD = paid on delivery).
+    const set: Record<string, unknown> = { status: dto.status };
+    if (dto.status === OrderStatus.DELIVERED && order.paymentStatus === PaymentStatus.PENDING) {
+      set.paymentStatus = PaymentStatus.PAID;
+    } else if (dto.status === OrderStatus.REFUNDED) {
+      set.paymentStatus = PaymentStatus.REFUNDED;
+    }
+
     return (await this.model
       .findByIdAndUpdate(
         id,
         {
-          status: dto.status,
+          $set: set,
           $push: { timeline: { status: dto.status, note: dto.note ?? '', at: now() } },
         },
         { new: true },

@@ -243,7 +243,6 @@ body {
 }
 .product-card:hover {
   border-color: var(--maxshop-red);
-  box-shadow: 0 4px 12px rgba(230, 46, 4, 0.1);
 }
 
 /* ─── MaxShop Primary Button ─────────────────────────────────── */

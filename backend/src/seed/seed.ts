@@ -1,7 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import * as path from 'path';
+import * as fs from 'fs';
 import {
+  CUSTOMER_ROLE,
   OrderStatus,
   PaymentStatus,
   ProductStatus,
@@ -195,6 +198,37 @@ async function seed() {
     await users.setEmailVerified(String(admin._id));
     console.log(`✓ Seeded SUPER ADMIN\n  email:    ${email}\n  password: ${password}`);
   }
+
+  // Sample storefront customers (idempotent per email) — each with saved addresses.
+  const customersPath = path.join(__dirname, '../../../seeds/customers.seed.json');
+  const sampleCustomers: {
+    name: string;
+    email: string;
+    phone?: string;
+    addresses: Record<string, unknown>[];
+  }[] = JSON.parse(fs.readFileSync(customersPath, 'utf-8'));
+  let seededCustomers = 0;
+  for (const c of sampleCustomers) {
+    if (await users.findByEmailWithPassword(c.email)) continue; // already seeded
+    const cust = await users.create({
+      name: c.name,
+      email: c.email,
+      password: await bcrypt.hash('Test@123', 10),
+      role: CUSTOMER_ROLE,
+      status: UserStatus.ACTIVE,
+    });
+    await users.setEmailVerified(String(cust._id));
+    if (c.phone) await users.updateProfile(String(cust._id), { phone: c.phone });
+    for (const addr of c.addresses) {
+      await users.addAddress(String(cust._id), addr as never);
+    }
+    seededCustomers++;
+  }
+  console.log(
+    seededCustomers > 0
+      ? `✓ Seeded ${seededCustomers} customers (password: Test@123) with addresses`
+      : '✓ Customers already present — skipped',
+  );
 
   // Sample catalog (only when empty) so the storefront has products to show.
   const products = app.get(ProductsService);

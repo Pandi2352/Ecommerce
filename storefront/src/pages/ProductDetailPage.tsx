@@ -91,19 +91,19 @@ export function ProductDetailPage() {
     return (
       <div className="grid gap-10 md:grid-cols-2 animate-fadeIn">
         <div className="space-y-4">
-          <div className="aspect-square skeleton rounded-3xl" />
+          <div className="aspect-square skeleton rounded-md" />
           <div className="flex gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-16 w-16 skeleton rounded-xl" />
+              <div key={i} className="h-16 w-16 skeleton rounded-md" />
             ))}
           </div>
         </div>
         <div className="space-y-5 pt-4">
-          <div className="h-8 w-3/4 skeleton rounded-xl" />
-          <div className="h-6 w-1/3 skeleton rounded-xl" />
+          <div className="h-8 w-3/4 skeleton rounded-md" />
+          <div className="h-6 w-1/3 skeleton rounded-md" />
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-4 skeleton rounded-lg" />
+              <div key={i} className="h-4 skeleton rounded-md" />
             ))}
           </div>
         </div>
@@ -119,7 +119,7 @@ export function ProductDetailPage() {
         <p className="text-text-secondary mb-6">{error ?? 'This product does not exist.'}</p>
         <Link
           to="/"
-          className="btn-primary rounded-xl px-6 py-2.5 text-sm font-bold flex items-center gap-2"
+          className="btn-primary rounded-md px-6 py-2.5 text-sm font-bold flex items-center gap-2"
         >
           <ChevronLeft className="h-4 w-4" /> Back to Shop
         </Link>
@@ -144,7 +144,7 @@ export function ProductDetailPage() {
       <div className="grid gap-10 md:grid-cols-2">
         {/* Gallery */}
         <div className="space-y-4 animate-fadeInLeft">
-          <div className="relative aspect-square overflow-hidden rounded-3xl bg-surface-2 border border-border group">
+          <div className="relative aspect-square overflow-hidden rounded-md bg-surface-2 border border-border group">
             <img
               src={image || config?.defaultProductImageUrl || DEFAULT_PRODUCT_IMAGE}
               alt={product.name}
@@ -154,7 +154,7 @@ export function ProductDetailPage() {
             {/* Sale badge */}
             {onSale && (
               <div className="absolute top-4 left-4">
-                <span className="badge-sale text-sm px-3 py-1">{discount}% OFF</span>
+                <span className="badge-sale text-sm px-3 py-1 rounded-md">{discount}% OFF</span>
               </div>
             )}
 
@@ -165,7 +165,7 @@ export function ProductDetailPage() {
                   setIsWishlisted((v) => !v);
                   toast(isWishlisted ? 'Removed from wishlist' : 'Added to wishlist ❤️');
                 }}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/90 shadow-md transition-all hover:scale-110"
+                className="flex h-9 w-9 items-center justify-center rounded-md bg-white/90 transition-all hover:scale-110"
               >
                 <Heart
                   className="h-4.5 w-4.5"
@@ -175,7 +175,7 @@ export function ProductDetailPage() {
                   }}
                 />
               </button>
-              <button className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/90 shadow-md text-text-secondary hover:scale-110 transition-all">
+              <button className="flex h-9 w-9 items-center justify-center rounded-md bg-white/90 text-text-secondary hover:scale-110 transition-all">
                 <Share2 className="h-4 w-4" />
               </button>
             </div>
@@ -189,8 +189,8 @@ export function ProductDetailPage() {
                   key={src}
                   onClick={() => setActiveImage(i)}
                   className={cn(
-                    'h-16 w-16 overflow-hidden rounded-xl border-2 transition-all duration-200 hover:scale-105',
-                    i === activeImage ? 'border-accent shadow-lg' : 'border-border',
+                    'h-16 w-16 overflow-hidden rounded-md border-2 transition-all duration-200 hover:scale-105',
+                    i === activeImage ? 'border-accent' : 'border-border',
                   )}
                 >
                   <img src={src} alt="" className="h-full w-full object-cover" />
@@ -206,7 +206,7 @@ export function ProductDetailPage() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               {product.sku && (
-                <span className="text-xs text-text-muted bg-surface-2 rounded-full px-3 py-1 border border-border">
+                <span className="text-xs text-text-muted bg-surface-2 rounded-md px-3 py-1 border border-border">
                   SKU: {product.sku}
                 </span>
               )}
@@ -269,9 +269,9 @@ export function ProductDetailPage() {
                     key={val}
                     onClick={() => setSelected((s) => ({ ...s, [opt.name]: val }))}
                     className={cn(
-                      'rounded-xl border-2 px-4 py-2 text-sm font-semibold transition-all duration-200',
+                      'rounded-md border-2 px-4 py-2 text-sm font-semibold transition-all duration-200',
                       selected[opt.name] === val
-                        ? 'text-white shadow-lg scale-105'
+                        ? 'text-white scale-105'
                         : 'border-border text-text hover:border-accent/50',
                     )}
                     style={
@@ -279,7 +279,6 @@ export function ProductDetailPage() {
                         ? {
                             background: 'var(--gradient-brand)',
                             border: 'none',
-                            boxShadow: 'var(--shadow-glow)',
                           }
                         : {}
                     }
@@ -316,13 +315,16 @@ export function ProductDetailPage() {
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-text">Qty:</span>
               <div className="flex items-center gap-2">
-                <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="qty-btn">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="qty-btn rounded-md"
+                >
                   <Minus className="h-3.5 w-3.5" />
                 </button>
                 <span className="w-8 text-center text-base font-bold text-text">{quantity}</span>
                 <button
                   onClick={() => setQuantity((q) => Math.min(stock || 99, q + 1))}
-                  className="qty-btn"
+                  className="qty-btn rounded-md"
                 >
                   <Plus className="h-3.5 w-3.5" />
                 </button>
@@ -334,7 +336,7 @@ export function ProductDetailPage() {
               <button
                 onClick={handleAdd}
                 disabled={!canAdd}
-                className="btn-primary flex-1 rounded-xl px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="btn-primary flex-1 rounded-md px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {addedToCart ? (
                   <>
@@ -353,7 +355,7 @@ export function ProductDetailPage() {
                   navigate('/cart');
                 }}
                 disabled={!canAdd}
-                className="flex-1 rounded-xl px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed transition-all border-2 border-accent text-accent hover:bg-accent/5"
+                className="flex-1 rounded-md px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed transition-all border-2 border-accent text-accent hover:bg-accent/5"
               >
                 <Zap className="h-4 w-4" /> Buy Now
               </button>
@@ -369,7 +371,7 @@ export function ProductDetailPage() {
             ].map(({ icon: Icon, label, sub }) => (
               <div
                 key={label}
-                className="flex flex-col items-center gap-1 rounded-xl border border-border p-3 text-center"
+                className="flex flex-col items-center gap-1 rounded-md border border-border p-3 text-center"
                 style={{ background: 'var(--surface-2)' }}
               >
                 <Icon className="h-4.5 w-4.5 text-accent" />
@@ -383,18 +385,17 @@ export function ProductDetailPage() {
 
       {/* Tabs */}
       <div className="space-y-6">
-        <div className="flex gap-1 rounded-2xl bg-surface-2 p-1 border border-border w-fit">
+        <div className="flex gap-1 rounded-md bg-surface-2 p-1 border border-border w-fit">
           {TABS.map((tab, i) => (
             <button
               key={tab}
               onClick={() => setActiveTab(i)}
-              className="rounded-xl px-5 py-2 text-sm font-semibold transition-all duration-200"
+              className="rounded-md px-5 py-2 text-sm font-semibold transition-all duration-200"
               style={
                 activeTab === i
                   ? {
                       background: 'var(--gradient-brand)',
                       color: 'white',
-                      boxShadow: '0 2px 8px rgba(99,102,241,0.3)',
                     }
                   : { color: 'var(--text-secondary)' }
               }
@@ -404,7 +405,7 @@ export function ProductDetailPage() {
           ))}
         </div>
         <div
-          className="rounded-2xl border border-border bg-surface p-6 min-h-32 animate-fadeIn"
+          className="rounded-md border border-border bg-surface p-6 min-h-32 animate-fadeIn"
           key={activeTab}
         >
           {activeTab === 0 && (
@@ -444,7 +445,7 @@ export function ProductDetailPage() {
             <div className="space-y-4">
               {[5, 4, 5].map((stars, i) => (
                 <div key={i} className="flex gap-3">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet to-pink flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  <div className="h-8 w-8 rounded-md bg-gradient-to-br from-violet to-pink flex items-center justify-center text-white text-xs font-bold shrink-0">
                     {String.fromCharCode(65 + i)}
                   </div>
                   <div>

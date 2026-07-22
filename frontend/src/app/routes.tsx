@@ -11,6 +11,7 @@ import { ProductsPage, ProductEditorPage } from '@/features/products';
 import { ProductFieldsPage } from '@/features/attributes';
 import { StockPage, LowStockPage, WarehousesPage } from '@/features/inventory';
 import { DiscountsPage } from '@/features/discounts';
+import { CustomersPage } from '@/features/customers';
 import { CartPage } from '@/features/cart';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { RequirePermission } from '@/features/auth/RequirePermission';
@@ -73,7 +74,7 @@ export const router = createBrowserRouter([
             element: g('orders.read', <Placeholder title="Abandoned Carts" />),
           },
           { path: 'pages', element: <Placeholder title="Pages" /> },
-          { path: 'customers', element: g('customers.read', <Placeholder title="Customers" />) },
+          { path: 'customers', element: g('customers.read', <CustomersPage />) },
           { path: 'marketing', element: g('marketing.read', <Placeholder title="Marketing" />) },
           { path: 'discounts', element: g('discounts.read', <DiscountsPage />) },
           { path: 'cart', element: <CartPage /> },
