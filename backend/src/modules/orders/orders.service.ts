@@ -52,7 +52,15 @@ export class OrdersService extends BaseService<OrderDocument> {
     const filter: Record<string, unknown> = {
       ...buildSearchFilter(['orderNumber', 'customer.name', 'customer.email'], q.search),
     };
-    if (q.status) filter.status = q.status;
+    if (q.statuses) {
+      const list = q.statuses
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (list.length) filter.status = { $in: list };
+    } else if (q.status) {
+      filter.status = q.status;
+    }
     if (q.paymentStatus) filter.paymentStatus = q.paymentStatus;
     return this.paginate({
       filter,

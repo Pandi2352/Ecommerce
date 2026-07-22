@@ -26,7 +26,7 @@ import { ProfilePage } from '@/features/profile';
 import { UsersPage } from '@/features/users';
 import { RolesPage, PermissionsPage } from '@/features/roles';
 import { AuditLogPage } from '@/features/audit';
-import { OrdersPage } from '@/features/orders';
+import { OrdersPage, ReturnsPage, AbandonedCartsPage } from '@/features/orders';
 import {
   RouteErrorBoundary,
   NotFound,
@@ -68,11 +68,8 @@ export const router = createBrowserRouter([
           { path: 'inventory', element: g('inventory.read', <StockPage />) },
           { path: 'inventory/low', element: g('inventory.read', <LowStockPage />) },
           { path: 'inventory/warehouses', element: g('inventory.read', <WarehousesPage />) },
-          { path: 'orders/returns', element: g('orders.read', <Placeholder title="Returns" />) },
-          {
-            path: 'orders/abandoned',
-            element: g('orders.read', <Placeholder title="Abandoned Carts" />),
-          },
+          { path: 'orders/returns', element: g('orders.read', <ReturnsPage />) },
+          { path: 'orders/abandoned', element: g('orders.read', <AbandonedCartsPage />) },
           { path: 'pages', element: <Placeholder title="Pages" /> },
           { path: 'customers', element: g('customers.read', <CustomersPage />) },
           { path: 'marketing', element: g('marketing.read', <Placeholder title="Marketing" />) },

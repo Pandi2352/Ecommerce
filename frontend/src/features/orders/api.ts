@@ -66,6 +66,33 @@ export interface OrdersFilters {
 
 export const fetchOrder = (id: string) => api.get<Order>(`/orders/${id}`).then((r) => r.data);
 export const fetchOrderStats = () => api.get<OrderStats>('/orders/stats').then((r) => r.data);
+
+// ── Returns (orders in RETURNED / REFUNDED) ──
+export const fetchReturns = (params: { page?: number; pageSize?: number; search?: string }) =>
+  getList<Order>('/orders', { params: { statuses: 'RETURNED,REFUNDED', ...params } });
+
+// ── Abandoned carts (admin) ──
+export interface AbandonedCart {
+  id: string;
+  customerName: string | null;
+  customerEmail: string | null;
+  guest: boolean;
+  itemCount: number;
+  lineCount: number;
+  value: number;
+  items: { name: string; image?: string; quantity: number; price: number }[];
+  updatedAt: string;
+}
+export interface AbandonedStats {
+  total: number;
+  guest: number;
+  registered: number;
+  potentialRevenue: number;
+}
+export const fetchAbandonedCarts = (params: { page?: number; pageSize?: number }) =>
+  getList<AbandonedCart>('/cart/admin/abandoned', { params });
+export const fetchAbandonedStats = () =>
+  api.get<AbandonedStats>('/cart/admin/abandoned/stats').then((r) => r.data);
 export const updateOrderStatus = (id: string, status: OrderStatus, note?: string) =>
   api.patch<Order>(`/orders/${id}/status`, { status, note }).then((r) => r.data);
 export const updateOrder = (id: string, dto: { paymentStatus?: PaymentStatus; notes?: string }) =>
@@ -73,7 +100,12 @@ export const updateOrder = (id: string, dto: { paymentStatus?: PaymentStatus; no
 
 export function useOrders() {
   const [filters, setFilters] = useState<OrdersFilters>({
-    page: 1, pageSize: 10, search: '', status: '', paymentStatus: '', sort: '-createdAt',
+    page: 1,
+    pageSize: 10,
+    search: '',
+    status: '',
+    paymentStatus: '',
+    sort: '-createdAt',
   });
   const [data, setData] = useState<Order[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
@@ -85,7 +117,11 @@ export function useOrders() {
     setLoading(true);
     setError(null);
     try {
-      const params: Record<string, string | number> = { page: filters.page, pageSize: filters.pageSize, sort: filters.sort };
+      const params: Record<string, string | number> = {
+        page: filters.page,
+        pageSize: filters.pageSize,
+        sort: filters.sort,
+      };
       if (debouncedSearch) params.search = debouncedSearch;
       if (filters.status) params.status = filters.status;
       if (filters.paymentStatus) params.paymentStatus = filters.paymentStatus;
@@ -97,9 +133,18 @@ export function useOrders() {
     } finally {
       setLoading(false);
     }
-  }, [filters.page, filters.pageSize, filters.status, filters.paymentStatus, filters.sort, debouncedSearch]);
+  }, [
+    filters.page,
+    filters.pageSize,
+    filters.status,
+    filters.paymentStatus,
+    filters.sort,
+    debouncedSearch,
+  ]);
 
-  useEffect(() => { void reload(); }, [reload]);
+  useEffect(() => {
+    void reload();
+  }, [reload]);
 
   return { data, meta, loading, error, filters, setFilters, reload };
 }

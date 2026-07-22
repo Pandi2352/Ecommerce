@@ -2,9 +2,19 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DiscountsService } from '../discounts/discounts.service';
-import { InventoryRecord, InventoryRecordDocument } from '../inventory/schemas/inventory-record.schema';
+import {
+  InventoryRecord,
+  InventoryRecordDocument,
+} from '../inventory/schemas/inventory-record.schema';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
-import { AddToCartDto, ApplyCartCouponDto, UpdateCartItemDto, UpdateCartOptionsDto } from './dto/cart.dto';
+import { User, UserDocument } from '../users/schemas/user.schema';
+import { buildMeta, type PaginatedMeta } from '../../common/dto/pagination.dto';
+import {
+  AddToCartDto,
+  ApplyCartCouponDto,
+  UpdateCartItemDto,
+  UpdateCartOptionsDto,
+} from './dto/cart.dto';
 import { Cart, CartDocument } from './schemas/cart.schema';
 import { calculateCartTotals } from './utils/cart-calculator.util';
 
@@ -13,9 +23,85 @@ export class CartService {
   constructor(
     @InjectModel(Cart.name) private readonly cartModel: Model<CartDocument>,
     @InjectModel(Product.name) private readonly productModel: Model<ProductDocument>,
-    @InjectModel(InventoryRecord.name) private readonly inventoryModel: Model<InventoryRecordDocument>,
+    @InjectModel(InventoryRecord.name)
+    private readonly inventoryModel: Model<InventoryRecordDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private readonly discountsService: DiscountsService,
   ) {}
+
+  /**
+   * Admin: abandoned carts = carts that still hold items and haven't been touched
+   * for `olderThanMinutes` (default 60). Enriches with a customer label + value.
+   */
+  async listAbandoned(q: {
+    page?: number;
+    pageSize?: number;
+    olderThanMinutes?: number;
+  }): Promise<{ data: unknown[]; meta: PaginatedMeta }> {
+    const page = q.page ?? 1;
+    const pageSize = q.pageSize ?? 10;
+    const cutoff = new Date(Date.now() - (q.olderThanMinutes ?? 60) * 60_000);
+    const filter = { 'items.0': { $exists: true }, updatedAt: { $lte: cutoff } };
+
+    const [total, carts] = await Promise.all([
+      this.cartModel.countDocuments(filter),
+      this.cartModel
+        .find(filter)
+        .sort({ updatedAt: -1 })
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .exec(),
+    ]);
+
+    const userIds = carts.map((c) => c.userId).filter(Boolean) as string[];
+    const users = userIds.length
+      ? await this.userModel
+          .find({ _id: { $in: userIds } })
+          .select('name email')
+          .exec()
+      : [];
+    const byId = new Map(users.map((u) => [String(u._id), u]));
+
+    const data = carts.map((c) => {
+      const active = c.items.filter((i) => !i.isSavedForLater);
+      const u = c.userId ? byId.get(c.userId) : undefined;
+      return {
+        id: String(c._id),
+        customerName: u?.name ?? null,
+        customerEmail: u?.email ?? null,
+        guest: !c.userId,
+        itemCount: active.reduce((n, i) => n + i.quantity, 0),
+        lineCount: active.length,
+        value: c.totals?.subtotal ?? active.reduce((s, i) => s + i.price * i.quantity, 0),
+        items: active.map((i) => ({
+          name: i.name,
+          image: i.image,
+          quantity: i.quantity,
+          price: i.price,
+        })),
+        updatedAt: (c as unknown as { updatedAt: Date }).updatedAt,
+      };
+    });
+
+    return { data, meta: buildMeta(total, page, pageSize) };
+  }
+
+  async abandonedStats() {
+    const cutoff = new Date(Date.now() - 60 * 60_000);
+    const carts = await this.cartModel
+      .find({ 'items.0': { $exists: true }, updatedAt: { $lte: cutoff } })
+      .exec();
+    const potential = carts.reduce(
+      (s, c) => s + (c.totals?.subtotal ?? c.items.reduce((x, i) => x + i.price * i.quantity, 0)),
+      0,
+    );
+    return {
+      total: carts.length,
+      guest: carts.filter((c) => !c.userId).length,
+      registered: carts.filter((c) => !!c.userId).length,
+      potentialRevenue: Math.round(potential * 100) / 100,
+    };
+  }
 
   async getOrCreateCart(userId?: string, guestId?: string): Promise<CartDocument> {
     if (!userId && !guestId) {
@@ -45,12 +131,16 @@ export class CartService {
     const product = await this.productModel.findById(dto.productId).exec();
     if (!product) throw new NotFoundException('Product not found');
 
-    const variant = product.variants?.find((v) => v.sku && v.sku.toUpperCase() === dto.variantSku.toUpperCase());
+    const variant = product.variants?.find(
+      (v) => v.sku && v.sku.toUpperCase() === dto.variantSku.toUpperCase(),
+    );
     const skuName = variant ? `${product.name} (${variant.sku})` : product.name;
     const itemPrice = variant?.price ?? product.price;
 
     // Check inventory stock
-    const inv = await this.inventoryModel.findOne({ variantSku: dto.variantSku.toUpperCase() }).exec();
+    const inv = await this.inventoryModel
+      .findOne({ variantSku: dto.variantSku.toUpperCase() })
+      .exec();
     const availableStock = inv ? Math.max(0, inv.onHand - inv.reserved) : product.stock;
 
     const existingIndex = cart.items.findIndex(
@@ -180,7 +270,9 @@ export class CartService {
     const userCart = await this.getOrCreateCart(userId);
 
     for (const gItem of guestCart.items) {
-      const existing = userCart.items.find((i) => i.variantSku.toUpperCase() === gItem.variantSku.toUpperCase());
+      const existing = userCart.items.find(
+        (i) => i.variantSku.toUpperCase() === gItem.variantSku.toUpperCase(),
+      );
       if (existing) {
         existing.quantity += gItem.quantity;
       } else {

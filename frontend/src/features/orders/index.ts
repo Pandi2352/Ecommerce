@@ -1,4 +1,6 @@
 export { OrdersPage } from './OrdersPage';
+export { ReturnsPage } from './ReturnsPage';
+export { AbandonedCartsPage } from './AbandonedCartsPage';
 export {
   useOrders,
   useOrderStats,
@@ -7,4 +9,11 @@ export {
   updateOrderStatus,
   updateOrder,
 } from './api';
-export type { Order, OrderItem, OrderStats, OrdersFilters, OrderStatus, PaymentStatus } from './api';
+export type {
+  Order,
+  OrderItem,
+  OrderStats,
+  OrdersFilters,
+  OrderStatus,
+  PaymentStatus,
+} from './api';

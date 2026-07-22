@@ -66,5 +66,7 @@ export class UpdateOrderDto {
 
 export class ListOrdersQueryDto extends PaginationQueryDto {
   @IsOptional() @IsEnum(OrderStatus) status?: OrderStatus;
+  /** Comma-separated statuses (e.g. "RETURNED,REFUNDED") — matches any (used by the Returns view). */
+  @IsOptional() @IsString() statuses?: string;
   @IsOptional() @IsEnum(PaymentStatus) paymentStatus?: PaymentStatus;
 }

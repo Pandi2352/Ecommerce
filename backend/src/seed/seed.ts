@@ -3,8 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as path from 'path';
 import * as fs from 'fs';
+import { getModelToken } from '@nestjs/mongoose';
+import type { Model } from 'mongoose';
 import {
   CUSTOMER_ROLE,
+  ORDER_STATUS_TRANSITIONS,
   OrderStatus,
   PaymentStatus,
   ProductStatus,
@@ -16,6 +19,33 @@ import { UsersService } from '../modules/users/users.service';
 import { RolesService } from '../modules/roles/roles.service';
 import { OrdersService } from '../modules/orders/orders.service';
 import { ProductsService } from '../modules/products/products.service';
+import { Cart } from '../modules/cart/schemas/cart.schema';
+import { Product } from '../modules/products/schemas/product.schema';
+
+/** Shortest valid transition path between two order statuses (state machine). */
+function statusPath(from: OrderStatus, target: OrderStatus): OrderStatus[] {
+  if (from === target) return [];
+  const queue: OrderStatus[][] = [[from]];
+  const seen = new Set<OrderStatus>([from]);
+  while (queue.length) {
+    const path = queue.shift()!;
+    for (const next of ORDER_STATUS_TRANSITIONS[path[path.length - 1]] ?? []) {
+      if (seen.has(next)) continue;
+      const np = [...path, next];
+      if (next === target) return np.slice(1);
+      seen.add(next);
+      queue.push(np);
+    }
+  }
+  return [];
+}
+
+/** Walk an order from `from` to `target` through valid transitions (builds a realistic timeline). */
+async function walkTo(orders: OrdersService, id: string, from: OrderStatus, target: OrderStatus) {
+  for (const status of statusPath(from, target)) {
+    await orders.updateStatus(id, { status, note: 'Seeded' });
+  }
+}
 
 const img = (seed: string) => `https://picsum.photos/seed/${seed}/700/700`;
 
@@ -252,13 +282,85 @@ async function seed() {
         paymentStatus: sp.paymentStatus,
         shipping: sp.shipping ?? 0,
       });
-      if (sp.status !== OrderStatus.CREATED) {
-        await orders.updateStatus(order._id, { status: sp.status, note: 'Seeded' });
-      }
+      // Walk through valid transitions so the state machine is honoured + timeline is realistic.
+      await walkTo(orders, String(order._id), OrderStatus.CREATED, sp.status);
     }
     console.log(`✓ Seeded ${SAMPLE_ORDERS.length} sample orders`);
   } else {
     console.log('✓ Orders already present — skipped samples');
+  }
+
+  // Sample returns/refunds (idempotent) so the Returns view has data.
+  if (
+    (await orders.list({ statuses: 'RETURNED,REFUNDED', page: 1, pageSize: 1 })).meta.total === 0
+  ) {
+    const delivered = await orders.list({ status: OrderStatus.DELIVERED, page: 1, pageSize: 3 });
+    const targets = [OrderStatus.RETURNED, OrderStatus.REFUNDED];
+    let n = 0;
+    for (const o of delivered.data) {
+      if (n >= targets.length) break;
+      await walkTo(orders, String(o._id), OrderStatus.DELIVERED, targets[n]);
+      n++;
+    }
+    console.log(
+      n > 0 ? `✓ Seeded ${n} return/refund order(s)` : '✓ No delivered orders to mark returned',
+    );
+  } else {
+    console.log('✓ Returns already present — skipped');
+  }
+
+  // Sample abandoned carts (idempotent) so the Abandoned Carts view has data.
+  const cartModel = app.get(getModelToken(Cart.name)) as Model<any>;
+  const productModel = app.get(getModelToken(Product.name)) as Model<any>;
+  if ((await cartModel.countDocuments({ 'items.0': { $exists: true } })) === 0) {
+    const pool = await productModel.find({ status: ProductStatus.ACTIVE }).limit(6).exec();
+    const toItem = (p: any, qty: number) => ({
+      productId: String(p._id),
+      variantSku: (p.sku || p.slug || 'SKU').toUpperCase(),
+      name: p.name,
+      image: p.images?.[0],
+      price: p.price,
+      quantity: qty,
+      isSavedForLater: false,
+    });
+    const aisha = await users.findByEmailWithPassword('aisha@example.com');
+    const DAY = 86_400_000;
+    const specs: { userId?: string; guestId?: string; items: any[]; ageMs: number }[] = [
+      {
+        guestId: 'guest-seed-anon-1',
+        items: [toItem(pool[0], 1), toItem(pool[1], 2)],
+        ageMs: 2 * DAY,
+      },
+      {
+        userId: aisha ? String(aisha._id) : undefined,
+        items: [toItem(pool[2], 1)],
+        ageMs: 5 * 3_600_000,
+      },
+      {
+        guestId: 'guest-seed-anon-2',
+        items: [toItem(pool[3], 1), toItem(pool[4], 1), toItem(pool[5], 3)],
+        ageMs: DAY,
+      },
+    ];
+    let carts = 0;
+    for (const s of specs.filter((x) => x.items.every(Boolean))) {
+      const subtotal = s.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      const cart = await cartModel.create({
+        userId: s.userId,
+        guestId: s.userId ? undefined : s.guestId,
+        items: s.items,
+        totals: { subtotal, discount: 0, shipping: 0, tax: 0, giftWrapFee: 0, total: subtotal },
+      });
+      // Backdate updatedAt via the raw driver (Mongoose would otherwise reset it to now).
+      await cartModel.collection.updateOne(
+        { _id: cart._id },
+        { $set: { updatedAt: new Date(Date.now() - s.ageMs) } },
+      );
+      carts++;
+    }
+    console.log(`✓ Seeded ${carts} abandoned carts`);
+  } else {
+    console.log('✓ Carts already present — skipped');
   }
 
   await app.close();
